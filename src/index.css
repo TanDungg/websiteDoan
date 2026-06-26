@@ -1,0 +1,195 @@
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap");
+@import "./styles/components.css";
+
+:root {
+  /* Font Families */
+  --font-sans: "Be Vietnam Pro", sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-family: var(--font-sans);
+
+  /* Color Palette */
+  --primary: #0284c7; /* Vibrant ocean blue */
+  --primary-hover: #0369a1;
+  --primary-light: #f0f9ff;
+  --primary-rgb: 2, 132, 199;
+
+  --secondary: #0ea5e9;
+
+  --accent-red: #ef4444; /* Vibrant red */
+  --accent-gold: #f59e0b; /* Golden warm */
+
+  --bg-main: #f8fafc; /* Slate-50 - clean modern grey-blue */
+  --bg-card: #ffffff;
+
+  --text-main: #0f172a; /* Slate-900 */
+  --text-muted: #64748b; /* Slate-500 */
+  --text-white: #ffffff;
+
+  --border-color: #f1f5f9; /* Slate-100 */
+  --border-color-dark: #cbd5e1; /* Slate-300 */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg:
+    0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.15);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-round: 50%;
+
+  /* Layout variables */
+  --header-height: 80px;
+  --max-width: 1200px;
+
+  /* Transitions */
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  outline: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Containers & Layouts */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.main-content {
+  min-height: calc(100vh - var(--header-height) - 200px);
+  padding: 40px 0;
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+@media (min-width: 992px) {
+  .layout-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Typography & Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.5em;
+  color: var(--text-main);
+}
+
+.section-title {
+  position: relative;
+  font-size: 1.8rem;
+  font-family: var(--font-display);
+  color: var(--primary);
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  display: inline-block;
+  letter-spacing: -0.5px;
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 2px;
+}
+
+/* Custom Category Badges (Specific to News Page) */
+.badge-hoat-dong {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-color: rgba(3, 105, 161, 0.15);
+}
+
+.badge-guong-sang {
+  background-color: #fef3c7;
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.15);
+}
+
+.badge-thong-bao {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-color: rgba(185, 28, 28, 0.15);
+}
+
+.badge-tin-dia-phuong {
+  background-color: #d1fae5;
+  color: #047857;
+  border-color: rgba(4, 120, 87, 0.15);
+}

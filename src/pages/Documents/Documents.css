@@ -1,0 +1,174 @@
+.docs-page {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.docs-intro {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  max-width: 800px;
+  margin-bottom: 30px;
+}
+
+/* Controls style */
+.docs-controls {
+  padding: 20px;
+  margin-bottom: 30px;
+  background-color: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+@media (min-width: 992px) {
+  .docs-controls {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.docs-categories {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.doc-filter-btn {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.doc-filter-btn:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.doc-filter-btn.active {
+  background-color: var(--primary);
+  color: var(--text-white);
+  border-color: var(--primary);
+}
+
+.docs-search {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .docs-search {
+    max-width: 320px;
+  }
+}
+
+.docs-search input {
+  padding-right: 40px;
+}
+
+.docs-search .search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Documents Table Styling */
+.docs-table-card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--bg-card);
+}
+
+.doc-number-cell {
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
+.doc-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.doc-file-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.doc-title-text {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* Category Specific Tags */
+.doc-cat-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.doc-cat-tag.cat-Kế hoạch {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.doc-cat-tag.cat-Nghị quyết {
+  background-color: #fee2e2;
+  color: var(--accent-red);
+}
+
+.doc-cat-tag.cat-Quyết định {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.doc-cat-tag.cat-Hướng dẫn {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.doc-date-cell {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-bottom: none !important; /* Overrule table cell layout */
+  padding-top: 18px !important;
+}
+
+.doc-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-round);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: var(--transition-fast);
+}
+
+.doc-download-btn:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.docs-no-results {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}

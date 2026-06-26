@@ -1,0 +1,142 @@
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search } from 'lucide-react';
+import { newsCategories } from '../../data/mockData';
+import NewsCard from '../../components/NewsCard/NewsCard';
+import Sidebar from '../../components/Sidebar/Sidebar';
+import './News.css';
+
+export default function News() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [posts, setPosts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchText, setSearchText] = useState('');
+
+  // Sync state with URL search param
+  const urlSearch = searchParams.get('search') || '';
+
+  useEffect(() => {
+    setSearchText(urlSearch);
+  }, [urlSearch]);
+
+  useEffect(() => {
+    let url = '/api/posts';
+    const params = [];
+    if (selectedCategory && selectedCategory !== 'all') {
+      params.push(`category=${selectedCategory}`);
+    }
+    if (urlSearch) {
+      params.push(`search=${encodeURIComponent(urlSearch)}`);
+    }
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => setPosts(data))
+      .catch((err) => console.error("Error loading posts:", err));
+  }, [selectedCategory, urlSearch]);
+
+  const handleCategorySelect = (catId) => {
+    setSelectedCategory(catId);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+    if (!e.target.value.trim()) {
+      // Clear URL parameter if search is cleared
+      searchParams.delete('search');
+      setSearchParams(searchParams);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchText.trim()) {
+      setSearchParams({ search: searchText.trim() });
+    } else {
+      searchParams.delete('search');
+      setSearchParams(searchParams);
+    }
+  };
+
+  const filteredNews = posts;
+
+  return (
+    <div className="news-page container">
+      <h1 className="section-title">Cổng thông tin tin tức</h1>
+      
+      <div className="layout-grid">
+        <main className="news-listing-main">
+          {/* Filters and search section */}
+          <div className="news-filter-panel card">
+            <div className="category-filters">
+              <button
+                className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => handleCategorySelect('all')}
+              >
+                Tất cả
+              </button>
+              {newsCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  className={`filter-btn ${selectedCategory === cat.id ? 'active' : ''}`}
+                  onClick={() => handleCategorySelect(cat.id)}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleSearchSubmit} className="inline-search-form">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Tìm bài viết..."
+                value={searchText}
+                onChange={handleSearchChange}
+              />
+              <button type="submit" className="inline-search-btn" aria-label="Search">
+                <Search size={18} />
+              </button>
+            </form>
+          </div>
+
+          {/* Results count display */}
+          <div className="results-info">
+            {searchText && (
+              <p>
+                Kết quả tìm kiếm cho từ khóa: <strong>&ldquo;{searchText}&rdquo;</strong> 
+                {selectedCategory !== 'all' && ` trong danh mục "${newsCategories.find(c=>c.id===selectedCategory)?.name}"`}
+              </p>
+            )}
+            <p className="results-count">Tìm thấy {filteredNews.length} bài viết</p>
+          </div>
+
+          {/* News articles Grid */}
+          {filteredNews.length > 0 ? (
+            <div className="news-listing-grid">
+              {filteredNews.map((news) => (
+                <NewsCard key={news.id} news={news} />
+              ))}
+            </div>
+          ) : (
+            <div className="no-results card">
+              <p>Không tìm thấy bài viết nào phù hợp với bộ lọc hiện tại.</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => { setSelectedCategory('all'); setSearchText(''); setSearchParams({}); }}
+              >
+                Đặt lại bộ lọc
+              </button>
+            </div>
+          )}
+        </main>
+        
+        {/* Sidebar */}
+        <Sidebar />
+      </div>
+    </div>
+  );
+}

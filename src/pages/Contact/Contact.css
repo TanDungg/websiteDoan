@@ -1,0 +1,145 @@
+.contact-page {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+@media (min-width: 992px) {
+  .contact-grid {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+
+.contact-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 600px) {
+  .info-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.contact-card-info {
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  background-color: var(--bg-card);
+}
+
+.contact-card-info .card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-round);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 10px;
+}
+
+.contact-card-info h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.contact-card-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Map Styling */
+.map-wrapper {
+  padding: 10px;
+  background-color: var(--bg-card);
+  overflow: hidden;
+}
+
+.map-wrapper iframe {
+  border-radius: var(--radius-md);
+}
+
+/* Form Styling */
+.contact-form-column {
+  padding: 40px;
+  background-color: var(--bg-card);
+}
+
+.contact-form-column h2 {
+  font-size: 1.4rem;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.form-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.form-row-double {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+@media (min-width: 600px) {
+  .form-row-double {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+
+.submit-form-btn {
+  width: 100%;
+  padding: 12px 20px;
+  margin-top: 15px;
+}
+
+/* Success submit state */
+.submit-success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 0;
+  gap: 20px;
+}
+
+.success-icon {
+  color: #059669;
+}
+
+.submit-success-state h2 {
+  font-size: 1.6rem;
+  color: #059669;
+}
+
+.submit-success-state p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 500px;
+  margin-bottom: 10px;
+}
