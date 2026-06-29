@@ -3,8 +3,8 @@
 
 :root {
   /* Font Families */
-  --font-sans: "Be Vietnam Pro", sans-serif;
-  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Cambria", Georgia, serif;
+  --font-display: "Cambria", Georgia, serif;
   --font-family: var(--font-sans);
 
   /* Color Palette */
