@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Check, Settings } from "lucide-react";
 import { Table, Modal } from "../../../components";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
+  const [branchTypes, setBranchTypes] = useState([]);
+  const [members, setMembers] = useState([]);
+
+  // Modals visibility
   const [showBranchModal, setShowBranchModal] = useState(false);
+  const [showTypeModal, setShowTypeModal] = useState(false);
+
+  // Form states
   const [editingBranch, setEditingBranch] = useState(null);
   const [branchForm, setBranchForm] = useState({
     name: "",
-    groupName: "",
-    displayOrder: 1,
-    memberCount: 0,
+    branchTypeId: "",
   });
 
-  const loadBranches = () => {
+  const [newTypeName, setNewTypeName] = useState("");
+  const [editingType, setEditingType] = useState(null);
+  const [editTypeName, setEditTypeName] = useState("");
+
+  const loadData = () => {
+    // Load branches
     fetch("/api/intro")
       .then((res) => res.json())
       .then((data) => {
@@ -22,28 +32,97 @@ export default function Branches() {
         }
       })
       .catch((err) => console.error("Error fetching branches:", err));
+
+    // Load branch types
+    fetch("/api/branch-types")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setBranchTypes(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching branch types:", err));
+
+    // Load members to count dynamically
+    fetch("/api/union-members")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setMembers(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching union members:", err));
   };
 
   useEffect(() => {
-    loadBranches();
+    loadData();
   }, []);
 
+  // Handlers for Branch Types CRUD
+  const handleAddType = (e) => {
+    e.preventDefault();
+    if (!newTypeName.trim()) return;
+
+    fetch("/api/branch-types", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newTypeName.trim() }),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setNewTypeName("");
+        loadData();
+      })
+      .catch((err) => console.error("Error adding branch type:", err));
+  };
+
+  const handleUpdateType = (id) => {
+    if (!editTypeName.trim()) return;
+
+    fetch(`/api/branch-types/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editTypeName.trim() }),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setEditingType(null);
+        setEditTypeName("");
+        loadData();
+      })
+      .catch((err) => console.error("Error updating branch type:", err));
+  };
+
+  const handleDeleteType = (id) => {
+    if (
+      window.confirm(
+        "Đồng chí có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!"
+      )
+    ) {
+      fetch(`/api/branch-types/${id}`, {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then(() => {
+          loadData();
+        })
+        .catch((err) => console.error("Error deleting branch type:", err));
+    }
+  };
+
+  // Handlers for Branch CRUD
   const handleOpenBranchModal = (branch = null) => {
     if (branch) {
       setEditingBranch(branch);
       setBranchForm({
         name: branch.name,
-        groupName: branch.groupName,
-        displayOrder: branch.displayOrder,
-        memberCount: branch.memberCount || 0,
+        branchTypeId: branch.branchTypeId || "",
       });
     } else {
       setEditingBranch(null);
       setBranchForm({
         name: "",
-        groupName: "",
-        displayOrder: branches.length + 1,
-        memberCount: 0,
+        branchTypeId: branchTypes[0]?.id || "",
       });
     }
     setShowBranchModal(true);
@@ -51,6 +130,11 @@ export default function Branches() {
 
   const handleBranchSubmit = (e) => {
     e.preventDefault();
+    if (!branchForm.branchTypeId) {
+      alert("Đồng chí vui lòng thiết lập phân loại cho chi đoàn này trước!");
+      return;
+    }
+
     const url = editingBranch ? `/api/branches/${editingBranch.id}` : "/api/branches";
     const method = editingBranch ? "PUT" : "POST";
 
@@ -64,7 +148,7 @@ export default function Branches() {
       .then((res) => res.json())
       .then(() => {
         setShowBranchModal(false);
-        loadBranches();
+        loadData();
       })
       .catch((err) => {
         console.error("Branch save error:", err);
@@ -75,7 +159,7 @@ export default function Branches() {
   const handleDeleteBranch = (id) => {
     if (
       window.confirm(
-        "Đồng chí có chắc chắn muốn xóa chi đoàn trực thuộc này không?",
+        "Đồng chí có chắc chắn muốn xóa chi đoàn trực thuộc này không?"
       )
     ) {
       fetch(`/api/branches/${id}`, {
@@ -84,7 +168,7 @@ export default function Branches() {
         .then((res) => res.json())
         .then(() => {
           alert("Đã xóa chi đoàn thành công!");
-          loadBranches();
+          loadData();
         })
         .catch((err) => {
           console.error("Delete branch error:", err);
@@ -93,6 +177,7 @@ export default function Branches() {
     }
   };
 
+  // Columns for Branches table
   const columns = [
     {
       title: "Tên chi đoàn",
@@ -102,7 +187,7 @@ export default function Branches() {
       render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
     },
     {
-      title: "Khối / Nhóm",
+      title: "Phân loại Chi đoàn",
       dataIndex: "groupName",
       key: "groupName",
       width: "30%",
@@ -117,24 +202,35 @@ export default function Branches() {
             borderRadius: "4px",
           }}
         >
-          {groupName}
+          {groupName || "Chưa phân loại"}
         </span>
       ),
     },
     {
       title: "Số đoàn viên",
-      dataIndex: "memberCount",
       key: "memberCount",
       width: "15%",
       align: "center",
-      render: (count) => <span style={{ fontWeight: 600, color: "var(--primary)" }}>{count || 0}</span>,
+      render: (_, record) => {
+        const count = members.filter((m) => m.branch_id === record.id).length;
+        return <span style={{ fontWeight: 600, color: "var(--primary)" }}>{count}</span>;
+      },
     },
     {
-      title: "Thứ tự hiển thị",
-      dataIndex: "displayOrder",
-      key: "displayOrder",
+      title: "Nhật ký",
+      key: "audit",
       width: "10%",
-      align: "center",
+      render: (_, record) => {
+        const createDate = record.createdAt ? new Date(record.createdAt).toLocaleDateString("vi-VN") : "";
+        return (
+          <span
+            style={{ fontSize: "0.75rem", color: "#718096" }}
+            title={`Người tạo: ${record.createdBy || "n/a"}\nLúc: ${record.createdAt || "n/a"}\nNgười sửa: ${record.updatedBy || "n/a"}\nLúc: ${record.updatedAt || "n/a"}`}
+          >
+            {record.createdBy || "admin"} ({createDate || "Mới"})
+          </span>
+        );
+      },
     },
     {
       title: "Thao tác",
@@ -168,14 +264,25 @@ export default function Branches() {
     <div className="panel-wrapper">
       <div className="panel-header">
         <h3>Hệ thống các Chi đoàn trực thuộc</h3>
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={() => handleOpenBranchModal()}
-        >
-          <Plus size={18} />
-          <span>Thêm chi đoàn</span>
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className="btn btn-outline"
+            type="button"
+            onClick={() => setShowTypeModal(true)}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <Settings size={16} />
+            <span>Quản lý Phân loại</span>
+          </button>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={() => handleOpenBranchModal()}
+          >
+            <Plus size={18} />
+            <span>Thêm chi đoàn</span>
+          </button>
+        </div>
       </div>
 
       <Table
@@ -220,61 +327,123 @@ export default function Branches() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Khối / Nhóm *</label>
+          <label className="form-label">Phân loại Chi đoàn *</label>
+          <select
+            className="form-control"
+            required
+            value={branchForm.branchTypeId}
+            onChange={(e) => setBranchForm({ ...branchForm, branchTypeId: e.target.value })}
+          >
+            <option value="" disabled>-- Chọn phân loại chi đoàn --</option>
+            {branchTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </Modal>
+
+      {/* MODAL: MANAGE BRANCH TYPES */}
+      <Modal
+        isOpen={showTypeModal}
+        onClose={() => setShowTypeModal(false)}
+        title="Quản lý Phân loại Chi đoàn"
+        maxWidth="600px"
+        footer={
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setShowTypeModal(false)}
+          >
+            Đóng hộp thoại
+          </button>
+        }
+      >
+        {/* Form to add a new type */}
+        <form onSubmit={handleAddType} style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
           <input
-            list="group-options"
             type="text"
             className="form-control"
+            style={{ flex: 1 }}
             required
-            value={branchForm.groupName}
-            onChange={(e) =>
-              setBranchForm({
-                ...branchForm,
-                groupName: e.target.value,
-              })
-            }
-            placeholder="Nhập hoặc chọn khối/nhóm"
+            placeholder="Tên phân loại mới (Ví dụ: Chi đoàn Khối Hành chính)"
+            value={newTypeName}
+            onChange={(e) => setNewTypeName(e.target.value)}
           />
-          <datalist id="group-options">
-            <option value="Chi đoàn Địa bàn Dân cư" />
-            <option value="Chi đoàn Lực lượng vũ trang" />
-            <option value="Chi đoàn Khối Trường học" />
-            <option value="Chi đoàn Khối Cơ quan - Doanh nghiệp" />
-          </datalist>
-        </div>
+          <button type="submit" className="btn btn-primary" style={{ whiteSpace: "nowrap" }}>
+            <Plus size={16} /> Thêm mới
+          </button>
+        </form>
 
-        <div className="form-group">
-          <label className="form-label">Số lượng đoàn viên *</label>
-          <input
-            type="number"
-            className="form-control"
-            required
-            min="0"
-            value={branchForm.memberCount}
-            onChange={(e) =>
-              setBranchForm({
-                ...branchForm,
-                memberCount: parseInt(e.target.value) || 0,
-              })
-            }
-            placeholder="Ví dụ: 25"
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Thứ tự hiển thị *</label>
-          <input
-            type="number"
-            className="form-control"
-            required
-            value={branchForm.displayOrder}
-            onChange={(e) =>
-              setBranchForm({
-                ...branchForm,
-                displayOrder: parseInt(e.target.value) || 0,
-              })
-            }
-          />
+        {/* List of current types */}
+        <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: "6px" }}>
+          {branchTypes.length === 0 ? (
+            <div style={{ padding: "20px", textAlign: "center", color: "#a0aec0" }}>
+              Chưa có phân loại nào. Hãy tạo phân loại đầu tiên ở trên!
+            </div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f7fafc", borderBottom: "1px solid #e2e8f0" }}>
+                  <th style={{ textAlign: "left", padding: "10px 15px", fontSize: "0.85rem", color: "#4a5568" }}>Tên Phân loại</th>
+                  <th style={{ textAlign: "center", padding: "10px 15px", fontSize: "0.85rem", color: "#4a5568", width: "120px" }}>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {branchTypes.map((type) => (
+                  <tr key={type.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                    <td style={{ padding: "10px 15px" }}>
+                      {editingType?.id === type.id ? (
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input
+                            type="text"
+                            className="form-control"
+                            style={{ height: "30px", fontSize: "0.9rem" }}
+                            value={editTypeName}
+                            onChange={(e) => setEditTypeName(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="action-btn edit-btn"
+                            style={{ padding: "4px" }}
+                            onClick={() => handleUpdateType(type.id)}
+                          >
+                            <Check size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ fontWeight: 500 }}>{type.name}</span>
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 15px", textAlign: "center" }}>
+                      <div className="action-buttons-group" style={{ justifyContent: "center" }}>
+                        {editingType?.id !== type.id && (
+                          <button
+                            className="action-btn edit-btn"
+                            type="button"
+                            onClick={() => {
+                              setEditingType(type);
+                              setEditTypeName(type.name);
+                            }}
+                          >
+                            <Edit size={14} />
+                          </button>
+                        )}
+                        <button
+                          className="action-btn delete-btn"
+                          type="button"
+                          onClick={() => handleDeleteType(type.id)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </Modal>
     </div>

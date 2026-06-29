@@ -16,6 +16,7 @@ import Intro from "./components/Intro";
 import Branches from "./components/Branches";
 import Bch from "./components/Bch";
 import Gallery from "./components/Gallery";
+import Members from "./components/Members";
 import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
@@ -133,6 +134,13 @@ export default function AdminDashboard() {
               <span>Quản lý Chi đoàn</span>
             </button>
             <button
+              className={`admin-nav-item ${activeTab === "members" ? "active" : ""}`}
+              onClick={() => setActiveTab("members")}
+            >
+              <Users size={18} />
+              <span>Quản lý Đoàn viên</span>
+            </button>
+            <button
               className={`admin-nav-item ${activeTab === "bch" ? "active" : ""}`}
               onClick={() => setActiveTab("bch")}
             >
@@ -161,6 +169,7 @@ export default function AdminDashboard() {
           )}
           {activeTab === "intro" && <Intro />}
           {activeTab === "branches" && <Branches />}
+          {activeTab === "members" && <Members />}
           {activeTab === "bch" && <Bch />}
           {activeTab === "gallery" && <Gallery />}
         </main>

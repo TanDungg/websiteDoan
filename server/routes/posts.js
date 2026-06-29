@@ -86,10 +86,12 @@ router.post("/", async (req, res) => {
   const postId =
     id || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
   const date = new Date().toISOString().split("T")[0];
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
   try {
     await runQuery(
-      `INSERT INTO posts (id, title, summary, content, category, image_url, author, date, views, is_hot)
-       VALUES (@id, @title, @summary, @content, @category, @imageUrl, @author, @date, 0, @isHot)`,
+      `INSERT INTO posts (id, title, summary, content, category, image_url, author, date, views, is_hot, created_by, created_at, updated_by, updated_at)
+       VALUES (@id, @title, @summary, @content, @category, @imageUrl, @author, @date, 0, @isHot, @createdBy, @createdAt, @createdBy, @createdAt)`,
       {
         id: postId,
         title,
@@ -100,6 +102,8 @@ router.post("/", async (req, res) => {
         author,
         date,
         isHot: false,
+        createdBy,
+        createdAt,
       },
     );
     res.status(201).json({
@@ -117,12 +121,14 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { title, summary, content, category, imageUrl, author } = req.body;
+  const updatedBy = "admin";
+  const updatedAt = new Date().toISOString();
   try {
     await runQuery(
       `UPDATE posts 
-       SET title = @title, summary = @summary, content = @content, category = @category, image_url = @imageUrl, author = @author
+       SET title = @title, summary = @summary, content = @content, category = @category, image_url = @imageUrl, author = @author, updated_by = @updatedBy, updated_at = @updatedAt
        WHERE id = @id`,
-      { id, title, summary, content, category, imageUrl, author },
+      { id, title, summary, content, category, imageUrl, author, updatedBy, updatedAt },
     );
     res.json({ success: true, message: "Cập nhật bài viết thành công!" });
   } catch (err) {

@@ -26,11 +26,13 @@ router.post("/", async (req, res) => {
   const { title, docNo, category, fileUrl } = req.body;
   const id = Date.now().toString();
   const date = new Date().toISOString().split("T")[0];
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
   try {
     await runQuery(
-      `INSERT INTO documents (id, title, doc_no, date, category, file_url)
-       VALUES (@id, @title, @docNo, @date, @category, @fileUrl)`,
-      { id, title, docNo, date, category, fileUrl },
+      `INSERT INTO documents (id, title, doc_no, date, category, file_url, created_by, created_at, updated_by, updated_at)
+       VALUES (@id, @title, @docNo, @date, @category, @fileUrl, @createdBy, @createdAt, @createdBy, @createdAt)`,
+      { id, title, docNo, date, category, fileUrl, createdBy, createdAt },
     );
     res
       .status(201)

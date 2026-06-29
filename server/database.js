@@ -103,17 +103,16 @@ function initMockDbStore() {
       phone: m.phone,
       image_url: m.imageUrl,
       responsibility: m.responsibility,
-      display_order: m.displayOrder
+      created_by: m.createdBy || 'admin',
+      created_at: m.createdAt || new Date().toISOString(),
+      updated_by: m.updatedBy || 'admin',
+      updated_at: m.updatedAt || new Date().toISOString()
     })),
     gallery: [],
     galleryPhotos: [],
-    branches: mockBranches.map((b) => ({
-      id: b.id,
-      name: b.name,
-      group_name: b.groupName,
-      display_order: b.displayOrder,
-      member_count: b.memberCount || 0
-    })),
+    branchTypes: [],
+    branches: [],
+    unionMembers: []
   };
 }
 
@@ -396,47 +395,166 @@ function runMockQuery(queryText, params = {}) {
     return { rows: [], rowCount: originalLength - mockDbStore.gallery.length };
   }
 
-  // 22. Select branches
-  if (normalizedQuery.includes('FROM branches') && normalizedQuery.startsWith('SELECT')) {
-    const list = [...mockDbStore.branches];
-    list.sort((a, b) => {
-      const groupCompare = (a.group_name || '').localeCompare(b.group_name || '');
-      if (groupCompare !== 0) return groupCompare;
-      return (a.display_order || 0) - (b.display_order || 0);
-    });
+  // 22. Select branch_types
+  if (normalizedQuery.includes('FROM branch_types') && normalizedQuery.startsWith('SELECT')) {
+    const list = [...mockDbStore.branchTypes];
+    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     return { rows: list, rowCount: list.length };
   }
 
-  // 23. Insert into branches
+  // 22b. Insert into branch_types
+  if (normalizedQuery.includes('INSERT INTO branch_types')) {
+    const newType = {
+      id: params.id,
+      name: params.name,
+      created_by: params.createdBy || 'admin',
+      created_at: params.createdAt || new Date().toISOString(),
+      updated_by: params.updatedBy || 'admin',
+      updated_at: params.updatedAt || new Date().toISOString()
+    };
+    mockDbStore.branchTypes.push(newType);
+    return { rows: [], rowCount: 1 };
+  }
+
+  // 22c. Update branch_types
+  if (normalizedQuery.startsWith('UPDATE branch_types')) {
+    const bType = mockDbStore.branchTypes.find(t => String(t.id) === String(params.id));
+    if (bType) {
+      bType.name = params.name;
+      bType.updated_by = params.updatedBy || 'admin';
+      bType.updated_at = params.updatedAt || new Date().toISOString();
+    }
+    return { rows: [], rowCount: bType ? 1 : 0 };
+  }
+
+  // 22d. Delete from branch_types
+  if (normalizedQuery.includes('DELETE FROM branch_types')) {
+    const originalLength = mockDbStore.branchTypes.length;
+    mockDbStore.branchTypes = mockDbStore.branchTypes.filter(t => String(t.id) !== String(params.id));
+    mockDbStore.branches = mockDbStore.branches.filter(b => String(b.branch_type_id) !== String(params.id));
+    return { rows: [], rowCount: originalLength - mockDbStore.branchTypes.length };
+  }
+
+  // 23. Select branches
+  if (normalizedQuery.includes('FROM branches') && normalizedQuery.startsWith('SELECT')) {
+    const list = mockDbStore.branches.map(b => {
+      const t = mockDbStore.branchTypes.find(type => String(type.id) === String(b.branch_type_id));
+      return {
+        id: b.id,
+        name: b.name,
+        branch_type_id: b.branch_type_id,
+        group_name: t ? t.name : '',
+        created_by: b.created_by,
+        created_at: b.created_at,
+        updated_by: b.updated_by,
+        updated_at: b.updated_at
+      };
+    });
+    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    return { rows: list, rowCount: list.length };
+  }
+
+  // 23b. Insert into branches
   if (normalizedQuery.includes('INSERT INTO branches')) {
     const newBranch = {
       id: params.id,
       name: params.name,
-      group_name: params.groupName,
-      display_order: parseInt(params.displayOrder) || 0,
-      member_count: parseInt(params.memberCount) || 0
+      branch_type_id: params.branchTypeId,
+      created_by: params.createdBy || 'admin',
+      created_at: params.createdAt || new Date().toISOString(),
+      updated_by: params.updatedBy || 'admin',
+      updated_at: params.updatedAt || new Date().toISOString()
     };
     mockDbStore.branches.push(newBranch);
     return { rows: [], rowCount: 1 };
   }
 
-  // 24. Update branches
+  // 23c. Update branches
   if (normalizedQuery.startsWith('UPDATE branches')) {
     const branch = mockDbStore.branches.find(b => String(b.id) === String(params.id));
     if (branch) {
       branch.name = params.name;
-      branch.group_name = params.groupName;
-      branch.display_order = parseInt(params.displayOrder) || 0;
-      branch.member_count = parseInt(params.memberCount) || 0;
+      branch.branch_type_id = params.branchTypeId;
+      branch.updated_by = params.updatedBy || 'admin';
+      branch.updated_at = params.updatedAt || new Date().toISOString();
     }
     return { rows: [], rowCount: branch ? 1 : 0 };
   }
 
-  // 25. Delete from branches
+  // 23d. Delete from branches
   if (normalizedQuery.includes('DELETE FROM branches')) {
     const originalLength = mockDbStore.branches.length;
     mockDbStore.branches = mockDbStore.branches.filter(b => String(b.id) !== String(params.id));
+    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(m => String(m.branch_id) !== String(params.id));
     return { rows: [], rowCount: originalLength - mockDbStore.branches.length };
+  }
+
+  // 24. Select union_members
+  if (normalizedQuery.includes('FROM union_members') && normalizedQuery.startsWith('SELECT')) {
+    const list = mockDbStore.unionMembers.map(m => {
+      const b = mockDbStore.branches.find(branch => String(branch.id) === String(m.branch_id));
+      return {
+        id: m.id,
+        name: m.name,
+        dob: m.dob,
+        phone: m.phone,
+        email: m.email,
+        branch_id: m.branch_id,
+        branch_name: b ? b.name : '',
+        join_date: m.join_date,
+        status: m.status,
+        created_by: m.created_by,
+        created_at: m.created_at,
+        updated_by: m.updated_by,
+        updated_at: m.updated_at
+      };
+    });
+    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    return { rows: list, rowCount: list.length };
+  }
+
+  // 24b. Insert into union_members
+  if (normalizedQuery.includes('INSERT INTO union_members')) {
+    const newMember = {
+      id: params.id,
+      name: params.name,
+      dob: params.dob,
+      phone: params.phone,
+      email: params.email,
+      branch_id: params.branchId,
+      join_date: params.joinDate,
+      status: params.status || 'Sinh hoạt',
+      created_by: params.createdBy || 'admin',
+      created_at: params.createdAt || new Date().toISOString(),
+      updated_by: params.updatedBy || 'admin',
+      updated_at: params.updatedAt || new Date().toISOString()
+    };
+    mockDbStore.unionMembers.push(newMember);
+    return { rows: [], rowCount: 1 };
+  }
+
+  // 24c. Update union_members
+  if (normalizedQuery.startsWith('UPDATE union_members')) {
+    const member = mockDbStore.unionMembers.find(m => String(m.id) === String(params.id));
+    if (member) {
+      member.name = params.name;
+      member.dob = params.dob;
+      member.phone = params.phone;
+      member.email = params.email;
+      member.branch_id = params.branchId;
+      member.join_date = params.joinDate;
+      member.status = params.status;
+      member.updated_by = params.updatedBy || 'admin';
+      member.updated_at = params.updatedAt || new Date().toISOString();
+    }
+    return { rows: [], rowCount: member ? 1 : 0 };
+  }
+
+  // 24d. Delete from union_members
+  if (normalizedQuery.includes('DELETE FROM union_members')) {
+    const originalLength = mockDbStore.unionMembers.length;
+    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(m => String(m.id) !== String(params.id));
+    return { rows: [], rowCount: originalLength - mockDbStore.unionMembers.length };
   }
 
   return { rows: [], rowCount: 0 };
@@ -506,7 +624,11 @@ const initializeDatabase = async () => {
             date VARCHAR(20),
             author VARCHAR(100),
             views INTEGER DEFAULT 0,
-            is_hot BOOLEAN DEFAULT FALSE
+            is_hot BOOLEAN DEFAULT FALSE,
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
         await client.query(`
@@ -516,7 +638,11 @@ const initializeDatabase = async () => {
             doc_no VARCHAR(100),
             date VARCHAR(20),
             category VARCHAR(50),
-            file_url VARCHAR(512)
+            file_url VARCHAR(512),
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
         await client.query(`
@@ -528,7 +654,11 @@ const initializeDatabase = async () => {
             unit VARCHAR(150),
             subject VARCHAR(255),
             message TEXT,
-            date VARCHAR(20)
+            date VARCHAR(20),
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
         await client.query(`
@@ -540,15 +670,18 @@ const initializeDatabase = async () => {
             phone VARCHAR(20),
             image_url TEXT,
             responsibility TEXT,
-            display_order INTEGER DEFAULT 0
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
         await client.query(`
           CREATE TABLE IF NOT EXISTS intro_settings (
             id INTEGER PRIMARY KEY DEFAULT 1,
             history_content TEXT,
-            stat_members VARCHAR(50) DEFAULT '350+',
-            stat_branches VARCHAR(50) DEFAULT '12',
+            stat_members VARCHAR(50) DEFAULT '0',
+            stat_branches VARCHAR(50) DEFAULT '0',
             branches_content TEXT
           );
         `);
@@ -566,7 +699,11 @@ const initializeDatabase = async () => {
           CREATE TABLE IF NOT EXISTS gallery (
             id VARCHAR(50) PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
-            date VARCHAR(20)
+            date VARCHAR(20),
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
 
@@ -575,21 +712,77 @@ const initializeDatabase = async () => {
             id VARCHAR(50) PRIMARY KEY,
             gallery_id VARCHAR(50) NOT NULL REFERENCES gallery(id) ON DELETE CASCADE,
             image_url TEXT NOT NULL,
-            file_name VARCHAR(255)
+            file_name VARCHAR(255),
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
+
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS branch_types (
+            id VARCHAR(50) PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
+          );
+        `);
+
         await client.query(`
           CREATE TABLE IF NOT EXISTS branches (
             id VARCHAR(50) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            group_name VARCHAR(150) NOT NULL,
-            display_order INTEGER DEFAULT 0,
-            member_count INTEGER DEFAULT 0
+            branch_type_id VARCHAR(50) REFERENCES branch_types(id) ON DELETE CASCADE,
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
           );
         `);
 
-        // Migration: ensure image_url columns can store large base64 strings and file_name column exists
-        await client.query("ALTER TABLE branches ADD COLUMN IF NOT EXISTS member_count INTEGER DEFAULT 0;");
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS union_members (
+            id VARCHAR(50) PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            dob VARCHAR(20),
+            phone VARCHAR(20),
+            email VARCHAR(100),
+            branch_id VARCHAR(50) NOT NULL REFERENCES branches(id) ON DELETE CASCADE,
+            join_date VARCHAR(20),
+            status VARCHAR(50) DEFAULT 'Sinh hoạt',
+            created_by VARCHAR(100),
+            created_at VARCHAR(30),
+            updated_by VARCHAR(100),
+            updated_at VARCHAR(30)
+          );
+        `);
+
+        // Migration updates for existing tables
+        const addAuditCols = async (tbl) => {
+          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_by VARCHAR(100);`);
+          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_at VARCHAR(30);`);
+          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_by VARCHAR(100);`);
+          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_at VARCHAR(30);`);
+        };
+        await addAuditCols("posts");
+        await addAuditCols("documents");
+        await addAuditCols("feedbacks");
+        await addAuditCols("bch_members");
+        await addAuditCols("gallery");
+        await addAuditCols("gallery_photos");
+
+        // Clean display_order from bch_members
+        await client.query("ALTER TABLE bch_members DROP COLUMN IF EXISTS display_order;");
+
+        // Clean branches columns and add new relation column
+        await client.query("ALTER TABLE branches DROP COLUMN IF EXISTS display_order;");
+        await client.query("ALTER TABLE branches DROP COLUMN IF EXISTS group_name;");
+        await client.query("ALTER TABLE branches DROP COLUMN IF EXISTS member_count;");
+        await client.query("ALTER TABLE branches ADD COLUMN IF NOT EXISTS branch_type_id VARCHAR(50);");
+
         await client.query("ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT;");
         await client.query("ALTER TABLE bch_members ALTER COLUMN image_url TYPE TEXT;");
         await client.query("ALTER TABLE gallery_photos ALTER COLUMN image_url TYPE TEXT;");
@@ -720,7 +913,11 @@ const initializeDatabase = async () => {
           date NVARCHAR(20),
           author NVARCHAR(100),
           views INT DEFAULT 0,
-          is_hot BIT DEFAULT 0
+          is_hot BIT DEFAULT 0,
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
@@ -732,7 +929,11 @@ const initializeDatabase = async () => {
           doc_no NVARCHAR(100),
           date NVARCHAR(20),
           category NVARCHAR(50),
-          file_url NVARCHAR(512)
+          file_url NVARCHAR(512),
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
@@ -746,7 +947,11 @@ const initializeDatabase = async () => {
           unit NVARCHAR(150),
           subject NVARCHAR(255),
           message NVARCHAR(MAX),
-          date NVARCHAR(20)
+          date NVARCHAR(20),
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
@@ -760,7 +965,10 @@ const initializeDatabase = async () => {
           phone NVARCHAR(20),
           image_url NVARCHAR(MAX),
           responsibility NVARCHAR(MAX),
-          display_order INT DEFAULT 0
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
@@ -769,8 +977,8 @@ const initializeDatabase = async () => {
         CREATE TABLE intro_settings (
           id INT PRIMARY KEY DEFAULT 1,
           history_content NVARCHAR(MAX),
-          stat_members NVARCHAR(50) DEFAULT '350+',
-          stat_branches NVARCHAR(50) DEFAULT '12',
+          stat_members NVARCHAR(50) DEFAULT '0',
+          stat_branches NVARCHAR(50) DEFAULT '0',
           branches_content NVARCHAR(MAX)
         );
       `);
@@ -787,7 +995,11 @@ const initializeDatabase = async () => {
         CREATE TABLE gallery (
           id NVARCHAR(50) PRIMARY KEY,
           title NVARCHAR(255) NOT NULL,
-          date NVARCHAR(20)
+          date NVARCHAR(20),
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
@@ -797,7 +1009,23 @@ const initializeDatabase = async () => {
           id NVARCHAR(50) PRIMARY KEY,
           gallery_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES gallery(id) ON DELETE CASCADE,
           image_url NVARCHAR(MAX) NOT NULL,
-          file_name NVARCHAR(255)
+          file_name NVARCHAR(255),
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
+        );
+      `);
+
+      await sql.query(`
+        IF OBJECT_ID('branch_types', 'U') IS NULL
+        CREATE TABLE branch_types (
+          id NVARCHAR(50) PRIMARY KEY,
+          name NVARCHAR(255) NOT NULL,
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
@@ -806,17 +1034,55 @@ const initializeDatabase = async () => {
         CREATE TABLE branches (
           id NVARCHAR(50) PRIMARY KEY,
           name NVARCHAR(255) NOT NULL,
-          group_name NVARCHAR(150) NOT NULL,
-          display_order INT DEFAULT 0,
-          member_count INT DEFAULT 0
+          branch_type_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES branch_types(id) ON DELETE CASCADE,
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
         );
       `);
 
-      // Migration: ensure image_url columns can store large base64 strings and file_name column exists
       await sql.query(`
-        IF COL_LENGTH('branches', 'member_count') IS NULL
-        ALTER TABLE branches ADD member_count INT DEFAULT 0;
+        IF OBJECT_ID('union_members', 'U') IS NULL
+        CREATE TABLE union_members (
+          id NVARCHAR(50) PRIMARY KEY,
+          name NVARCHAR(100) NOT NULL,
+          dob NVARCHAR(20),
+          phone NVARCHAR(20),
+          email NVARCHAR(100),
+          branch_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES branches(id) ON DELETE CASCADE,
+          join_date NVARCHAR(20),
+          status NVARCHAR(50) DEFAULT N'Sinh hoạt',
+          created_by NVARCHAR(100),
+          created_at NVARCHAR(30),
+          updated_by NVARCHAR(100),
+          updated_at NVARCHAR(30)
+        );
       `);
+
+      // Migration: Add audit columns to existing MS SQL Server tables
+      const addAuditColsMssql = async (tbl) => {
+        await sql.query(`IF COL_LENGTH('${tbl}', 'created_by') IS NULL ALTER TABLE ${tbl} ADD created_by NVARCHAR(100);`);
+        await sql.query(`IF COL_LENGTH('${tbl}', 'created_at') IS NULL ALTER TABLE ${tbl} ADD created_at NVARCHAR(30);`);
+        await sql.query(`IF COL_LENGTH('${tbl}', 'updated_by') IS NULL ALTER TABLE ${tbl} ADD updated_by NVARCHAR(100);`);
+        await sql.query(`IF COL_LENGTH('${tbl}', 'updated_at') IS NULL ALTER TABLE ${tbl} ADD updated_at NVARCHAR(30);`);
+      };
+      await addAuditColsMssql("posts");
+      await addAuditColsMssql("documents");
+      await addAuditColsMssql("feedbacks");
+      await addAuditColsMssql("bch_members");
+      await addAuditColsMssql("gallery");
+      await addAuditColsMssql("gallery_photos");
+
+      // Drop display_order from bch_members
+      await sql.query("IF COL_LENGTH('bch_members', 'display_order') IS NOT NULL ALTER TABLE bch_members DROP COLUMN display_order;");
+
+      // Drop columns from branches
+      await sql.query("IF COL_LENGTH('branches', 'display_order') IS NOT NULL ALTER TABLE branches DROP COLUMN display_order;");
+      await sql.query("IF COL_LENGTH('branches', 'group_name') IS NOT NULL ALTER TABLE branches DROP COLUMN group_name;");
+      await sql.query("IF COL_LENGTH('branches', 'member_count') IS NOT NULL ALTER TABLE branches DROP COLUMN member_count;");
+      await sql.query("IF COL_LENGTH('branches', 'branch_type_id') IS NULL ALTER TABLE branches ADD branch_type_id NVARCHAR(50);");
+
       await sql.query("ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);");
       await sql.query("ALTER TABLE bch_members ALTER COLUMN image_url NVARCHAR(MAX);");
       await sql.query("ALTER TABLE gallery_photos ALTER COLUMN image_url NVARCHAR(MAX);");

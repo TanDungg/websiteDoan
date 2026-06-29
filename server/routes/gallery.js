@@ -55,11 +55,13 @@ router.post("/", async (req, res) => {
   const crypto = require("crypto");
   const galleryId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
 
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
   try {
     await runQuery(
-      `INSERT INTO gallery (id, title, date)
-       VALUES (@id, @title, @date)`,
-      { id: galleryId, title: title?.trim() || "Album hình ảnh hoạt động", date }
+      `INSERT INTO gallery (id, title, date, created_by, created_at, updated_by, updated_at)
+       VALUES (@id, @title, @date, @createdBy, @createdAt, @createdBy, @createdAt)`,
+      { id: galleryId, title: title?.trim() || "Album hình ảnh hoạt động", date, createdBy, createdAt }
     );
 
     for (const file of files) {
@@ -73,9 +75,9 @@ router.post("/", async (req, res) => {
       const imageUrl = fileData;
 
       await runQuery(
-        `INSERT INTO gallery_photos (id, gallery_id, image_url, file_name)
-         VALUES (@id, @galleryId, @imageUrl, @fileName)`,
-        { id: photoId, galleryId, imageUrl, fileName }
+        `INSERT INTO gallery_photos (id, gallery_id, image_url, file_name, created_by, created_at, updated_by, updated_at)
+         VALUES (@id, @galleryId, @imageUrl, @fileName, @createdBy, @createdAt, @createdBy, @createdAt)`,
+        { id: photoId, galleryId, imageUrl, fileName, createdBy, createdAt }
       );
     }
     res.status(201).json({

@@ -9,22 +9,32 @@ router.get("/", async (req, res) => {
       "SELECT * FROM intro_settings WHERE id = 1",
     );
     const bchResult = await runQuery(
-      "SELECT * FROM bch_members ORDER BY display_order ASC",
+      "SELECT * FROM bch_members"
     );
     const branchesResult = await runQuery(
-      "SELECT * FROM branches ORDER BY display_order ASC",
+      `SELECT b.*, t.name as group_name 
+       FROM branches b 
+       LEFT JOIN branch_types t ON b.branch_type_id = t.id`
     );
+    const branchesCountResult = await runQuery("SELECT COUNT(*) AS count FROM branches");
+    const membersCountResult = await runQuery("SELECT COUNT(*) AS count FROM union_members");
 
     const branches = branchesResult.rows.map((row) => ({
       id: row.id,
       name: row.name,
-      groupName: row.group_name,
-      displayOrder: row.display_order,
-      memberCount: parseInt(row.member_count) || 0,
+      branchTypeId: row.branch_type_id,
+      groupName: row.group_name || "",
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedBy: row.updated_by,
+      updatedAt: row.updated_at
     }));
 
-    const statBranches = branches.length;
-    const statMembers = branches.reduce((acc, b) => acc + (b.memberCount || 0), 0);
+    // Sort alphabetically by name
+    branches.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+    const statBranches = branchesCountResult.rows[0]?.count || 0;
+    const statMembers = membersCountResult.rows[0]?.count || 0;
 
     let settings = {
       historyContent: "",
@@ -47,8 +57,14 @@ router.get("/", async (req, res) => {
       phone: row.phone,
       imageUrl: row.image_url,
       responsibility: row.responsibility,
-      displayOrder: row.display_order,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedBy: row.updated_by,
+      updatedAt: row.updated_at
     }));
+
+    // Sort BCH members by name
+    members.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
     res.json({ settings, bchMembers: members, branches });
   } catch (err) {

@@ -4,18 +4,20 @@ const { runQuery } = require("../database");
 
 // POST /api/branches -> mounted on /api/branches, so POST /
 router.post("/", async (req, res) => {
-  const { name, groupName, displayOrder, memberCount } = req.body;
+  const { name, branchTypeId } = req.body;
   const id = Date.now().toString();
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
   try {
     await runQuery(
-      `INSERT INTO branches (id, name, group_name, display_order, member_count)
-       VALUES (@id, @name, @groupName, @displayOrder, @memberCount)`,
+      `INSERT INTO branches (id, name, branch_type_id, created_by, created_at, updated_by, updated_at)
+       VALUES (@id, @name, @branchTypeId, @createdBy, @createdAt, @createdBy, @createdAt)`,
       {
         id,
         name,
-        groupName,
-        displayOrder: parseInt(displayOrder) || 0,
-        memberCount: parseInt(memberCount) || 0,
+        branchTypeId,
+        createdBy,
+        createdAt,
       },
     );
     res
@@ -30,18 +32,20 @@ router.post("/", async (req, res) => {
 // PUT /api/branches/:id -> mounted on /api/branches, so PUT /:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, groupName, displayOrder, memberCount } = req.body;
+  const { name, branchTypeId } = req.body;
+  const updatedBy = "admin";
+  const updatedAt = new Date().toISOString();
   try {
     await runQuery(
       `UPDATE branches 
-       SET name = @name, group_name = @groupName, display_order = @displayOrder, member_count = @memberCount
+       SET name = @name, branch_type_id = @branchTypeId, updated_by = @updatedBy, updated_at = @updatedAt
        WHERE id = @id`,
       {
         id,
         name,
-        groupName,
-        displayOrder: parseInt(displayOrder) || 0,
-        memberCount: parseInt(memberCount) || 0,
+        branchTypeId,
+        updatedBy,
+        updatedAt,
       },
     );
     res.json({ success: true, message: "Cập nhật chi đoàn thành công!" });

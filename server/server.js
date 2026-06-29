@@ -28,6 +28,8 @@ app.use("/api/feedbacks", require("./routes/feedbacks"));
 app.use("/api/bch-members", require("./routes/bch"));
 app.use("/api/intro", require("./routes/intro"));
 app.use("/api/branches", require("./routes/branches"));
+app.use("/api/branch-types", require("./routes/branchTypes"));
+app.use("/api/union-members", require("./routes/unionMembers"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/gallery", require("./routes/gallery"));
 

@@ -11,13 +11,14 @@ router.post("/", async (req, res) => {
     phone,
     imageUrl,
     responsibility,
-    displayOrder,
   } = req.body;
   const id = Date.now().toString();
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
   try {
     await runQuery(
-      `INSERT INTO bch_members (id, name, position, email, phone, image_url, responsibility, display_order)
-       VALUES (@id, @name, @position, @email, @phone, @imageUrl, @responsibility, @displayOrder)`,
+      `INSERT INTO bch_members (id, name, position, email, phone, image_url, responsibility, created_by, created_at, updated_by, updated_at)
+       VALUES (@id, @name, @position, @email, @phone, @imageUrl, @responsibility, @createdBy, @createdAt, @createdBy, @createdAt)`,
       {
         id,
         name,
@@ -26,7 +27,8 @@ router.post("/", async (req, res) => {
         phone,
         imageUrl,
         responsibility,
-        displayOrder: parseInt(displayOrder) || 0,
+        createdBy,
+        createdAt,
       },
     );
     res
@@ -48,12 +50,13 @@ router.put("/:id", async (req, res) => {
     phone,
     imageUrl,
     responsibility,
-    displayOrder,
   } = req.body;
+  const updatedBy = "admin";
+  const updatedAt = new Date().toISOString();
   try {
     await runQuery(
       `UPDATE bch_members 
-       SET name = @name, position = @position, email = @email, phone = @phone, image_url = @imageUrl, responsibility = @responsibility, display_order = @displayOrder
+       SET name = @name, position = @position, email = @email, phone = @phone, image_url = @imageUrl, responsibility = @responsibility, updated_by = @updatedBy, updated_at = @updatedAt
        WHERE id = @id`,
       {
         id,
@@ -63,7 +66,8 @@ router.put("/:id", async (req, res) => {
         phone,
         imageUrl,
         responsibility,
-        displayOrder: parseInt(displayOrder) || 0,
+        updatedBy,
+        updatedAt,
       },
     );
     res.json({ success: true, message: "Cập nhật thành viên BCH thành công!" });
