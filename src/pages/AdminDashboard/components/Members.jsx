@@ -272,6 +272,7 @@ export default function Members() {
         onClose={() => setShowMemberModal(false)}
         title={editingMember ? "Cập nhật Hồ sơ Đoàn viên" : "Tiếp nhận Đoàn viên Mới"}
         maxWidth="600px"
+        className="premium-modal"
         onSubmit={handleMemberSubmit}
         footer={
           <>

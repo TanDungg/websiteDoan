@@ -482,3 +482,82 @@
   text-align: center;
   color: var(--text-muted);
 }
+
+/* Premium Modal Overrides */
+.premium-modal.modal-container {
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.premium-modal .modal-header {
+  background: #ffffff !important;
+  padding: 18px 24px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.premium-modal .modal-header h3 {
+  color: #0f172a !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  font-size: 1.2rem !important;
+  letter-spacing: -0.02em !important;
+  text-transform: none !important;
+}
+
+.premium-modal .modal-close {
+  color: #64748b !important;
+  background-color: #f1f5f9 !important;
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 1.1rem !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.premium-modal .modal-close:hover {
+  background-color: #fee2e2 !important;
+  color: #ef4444 !important;
+  transform: rotate(90deg) !important;
+}
+
+.premium-modal .modal-body {
+  padding: 24px !important;
+  background-color: #ffffff !important;
+}
+
+.premium-modal .modal-actions,
+.premium-modal .modal-footer {
+  background-color: #f8fafc !important;
+  padding: 16px 24px !important;
+  border-top: 1px solid #f1f5f9 !important;
+}
+
+.premium-modal .form-label {
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  color: #475569 !important;
+  margin-bottom: 6px !important;
+}
+
+.premium-modal .form-control,
+.premium-modal .form-select {
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-size: 0.9rem !important;
+  padding: 9px 12px !important;
+  transition: all 0.15s ease-in-out !important;
+  background-color: #ffffff !important;
+}
+
+.premium-modal .form-control:focus,
+.premium-modal .form-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  outline: none !important;
+}

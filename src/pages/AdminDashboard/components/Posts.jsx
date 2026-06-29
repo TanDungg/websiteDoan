@@ -242,6 +242,7 @@ export default function Posts() {
         onClose={() => setShowPostModal(false)}
         title={editingPost ? "Sửa bài viết" : "Viết bài mới"}
         maxWidth="750px"
+        className="premium-modal"
         onSubmit={handlePostSubmit}
         footer={
           <>
@@ -291,8 +292,16 @@ export default function Posts() {
             </select>
           </div>
 
-          <div className="form-group" style={{ flex: 1, marginBottom: 0, display: "flex", alignItems: "flex-end" }}>
-            <label 
+          <div
+            className="form-group"
+            style={{
+              flex: 1,
+              marginBottom: 0,
+              display: "flex",
+              alignItems: "flex-end",
+            }}
+          >
+            <label
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -307,19 +316,31 @@ export default function Posts() {
                 width: "100%",
                 height: "42px",
                 margin: 0,
-                transition: "all 0.2s ease"
+                transition: "all 0.2s ease",
               }}
             >
               <input
                 type="checkbox"
                 id="post-is-hot"
-                style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#22c55e", margin: 0 }}
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  cursor: "pointer",
+                  accentColor: "#22c55e",
+                  margin: 0,
+                }}
                 checked={postForm.isHot}
                 onChange={(e) =>
                   setPostForm({ ...postForm, isHot: e.target.checked })
                 }
               />
-              <span style={{ fontWeight: 600, fontSize: "0.85rem", color: postForm.isHot ? "#166534" : "#475569" }}>
+              <span
+                style={{
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  color: postForm.isHot ? "#166534" : "#475569",
+                }}
+              >
                 Ghim làm Tin nổi bật ở Banner Trang chủ
               </span>
             </label>
@@ -335,7 +356,7 @@ export default function Posts() {
             style={{ display: "none" }}
             onChange={handleImageUpload}
           />
-          
+
           <div
             style={{
               position: "relative",
@@ -343,14 +364,16 @@ export default function Posts() {
               height: "190px",
               borderRadius: "8px",
               overflow: "hidden",
-              border: isImageCardHovered ? "2px dashed var(--primary)" : "2px dashed #cbd5e1",
+              border: isImageCardHovered
+                ? "1px solid var(--primary)"
+                : "1px solid #cbd5e1",
               backgroundColor: "#f8fafc",
               cursor: "pointer",
               transition: "all 0.2s ease-in-out",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center"
+              justifyContent: "center",
             }}
             onClick={() => fileInputRef.current?.click()}
             onMouseEnter={() => setIsImageCardHovered(true)}
@@ -363,7 +386,7 @@ export default function Posts() {
                   alt="Preview Cover"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
-                
+
                 {/* Overlay on hover to tell user they can click to change directly */}
                 <div
                   style={{
@@ -378,7 +401,7 @@ export default function Posts() {
                     gap: "8px",
                     opacity: isImageCardHovered ? 1 : 0,
                     transition: "opacity 0.2s ease",
-                    color: "#fff"
+                    color: "#fff",
                   }}
                 >
                   <Upload size={28} />
@@ -406,7 +429,7 @@ export default function Posts() {
                     cursor: "pointer",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
                     transition: "transform 0.2s ease",
-                    zIndex: 10
+                    zIndex: 10,
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -425,21 +448,39 @@ export default function Posts() {
                 </button>
               </>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "20px" }}>
-                <div style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  backgroundColor: isImageCardHovered ? "var(--primary-light)" : "#e2e8f0",
+              <div
+                style={{
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center",
-                  color: isImageCardHovered ? "var(--primary)" : "#64748b",
-                  transition: "all 0.2s"
-                }}>
+                  gap: "8px",
+                  padding: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundColor: isImageCardHovered
+                      ? "var(--primary-light)"
+                      : "#e2e8f0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: isImageCardHovered ? "var(--primary)" : "#64748b",
+                    transition: "all 0.2s",
+                  }}
+                >
                   <Image size={24} />
                 </div>
-                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "#334155" }}>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "0.9rem",
+                    color: "#334155",
+                  }}
+                >
                   Kéo thả hoặc nhấp chuột để tải ảnh bìa lên
                 </span>
                 <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
@@ -449,8 +490,22 @@ export default function Posts() {
             )}
           </div>
 
-          <div style={{ display: "flex", gap: "10px", marginTop: "10px", alignItems: "center" }}>
-            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#64748b", whiteSpace: "nowrap" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginTop: "10px",
+              alignItems: "center",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                color: "#64748b",
+                whiteSpace: "nowrap",
+              }}
+            >
               Hoặc nhập liên kết ảnh (URL):
             </span>
             <input
