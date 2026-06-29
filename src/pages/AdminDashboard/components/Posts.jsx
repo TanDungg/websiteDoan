@@ -271,64 +271,130 @@ export default function Posts() {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Chuyên mục *</label>
-          <select
-            className="form-control"
-            value={postForm.category}
-            onChange={(e) =>
-              setPostForm({ ...postForm, category: e.target.value })
-            }
-          >
-            {newsCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+        <div style={{ display: "flex", gap: "20px", marginBottom: "15px" }}>
+          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+            <label className="form-label">Chuyên mục *</label>
+            <select
+              className="form-control"
+              value={postForm.category}
+              onChange={(e) =>
+                setPostForm({ ...postForm, category: e.target.value })
+              }
+            >
+              {newsCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group" style={{ flex: 1, marginBottom: 0, display: "flex", alignItems: "flex-end" }}>
+            <label 
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "0 15px",
+                border: "1px solid #cbd5e1",
+                borderRadius: "6px",
+                backgroundColor: postForm.isHot ? "#f0fdf4" : "#f8fafc",
+                borderColor: postForm.isHot ? "#22c55e" : "#cbd5e1",
+                cursor: "pointer",
+                userSelect: "none",
+                width: "100%",
+                height: "42px",
+                margin: 0,
+                transition: "all 0.2s ease"
+              }}
+            >
+              <input
+                type="checkbox"
+                id="post-is-hot"
+                style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#22c55e", margin: 0 }}
+                checked={postForm.isHot}
+                onChange={(e) =>
+                  setPostForm({ ...postForm, isHot: e.target.checked })
+                }
+              />
+              <span style={{ fontWeight: 600, fontSize: "0.85rem", color: postForm.isHot ? "#166534" : "#475569" }}>
+                Ghim làm Tin nổi bật ở Banner Trang chủ
+              </span>
+            </label>
+          </div>
         </div>
 
-        <div className="form-group" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 0 12px" }}>
-          <input
-            type="checkbox"
-            id="post-is-hot"
-            style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "var(--primary)" }}
-            checked={postForm.isHot}
-            onChange={(e) =>
-              setPostForm({ ...postForm, isHot: e.target.checked })
-            }
-          />
-          <label htmlFor="post-is-hot" className="form-label" style={{ marginBottom: 0, cursor: "pointer", fontWeight: 600, color: "var(--text-main)" }}>
-            Tin nổi bật (Ghim lên Slider biểu ngữ Banner tại trang chủ)
-          </label>
-        </div>
-
-        <div className="form-group">
+        <div className="form-group" style={{ marginTop: "15px" }}>
           <label className="form-label">Ảnh bìa bài viết *</label>
-          <div className="image-upload-wrapper">
-            {tempImage || postForm.imageUrl ? (
+          {tempImage || postForm.imageUrl ? (
+            <div style={{ position: "relative", width: "100%", height: "180px", borderRadius: "8px", overflow: "hidden", border: "1px solid #cbd5e1", backgroundColor: "#f1f5f9" }}>
               <img
                 src={tempImage ? tempImage.previewUrl : postForm.imageUrl}
-                alt="Preview"
-                className="image-preview-thumbnail"
+                alt="Preview Cover"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
-            ) : (
-              <div className="image-preview-placeholder">Chưa chọn ảnh</div>
-            )}
-            <label className="image-upload-btn-label">
-              Tải ảnh từ máy
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleImageUpload}
-              />
-            </label>
+              <button
+                type="button"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  backgroundColor: "rgba(239, 68, 68, 0.9)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                  transition: "all 0.2s"
+                }}
+                onClick={() => {
+                  setTempImage(null);
+                  setPostForm({ ...postForm, imageUrl: "" });
+                }}
+              >
+                Gỡ bỏ ảnh bìa
+              </button>
+            </div>
+          ) : (
+            <div style={{
+              border: "2px dashed #cbd5e1",
+              borderRadius: "8px",
+              backgroundColor: "#f8fafc",
+              padding: "24px",
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}>
+              <label style={{ cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "1.8rem" }}>📁</span>
+                <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "#334155" }}>
+                  Nhấp để tải ảnh bìa từ máy tính
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                  Định dạng hỗ trợ: JPG, PNG, WEBP, GIF
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleImageUpload}
+                />
+              </label>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px", alignItems: "center" }}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#64748b", whiteSpace: "nowrap" }}>
+              Hoặc nhập liên kết ảnh (URL):
+            </span>
             <input
               type="text"
               className="form-control"
-              placeholder="Hoặc nhập liên kết ảnh (URL)..."
-              style={{ flex: 1 }}
+              placeholder="Nhập liên kết ảnh bìa từ Internet (ví dụ: https://...)"
+              style={{ flex: 1, height: "36px" }}
               value={postForm.imageUrl}
               onChange={(e) => {
                 setTempImage(null);
