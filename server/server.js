@@ -120,8 +120,8 @@ app.post("/api/posts", async (req, res) => {
   try {
     await runQuery(
       `INSERT INTO posts (id, title, summary, content, category, image_url, author, date, views, is_hot)
-       VALUES (@id, @title, @summary, @content, @category, @imageUrl, @author, @date, 0, 0)`,
-      { id: postId, title, summary, content, category, imageUrl, author, date },
+       VALUES (@id, @title, @summary, @content, @category, @imageUrl, @author, @date, 0, @isHot)`,
+      { id: postId, title, summary, content, category, imageUrl, author, date, isHot: false },
     );
     res
       .status(201)
