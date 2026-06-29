@@ -583,15 +583,36 @@ app.post("/api/upload", (req, res) => {
 });
 
 // API: Gallery
+// API: Gallery
 app.get("/api/gallery", async (req, res) => {
   try {
-    const result = await runQuery("SELECT * FROM gallery ORDER BY date DESC");
-    const items = result.rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      imageUrl: row.image_url,
-      date: row.date,
-    }));
+    const result = await runQuery(
+      `SELECT g.id, g.title, g.date, gp.id AS photo_id, gp.image_url 
+       FROM gallery g 
+       LEFT JOIN gallery_photos gp ON g.id = gp.gallery_id 
+       ORDER BY g.date DESC`
+    );
+
+    const albumsMap = {};
+    result.rows.forEach((row) => {
+      const albumId = row.id;
+      if (!albumsMap[albumId]) {
+        albumsMap[albumId] = {
+          id: albumId,
+          title: row.title,
+          date: row.date,
+          images: [],
+        };
+      }
+      if (row.image_url) {
+        albumsMap[albumId].images.push({
+          id: row.photo_id,
+          imageUrl: row.image_url,
+        });
+      }
+    });
+
+    const items = Object.values(albumsMap);
     res.json(items);
   } catch (err) {
     console.error("GET /api/gallery error:", err);
@@ -602,36 +623,49 @@ app.get("/api/gallery", async (req, res) => {
 app.post("/api/gallery", async (req, res) => {
   const { title, files } = req.body;
   if (!files || !Array.isArray(files) || files.length === 0) {
-    return res.status(400).json({ error: "Không có tệp tin nào được gửi lên!" });
+    return res
+      .status(400)
+      .json({ error: "Không có tệp tin nào được gửi lên!" });
   }
 
   const date = new Date().toISOString().split("T")[0];
   const crypto = require("crypto");
+  const galleryId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
 
   try {
+    await runQuery(
+      `INSERT INTO gallery (id, title, date)
+       VALUES (@id, @title, @date)`,
+      { id: galleryId, title: title?.trim() || "Album hình ảnh hoạt động", date }
+    );
+
     for (const file of files) {
       const { fileData, fileName } = file;
       if (!fileData || !fileName) continue;
 
-      const fileId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).substring(2, 5);
+      const photoId = crypto.randomUUID
+        ? crypto.randomUUID()
+        : Date.now().toString() + Math.random().toString(36).substring(2, 5);
       const base64Data = fileData.replace(/^data:image\/\w+;base64,/, "");
       const buffer = Buffer.from(base64Data, "base64");
 
-      const uniqueFileName = `gallery-${fileId}-${fileName.replace(/\s+/g, "_")}`;
+      const uniqueFileName = `gallery-${photoId}-${fileName.replace(/\s+/g, "_")}`;
       const filePath = path.join(uploadsPath, uniqueFileName);
 
       fs.writeFileSync(filePath, buffer);
 
       const imageUrl = `/uploads/${uniqueFileName}`;
-      const galleryItemTitle = title?.trim() || fileName.replace(/\.[^/.]+$/, "");
 
       await runQuery(
-        `INSERT INTO gallery (id, title, image_url, date)
-         VALUES (@id, @title, @imageUrl, @date)`,
-        { id: fileId, title: galleryItemTitle, imageUrl, date },
+        `INSERT INTO gallery_photos (id, gallery_id, image_url)
+         VALUES (@id, @galleryId, @imageUrl)`,
+        { id: photoId, galleryId, imageUrl }
       );
     }
-    res.status(201).json({ success: true, message: "Đăng tải thành công tất cả hình ảnh lên thư viện!" });
+    res.status(201).json({
+      success: true,
+      message: "Đăng tải thành công tất cả hình ảnh lên thư viện!",
+    });
   } catch (err) {
     console.error("POST /api/gallery error:", err);
     res.status(500).json({ error: "Lỗi lưu hình ảnh thư viện" });
@@ -641,26 +675,27 @@ app.post("/api/gallery", async (req, res) => {
 app.delete("/api/gallery/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const selectRes = await runQuery(
-      "SELECT image_url FROM gallery WHERE id = @id",
-      { id },
+    const photosRes = await runQuery(
+      "SELECT image_url FROM gallery_photos WHERE gallery_id = @id",
+      { id }
     );
-    if (selectRes.rows.length > 0) {
-      const imageUrl = selectRes.rows[0].image_url;
-      if (imageUrl.startsWith("/uploads/")) {
+
+    photosRes.rows.forEach((row) => {
+      const imageUrl = row.image_url;
+      if (imageUrl && imageUrl.startsWith("/uploads/")) {
         const actualPath = path.join(__dirname, imageUrl);
         if (fs.existsSync(actualPath)) {
           try {
             fs.unlinkSync(actualPath);
           } catch (_) {
-            // Ignore error if the file has already been deleted or cannot be unlinked
+            // Ignore unlinking errors
           }
         }
       }
-    }
+    });
 
     await runQuery("DELETE FROM gallery WHERE id = @id", { id });
-    res.json({ success: true, message: "Xóa ảnh thư viện thành công!" });
+    res.json({ success: true, message: "Xóa album thư viện thành công!" });
   } catch (err) {
     console.error("DELETE /api/gallery error:", err);
     res.status(500).json({ error: "Lỗi xóa hình ảnh thư viện" });

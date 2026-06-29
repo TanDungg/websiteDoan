@@ -101,7 +101,7 @@ export default function Gallery() {
   const handleDeleteGalleryItem = (id) => {
     if (
       window.confirm(
-        "Đồng chí có chắc chắn muốn xóa hình ảnh này khỏi thư viện?",
+        "Đồng chí có chắc chắn muốn xóa album này và toàn bộ ảnh bên trong khỏi thư viện?",
       )
     ) {
       fetch(`/api/gallery/${id}`, {
@@ -112,8 +112,8 @@ export default function Gallery() {
           loadGallery();
         })
         .catch((err) => {
-          console.error("Delete gallery image error:", err);
-          alert("Có lỗi xảy ra khi xóa hình ảnh!");
+          console.error("Delete gallery album error:", err);
+          alert("Có lỗi xảy ra khi xóa album!");
         });
     }
   };
@@ -132,24 +132,41 @@ export default function Gallery() {
           }}
         >
           <Plus size={18} />
-          <span>Đăng ảnh mới</span>
+          <span>Đăng album mới</span>
         </button>
       </div>
 
       <div className="gallery-manager-wrapper">
         <div className="card" style={{ padding: "24px" }}>
           <h4 style={{ marginBottom: "20px" }}>
-            Danh sách ảnh hiện có ({gallery.length})
+            Danh sách album hiện có ({gallery.length})
           </h4>
           {gallery.length > 0 ? (
             <div className="gallery-grid-admin">
               {gallery.map((item) => (
-                <div key={item.id} className="gallery-item-admin-card">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="gallery-item-admin-img"
-                  />
+                <div key={item.id} className="gallery-item-admin-card" style={{ position: "relative" }}>
+                  <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", overflow: "hidden" }}>
+                    <img
+                      src={item.images[0]?.imageUrl || "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80"}
+                      alt={item.title}
+                      className="gallery-item-admin-img"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                    <span className="gallery-photo-count-badge" style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      backgroundColor: "rgba(0, 0, 0, 0.75)",
+                      color: "#fff",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontSize: "0.7rem",
+                      fontWeight: "500",
+                      zIndex: 1
+                    }}>
+                      {item.images.length} ảnh
+                    </span>
+                  </div>
                   <div className="gallery-item-admin-info">
                     <p className="gallery-item-admin-title" title={item.title}>
                       {item.title}
@@ -167,7 +184,7 @@ export default function Gallery() {
                         className="action-btn delete-btn"
                         type="button"
                         style={{ width: "28px", height: "28px" }}
-                        title="Xóa ảnh này"
+                        title="Xóa album này"
                         onClick={() => handleDeleteGalleryItem(item.id)}
                       >
                         <Trash2 size={14} />

@@ -148,6 +148,7 @@ function initMockDbStore() {
       display_order: m.displayOrder
     })),
     gallery: [],
+    galleryPhotos: [],
     branches: mockBranches.map((b) => ({
       id: b.id,
       name: b.name,
@@ -371,29 +372,68 @@ function runMockQuery(queryText, params = {}) {
     return { rows: [], rowCount: 1 };
   }
 
-  // 19. Select gallery
-  if (normalizedQuery.includes('FROM gallery') && normalizedQuery.startsWith('SELECT')) {
-    const list = [...mockDbStore.gallery];
+  // 19. Select gallery (Relational join)
+  if (normalizedQuery.includes('from gallery g left join gallery_photos gp') || normalizedQuery.includes('from gallery')) {
+    const list = [];
+    mockDbStore.gallery.forEach(g => {
+      const photos = mockDbStore.galleryPhotos.filter(gp => String(gp.gallery_id) === String(g.id));
+      if (photos.length === 0) {
+        list.push({
+          id: g.id,
+          title: g.title,
+          date: g.date,
+          photo_id: null,
+          image_url: null
+        });
+      } else {
+        photos.forEach(gp => {
+          list.push({
+            id: g.id,
+            title: g.title,
+            date: g.date,
+            photo_id: gp.id,
+            image_url: gp.image_url
+          });
+        });
+      }
+    });
     list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     return { rows: list, rowCount: list.length };
   }
 
-  // 20. Insert into gallery
-  if (normalizedQuery.includes('INSERT INTO gallery')) {
-    const newImage = {
+  // 20. Insert into gallery (Relational)
+  if (normalizedQuery.includes('insert into gallery') && !normalizedQuery.includes('gallery_photos')) {
+    const newAlbum = {
       id: params.id,
       title: params.title,
-      image_url: params.imageUrl,
       date: params.date
     };
-    mockDbStore.gallery.push(newImage);
+    mockDbStore.gallery.push(newAlbum);
     return { rows: [], rowCount: 1 };
   }
 
+  // 20b. Insert into gallery_photos
+  if (normalizedQuery.includes('insert into gallery_photos')) {
+    const newPhoto = {
+      id: params.id,
+      gallery_id: params.galleryId,
+      image_url: params.imageUrl
+    };
+    mockDbStore.galleryPhotos.push(newPhoto);
+    return { rows: [], rowCount: 1 };
+  }
+
+  // 20c. Select from gallery_photos by gallery_id
+  if (normalizedQuery.includes('from gallery_photos where gallery_id')) {
+    const photos = mockDbStore.galleryPhotos.filter(gp => String(gp.gallery_id) === String(params.id));
+    return { rows: photos.map(gp => ({ image_url: gp.image_url })), rowCount: photos.length };
+  }
+
   // 21. Delete from gallery
-  if (normalizedQuery.includes('DELETE FROM gallery')) {
+  if (normalizedQuery.includes('delete from gallery')) {
     const originalLength = mockDbStore.gallery.length;
     mockDbStore.gallery = mockDbStore.gallery.filter(item => String(item.id) !== String(params.id));
+    mockDbStore.galleryPhotos = mockDbStore.galleryPhotos.filter(gp => String(gp.gallery_id) !== String(params.id));
     return { rows: [], rowCount: originalLength - mockDbStore.gallery.length };
   }
 
@@ -551,12 +591,29 @@ const initializeDatabase = async () => {
             branches_content TEXT
           );
         `);
+        // Migration: check if old gallery table structure exists
+        const oldGalleryCheck = await client.query(
+          "SELECT column_name FROM information_schema.columns WHERE table_name='gallery' AND column_name='image_url'"
+        );
+        if (oldGalleryCheck.rows.length > 0) {
+          console.log("Migrating gallery table structure: Dropping old gallery table...");
+          await client.query("DROP TABLE IF EXISTS gallery_photos CASCADE;");
+          await client.query("DROP TABLE IF EXISTS gallery CASCADE;");
+        }
+
         await client.query(`
           CREATE TABLE IF NOT EXISTS gallery (
             id VARCHAR(50) PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
-            image_url VARCHAR(512) NOT NULL,
             date VARCHAR(20)
+          );
+        `);
+
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS gallery_photos (
+            id VARCHAR(50) PRIMARY KEY,
+            gallery_id VARCHAR(50) NOT NULL REFERENCES gallery(id) ON DELETE CASCADE,
+            image_url VARCHAR(512) NOT NULL
           );
         `);
         await client.query(`
@@ -748,12 +805,28 @@ const initializeDatabase = async () => {
         );
       `);
       await sql.query(`
+        IF COL_LENGTH('gallery', 'image_url') IS NOT NULL
+        BEGIN
+          DROP TABLE IF EXISTS gallery_photos;
+          DROP TABLE IF EXISTS gallery;
+        END
+      `);
+
+      await sql.query(`
         IF OBJECT_ID('gallery', 'U') IS NULL
         CREATE TABLE gallery (
           id NVARCHAR(50) PRIMARY KEY,
           title NVARCHAR(255) NOT NULL,
-          image_url NVARCHAR(512) NOT NULL,
           date NVARCHAR(20)
+        );
+      `);
+
+      await sql.query(`
+        IF OBJECT_ID('gallery_photos', 'U') IS NULL
+        CREATE TABLE gallery_photos (
+          id NVARCHAR(50) PRIMARY KEY,
+          gallery_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES gallery(id) ON DELETE CASCADE,
+          image_url NVARCHAR(512) NOT NULL
         );
       `);
 
