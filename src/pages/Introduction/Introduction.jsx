@@ -105,13 +105,6 @@ export default function Introduction() {
             </div>
           </div>
         </div>
-        <div className="intro-image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=800&q=80"
-            alt="Hoạt động tình nguyện Đoàn xã Tam Anh"
-            className="intro-banner-img"
-          />
-        </div>
       </section>
 
       {/* Organizational Structure */}

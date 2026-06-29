@@ -13,11 +13,7 @@
   background-color: var(--bg-card);
 }
 
-@media (min-width: 992px) {
-  .intro-overview {
-    grid-template-columns: 2fr 1fr;
-  }
-}
+
 
 .intro-text-content h2 {
   font-size: 1.5rem;
