@@ -10,6 +10,7 @@ export default function Branches() {
     name: "",
     groupName: "",
     displayOrder: 1,
+    memberCount: 0,
   });
 
   const loadBranches = () => {
@@ -34,6 +35,7 @@ export default function Branches() {
         name: branch.name,
         groupName: branch.groupName,
         displayOrder: branch.displayOrder,
+        memberCount: branch.memberCount || 0,
       });
     } else {
       setEditingBranch(null);
@@ -41,6 +43,7 @@ export default function Branches() {
         name: "",
         groupName: "",
         displayOrder: branches.length + 1,
+        memberCount: 0,
       });
     }
     setShowBranchModal(true);
@@ -95,14 +98,14 @@ export default function Branches() {
       title: "Tên chi đoàn",
       dataIndex: "name",
       key: "name",
-      width: "45%",
+      width: "35%",
       render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
     },
     {
       title: "Khối / Nhóm",
       dataIndex: "groupName",
       key: "groupName",
-      width: "35%",
+      width: "30%",
       render: (groupName) => (
         <span
           className="badge"
@@ -117,6 +120,14 @@ export default function Branches() {
           {groupName}
         </span>
       ),
+    },
+    {
+      title: "Số đoàn viên",
+      dataIndex: "memberCount",
+      key: "memberCount",
+      width: "15%",
+      align: "center",
+      render: (count) => <span style={{ fontWeight: 600, color: "var(--primary)" }}>{count || 0}</span>,
     },
     {
       title: "Thứ tự hiển thị",
@@ -230,6 +241,24 @@ export default function Branches() {
             <option value="Chi đoàn Khối Trường học" />
             <option value="Chi đoàn Khối Cơ quan - Doanh nghiệp" />
           </datalist>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Số lượng đoàn viên *</label>
+          <input
+            type="number"
+            className="form-control"
+            required
+            min="0"
+            value={branchForm.memberCount}
+            onChange={(e) =>
+              setBranchForm({
+                ...branchForm,
+                memberCount: parseInt(e.target.value) || 0,
+              })
+            }
+            placeholder="Ví dụ: 25"
+          />
         </div>
 
         <div className="form-group">

@@ -15,21 +15,28 @@ router.get("/", async (req, res) => {
       "SELECT * FROM branches ORDER BY display_order ASC",
     );
 
+    const branches = branchesResult.rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      groupName: row.group_name,
+      displayOrder: row.display_order,
+      memberCount: parseInt(row.member_count) || 0,
+    }));
+
+    const statBranches = branches.length;
+    const statMembers = branches.reduce((acc, b) => acc + (b.memberCount || 0), 0);
+
     let settings = {
       historyContent: "",
-      statMembers: "0",
-      statBranches: "0",
+      statMembers: String(statMembers),
+      statBranches: String(statBranches),
       branchesContent: "",
     };
 
     if (introResult.rows.length > 0) {
       const row = introResult.rows[0];
-      settings = {
-        historyContent: row.history_content,
-        statMembers: row.stat_members,
-        statBranches: row.stat_branches,
-        branchesContent: row.branches_content,
-      };
+      settings.historyContent = row.history_content;
+      settings.branchesContent = row.branches_content;
     }
 
     const members = bchResult.rows.map((row) => ({
@@ -40,13 +47,6 @@ router.get("/", async (req, res) => {
       phone: row.phone,
       imageUrl: row.image_url,
       responsibility: row.responsibility,
-      displayOrder: row.display_order,
-    }));
-
-    const branches = branchesResult.rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      groupName: row.group_name,
       displayOrder: row.display_order,
     }));
 

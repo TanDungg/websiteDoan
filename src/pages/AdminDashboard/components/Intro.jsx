@@ -69,46 +69,12 @@ export default function Intro() {
             placeholder="Nhập giới thiệu..."
           />
 
-          <div
-            className="row"
-            style={{
-              display: "flex",
-              gap: "20px",
-              marginBottom: "15px",
-            }}
-          >
-            <FormItem
-              label="Số lượng đoàn viên"
-              required
-              style={{ flex: 1 }}
-              value={introSettings.statMembers}
-              onChange={(val) =>
-                setIntroSettings({
-                  ...introSettings,
-                  statMembers: val,
-                })
-              }
-              placeholder="Ví dụ: 120"
-            />
-            <FormItem
-              label="Số lượng chi đoàn trực thuộc"
-              required
-              style={{ flex: 1 }}
-              value={introSettings.statBranches}
-              onChange={(val) =>
-                setIntroSettings({
-                  ...introSettings,
-                  statBranches: val,
-                })
-              }
-              placeholder="Ví dụ: 12"
-            />
-          </div>
+
 
           <div style={{ textAlign: "right", marginTop: "15px" }}>
             <button type="submit" className="btn btn-primary">
               <Check size={16} style={{ marginRight: "6px" }} />
-              <span>Cập nhật cấu hình chung</span>
+              <span>Cập nhật giới thiệu</span>
             </button>
           </div>
         </form>

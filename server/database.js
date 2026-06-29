@@ -82,16 +82,16 @@ const mockBchMembers = [
 ];
 
 const mockBranches = [
-  { id: "b1", name: "Chi đoàn Thôn Tam Anh 1", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 1 },
-  { id: "b2", name: "Chi đoàn Thôn Tam Anh 2", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 2 },
-  { id: "b3", name: "Chi đoàn Thôn Tam Anh 3", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 3 },
-  { id: "b4", name: "Chi đoàn Thôn Tam Anh 4", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 4 },
-  { id: "b5", name: "Chi đoàn Thôn Tam Anh 5", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 5 },
-  { id: "b6", name: "Chi đoàn Công an xã", groupName: "Chi đoàn Lực lượng vũ trang", displayOrder: 6 },
-  { id: "b7", name: "Chi đoàn Quân sự xã (Trung đội dân quân cơ động)", groupName: "Chi đoàn Lực lượng vũ trang", displayOrder: 7 },
-  { id: "b8", name: "Chi đoàn Trường Tiểu học Tam Anh", groupName: "Chi đoàn Khối Trường học", displayOrder: 8 },
-  { id: "b9", name: "Chi đoàn Trường THCS Tam Anh", groupName: "Chi đoàn Khối Trường học", displayOrder: 9 },
-  { id: "b10", name: "Chi đoàn Trường Mầm non Hướng Dương", groupName: "Chi đoàn Khối Trường học", displayOrder: 10 }
+  { id: "b1", name: "Chi đoàn Thôn Tam Anh 1", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 1, memberCount: 35 },
+  { id: "b2", name: "Chi đoàn Thôn Tam Anh 2", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 2, memberCount: 28 },
+  { id: "b3", name: "Chi đoàn Thôn Tam Anh 3", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 3, memberCount: 30 },
+  { id: "b4", name: "Chi đoàn Thôn Tam Anh 4", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 4, memberCount: 25 },
+  { id: "b5", name: "Chi đoàn Thôn Tam Anh 5", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 5, memberCount: 22 },
+  { id: "b6", name: "Chi đoàn Công an xã", groupName: "Chi đoàn Lực lượng vũ trang", displayOrder: 6, memberCount: 15 },
+  { id: "b7", name: "Chi đoàn Quân sự xã (Trung đội dân quân cơ động)", groupName: "Chi đoàn Lực lượng vũ trang", displayOrder: 7, memberCount: 18 },
+  { id: "b8", name: "Chi đoàn Trường Tiểu học Tam Anh", groupName: "Chi đoàn Khối Trường học", displayOrder: 8, memberCount: 20 },
+  { id: "b9", name: "Chi đoàn Trường THCS Tam Anh", groupName: "Chi đoàn Khối Trường học", displayOrder: 9, memberCount: 22 },
+  { id: "b10", name: "Chi đoàn Trường Mầm non Hướng Dương", groupName: "Chi đoàn Khối Trường học", displayOrder: 10, memberCount: 17 }
 ];
 
 const mockIntroSettings = {
@@ -153,7 +153,8 @@ function initMockDbStore() {
       id: b.id,
       name: b.name,
       group_name: b.groupName,
-      display_order: b.displayOrder
+      display_order: b.displayOrder,
+      member_count: b.memberCount || 0
     })),
   };
 }
@@ -454,7 +455,8 @@ function runMockQuery(queryText, params = {}) {
       id: params.id,
       name: params.name,
       group_name: params.groupName,
-      display_order: parseInt(params.displayOrder) || 0
+      display_order: parseInt(params.displayOrder) || 0,
+      member_count: parseInt(params.memberCount) || 0
     };
     mockDbStore.branches.push(newBranch);
     return { rows: [], rowCount: 1 };
@@ -467,6 +469,7 @@ function runMockQuery(queryText, params = {}) {
       branch.name = params.name;
       branch.group_name = params.groupName;
       branch.display_order = parseInt(params.displayOrder) || 0;
+      branch.member_count = parseInt(params.memberCount) || 0;
     }
     return { rows: [], rowCount: branch ? 1 : 0 };
   }
@@ -622,11 +625,13 @@ const initializeDatabase = async () => {
             id VARCHAR(50) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             group_name VARCHAR(150) NOT NULL,
-            display_order INTEGER DEFAULT 0
+            display_order INTEGER DEFAULT 0,
+            member_count INTEGER DEFAULT 0
           );
         `);
 
         // Migration: ensure image_url columns can store large base64 strings and file_name column exists
+        await client.query("ALTER TABLE branches ADD COLUMN IF NOT EXISTS member_count INTEGER DEFAULT 0;");
         await client.query("ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT;");
         await client.query("ALTER TABLE bch_members ALTER COLUMN image_url TYPE TEXT;");
         await client.query("ALTER TABLE gallery_photos ALTER COLUMN image_url TYPE TEXT;");
@@ -696,9 +701,9 @@ const initializeDatabase = async () => {
         if (parseInt(branchesCount.rows[0].count) === 0) {
           for (const b of mockBranches) {
             await client.query(
-              `INSERT INTO branches (id, name, group_name, display_order)
-               VALUES ($1, $2, $3, $4)`,
-              [b.id, b.name, b.groupName, b.displayOrder]
+              `INSERT INTO branches (id, name, group_name, display_order, member_count)
+               VALUES ($1, $2, $3, $4, $5)`,
+              [b.id, b.name, b.groupName, b.displayOrder, b.memberCount]
             );
           }
         }
@@ -844,11 +849,16 @@ const initializeDatabase = async () => {
           id NVARCHAR(50) PRIMARY KEY,
           name NVARCHAR(255) NOT NULL,
           group_name NVARCHAR(150) NOT NULL,
-          display_order INT DEFAULT 0
+          display_order INT DEFAULT 0,
+          member_count INT DEFAULT 0
         );
       `);
 
       // Migration: ensure image_url columns can store large base64 strings and file_name column exists
+      await sql.query(`
+        IF COL_LENGTH('branches', 'member_count') IS NULL
+        ALTER TABLE branches ADD member_count INT DEFAULT 0;
+      `);
       await sql.query("ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);");
       await sql.query("ALTER TABLE bch_members ALTER COLUMN image_url NVARCHAR(MAX);");
       await sql.query("ALTER TABLE gallery_photos ALTER COLUMN image_url NVARCHAR(MAX);");
@@ -954,9 +964,10 @@ const initializeDatabase = async () => {
           request.input("name", b.name);
           request.input("groupName", b.groupName);
           request.input("displayOrder", b.displayOrder);
+          request.input("memberCount", b.memberCount);
           await request.query(`
-            INSERT INTO branches (id, name, group_name, display_order)
-            VALUES (@id, @name, @groupName, @displayOrder)
+            INSERT INTO branches (id, name, group_name, display_order, member_count)
+            VALUES (@id, @name, @groupName, @displayOrder, @memberCount)
           `);
         }
       }
