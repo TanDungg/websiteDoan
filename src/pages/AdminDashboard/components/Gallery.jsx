@@ -58,43 +58,32 @@ export default function Gallery() {
     setUploadingGallery(true);
 
     try {
-      const uploadPromises = selectedFiles.map(async (fileObj) => {
-        const base64Data = await fileObj.base64Promise;
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+      const filesPayload = await Promise.all(
+        selectedFiles.map(async (fileObj) => {
+          const base64Data = await fileObj.base64Promise;
+          return {
             fileData: base64Data,
             fileName: fileObj.file.name,
-          }),
-        });
-        const uploadData = await uploadRes.json();
+          };
+        })
+      );
 
-        if (uploadData.success) {
-          const saveRes = await fetch("/api/gallery", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              title:
-                galleryTitle.trim() ||
-                fileObj.file.name.replace(/\.[^/.]+$/, ""),
-              imageUrl: uploadData.filePath || uploadData.url,
-            }),
-          });
-          const saveData = await saveRes.json();
-          if (!saveRes.ok) {
-            throw new Error(saveData.error || "Lỗi lưu thư viện");
-          }
-        } else {
-          throw new Error(uploadData.error || "Lỗi tải tệp lên máy chủ");
-        }
+      const response = await fetch("/api/gallery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: galleryTitle.trim(),
+          files: filesPayload,
+        }),
       });
 
-      await Promise.all(uploadPromises);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Lỗi lưu hình ảnh thư viện");
+      }
 
       alert("Đã đăng tải thành công tất cả hình ảnh lên thư viện!");
       setSelectedFiles([]);
