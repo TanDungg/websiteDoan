@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import {
   Mail,
   Phone,
@@ -7,31 +7,27 @@ import {
   CalendarDays,
   Award,
 } from "lucide-react";
+import apiService from "src/services/apiService";
+import { useApi } from "src/hooks/useApi";
 import "./Introduction.css";
 
 export default function Introduction() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    data,
+    loading,
+    execute: loadIntro,
+  } = useApi(
+    useCallback(() => apiService.get("/api/intro"), [])
+  );
 
   useEffect(() => {
-    fetch("/api/intro")
-      .then((res) => res.json())
-      .then((resData) => {
-        setData(resData);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load introduction:", err);
-        setLoading(false);
-      });
-  }, []);
+    loadIntro().catch((err) => console.error("Failed to load introduction:", err));
+  }, [loadIntro]);
 
   if (loading) {
     return (
-      <div
-        className="container"
-        style={{ textAlign: "center", padding: "50px 0" }}
-      >
+      <div className="global-loading-container">
+        <div className="global-spinner"></div>
         <p>Đang tải thông tin giới thiệu...</p>
       </div>
     );

@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Search, FileText, Download, Calendar } from 'lucide-react';
-import './Documents.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { Search, FileText, Download, Calendar } from "lucide-react";
+import apiService from "src/services/apiService";
+import { useApi } from "src/hooks/useApi";
+import "./Documents.css";
 
 export default function Documents() {
-  const [docs, setDocs] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const {
+    data: docs = [],
+    loading,
+    execute: loadDocs,
+  } = useApi(
+    useCallback(() => apiService.get("/api/documents"), [])
+  );
 
   useEffect(() => {
-    fetch('/api/documents')
-      .then((res) => res.json())
-      .then((data) => setDocs(data))
-      .catch((err) => console.error("Error loading documents:", err));
-  }, []);
+    loadDocs().catch((err) => console.error("Error loading documents:", err));
+  }, [loadDocs]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -72,9 +78,13 @@ export default function Documents() {
         </div>
       </div>
 
-      {/* Documents Table */}
       <div className="table-responsive card docs-table-card">
-        {filteredDocs.length > 0 ? (
+        {loading ? (
+          <div className="global-loading-container">
+            <div className="global-spinner"></div>
+            <p>Đang tải danh sách văn bản...</p>
+          </div>
+        ) : filteredDocs.length > 0 ? (
           <table className="table">
             <thead>
               <tr>

@@ -1,44 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Calendar, User, Eye, ArrowLeft, Share2, Link2 } from 'lucide-react';
-import { newsCategories } from '../../data/mockData';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import './NewsDetail.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Calendar, User, Eye, ArrowLeft, Share2, Link2 } from "lucide-react";
+import apiService from "src/services/apiService";
+import { useApi } from "src/hooks/useApi";
+import { newsCategories } from "../../data/mockData";
+import Sidebar from "../../components/Sidebar/Sidebar";
+import "./NewsDetail.css";
 
 export default function NewsDetail() {
   const { id } = useParams();
-  const [newsItem, setNewsItem] = useState(null);
-  const [relatedPosts, setRelatedPosts] = useState([]);
   const [copied, setCopied] = useState(false);
 
+  const {
+    data: detailData = null,
+    loading,
+    execute: loadPostDetail,
+  } = useApi(
+    useCallback(async (postId) => {
+      // 1. Fetch current post
+      const post = await apiService.get(`/api/posts/${postId}`);
+      // 2. Fetch related posts by category
+      let related = [];
+      try {
+        const postsData = await apiService.get(`/api/posts?category=${post.category}`);
+        related = postsData
+          .filter((item) => item.id.toString() !== postId.toString())
+          .slice(0, 3);
+      } catch (e) {
+        console.error("Error loading related posts:", e);
+      }
+      return { post, related };
+    }, [])
+  );
+
   useEffect(() => {
-    // 1. Fetch current post
-    fetch(`/api/posts/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setNewsItem(data);
-        // 2. Fetch related posts by category
-        fetch(`/api/posts?category=${data.category}`)
-          .then((res2) => res2.json())
-          .then((postsData) => {
-            const related = postsData
-              .filter((item) => item.id.toString() !== id.toString())
-              .slice(0, 3);
-            setRelatedPosts(related);
-          })
-          .catch((e) => console.error("Error loading related posts:", e));
-      })
-      .catch((err) => console.error("Error loading post:", err));
-    
-    // Scroll to top on page load
+    loadPostDetail(id).catch((err) => console.error("Error loading post:", err));
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [id, loadPostDetail]);
+
+  const newsItem = detailData?.post;
+  const relatedPosts = detailData?.related || [];
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (loading) {
+    return (
+      <div className="global-loading-container">
+        <div className="global-spinner"></div>
+        <p>Đang tải nội dung bài viết...</p>
+      </div>
+    );
+  }
 
   if (!newsItem) {
     return (

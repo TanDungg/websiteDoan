@@ -193,3 +193,32 @@ h6 {
   color: #047857;
   border-color: rgba(4, 120, 87, 0.15);
 }
+
+/* Global Loading Spinner */
+.global-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  gap: 16px;
+  color: var(--text-muted);
+}
+
+.global-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(2, 132, 199, 0.1);
+  border-top-color: var(--primary, #0284c7);
+  border-radius: 50%;
+  animation: global-spin 1s linear infinite;
+}
+
+@keyframes global-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

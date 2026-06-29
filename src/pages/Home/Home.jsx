@@ -1,21 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Compass, Heart, BookOpen, Image } from 'lucide-react';
-import { galleryList } from '../../data/mockData';
-import NewsCard from '../../components/NewsCard/NewsCard';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import './Home.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Compass, Heart, BookOpen, Image } from "lucide-react";
+import apiService from "src/services/apiService";
+import { useApi } from "src/hooks/useApi";
+import { galleryList } from "../../data/mockData";
+import NewsCard from "../../components/NewsCard/NewsCard";
+import Sidebar from "../../components/Sidebar/Sidebar";
+import "./Home.css";
 
 export default function Home() {
-  const [posts, setPosts] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const {
+    data: posts = [],
+    loading,
+    execute: loadPosts,
+  } = useApi(
+    useCallback(() => apiService.get("/api/posts"), [])
+  );
 
   useEffect(() => {
-    fetch('/api/posts')
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((err) => console.error("Failed to load posts:", err));
-  }, []);
+    loadPosts().catch((err) => console.error("Failed to load posts:", err));
+  }, [loadPosts]);
+
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const hotNews = posts.filter((n) => n.isHot);
   const recentNews = posts.slice(0, 4);
@@ -36,6 +42,15 @@ export default function Home() {
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % hotNews.length);
   };
+
+  if (loading) {
+    return (
+      <div className="global-loading-container">
+        <div className="global-spinner"></div>
+        <p>Đang tải trang chủ...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="home-container">

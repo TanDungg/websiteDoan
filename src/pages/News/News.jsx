@@ -1,42 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search } from 'lucide-react';
-import { newsCategories } from '../../data/mockData';
-import NewsCard from '../../components/NewsCard/NewsCard';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import './News.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
+import apiService from "src/services/apiService";
+import { useApi } from "src/hooks/useApi";
+import { newsCategories } from "../../data/mockData";
+import NewsCard from "../../components/NewsCard/NewsCard";
+import Sidebar from "../../components/Sidebar/Sidebar";
+import "./News.css";
 
 export default function News() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [posts, setPosts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchText, setSearchText] = useState("");
+
+  const {
+    data: posts = [],
+    loading,
+    execute: loadPosts,
+  } = useApi(
+    useCallback((cat, search) => {
+      let url = "/api/posts";
+      const params = [];
+      if (cat && cat !== "all") {
+        params.push(`category=${cat}`);
+      }
+      if (search) {
+        params.push(`search=${encodeURIComponent(search)}`);
+      }
+      if (params.length > 0) {
+        url += "?" + params.join("&");
+      }
+      return apiService.get(url);
+    }, [])
+  );
 
   // Sync state with URL search param
-  const urlSearch = searchParams.get('search') || '';
+  const urlSearch = searchParams.get("search") || "";
 
   useEffect(() => {
     setSearchText(urlSearch);
   }, [urlSearch]);
 
   useEffect(() => {
-    let url = '/api/posts';
-    const params = [];
-    if (selectedCategory && selectedCategory !== 'all') {
-      params.push(`category=${selectedCategory}`);
-    }
-    if (urlSearch) {
-      params.push(`search=${encodeURIComponent(urlSearch)}`);
-    }
-    if (params.length > 0) {
-      url += '?' + params.join('&');
-    }
-
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((err) => console.error("Error loading posts:", err));
-  }, [selectedCategory, urlSearch]);
+    loadPosts(selectedCategory, urlSearch).catch((err) => console.error("Error loading posts:", err));
+  }, [loadPosts, selectedCategory, urlSearch]);
 
   const handleCategorySelect = (catId) => {
     setSelectedCategory(catId);
@@ -115,7 +122,12 @@ export default function News() {
           </div>
 
           {/* News articles Grid */}
-          {filteredNews.length > 0 ? (
+          {loading ? (
+            <div className="global-loading-container">
+              <div className="global-spinner"></div>
+              <p>Đang tải danh sách bài viết...</p>
+            </div>
+          ) : filteredNews.length > 0 ? (
             <div className="news-listing-grid">
               {filteredNews.map((news) => (
                 <NewsCard key={news.id} news={news} />
