@@ -241,7 +241,7 @@ export default function Bch() {
       {showMemberModal && (
         <div className="modal-overlay">
           <div
-            className="modal-container card animate-fade-in premium-modal"
+            className="modal-container card animate-fade-in"
             style={{ maxWidth: "550px" }}
           >
             <div className="modal-header">

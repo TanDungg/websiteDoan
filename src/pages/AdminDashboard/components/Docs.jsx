@@ -146,7 +146,7 @@ export default function Docs() {
       {showDocModal && (
         <div className="modal-overlay">
           <div
-            className="modal-container card animate-fade-in premium-modal"
+            className="modal-container card animate-fade-in"
             style={{ maxWidth: "500px" }}
           >
             <div className="modal-header">

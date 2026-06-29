@@ -242,7 +242,6 @@ export default function Posts() {
         onClose={() => setShowPostModal(false)}
         title={editingPost ? "Sửa bài viết" : "Viết bài mới"}
         maxWidth="750px"
-        className="premium-modal"
         onSubmit={handlePostSubmit}
         footer={
           <>
@@ -297,53 +296,69 @@ export default function Posts() {
             style={{
               flex: 1,
               marginBottom: 0,
-              display: "flex",
-              alignItems: "flex-end",
             }}
           >
-            <label
+            <label className="form-label" style={{ opacity: 0, userSelect: "none", marginBottom: "6px" }}>Ghim tin nổi bật</label>
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                padding: "0 15px",
+                gap: "12px",
+                padding: "0 16px",
                 border: "1px solid #cbd5e1",
                 borderRadius: "6px",
                 backgroundColor: postForm.isHot ? "#f0fdf4" : "#f8fafc",
                 borderColor: postForm.isHot ? "#22c55e" : "#cbd5e1",
-                cursor: "pointer",
-                userSelect: "none",
                 width: "100%",
                 height: "42px",
-                margin: 0,
                 transition: "all 0.2s ease",
               }}
             >
-              <input
-                type="checkbox"
-                id="post-is-hot"
+              <button
+                type="button"
+                onClick={() => setPostForm({ ...postForm, isHot: !postForm.isHot })}
                 style={{
-                  width: "18px",
-                  height: "18px",
+                  position: "relative",
+                  width: "42px",
+                  height: "22px",
+                  borderRadius: "11px",
+                  backgroundColor: postForm.isHot ? "#22c55e" : "#cbd5e1",
+                  border: "none",
                   cursor: "pointer",
-                  accentColor: "#22c55e",
-                  margin: 0,
+                  padding: 0,
+                  transition: "background-color 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center"
                 }}
-                checked={postForm.isHot}
-                onChange={(e) =>
-                  setPostForm({ ...postForm, isHot: e.target.checked })
-                }
-              />
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "2px",
+                    left: postForm.isHot ? "22px" : "2px",
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                    transition: "left 0.2s ease"
+                  }}
+                />
+              </button>
+              
               <span
                 style={{
                   fontWeight: 600,
                   fontSize: "0.85rem",
                   color: postForm.isHot ? "#166534" : "#475569",
+                  cursor: "pointer",
+                  userSelect: "none"
                 }}
+                onClick={() => setPostForm({ ...postForm, isHot: !postForm.isHot })}
               >
-                Ghim làm Tin nổi bật ở Banner Trang chủ
+                Ghim Tin nổi bật ở Banner Trang chủ
               </span>
-            </label>
+            </div>
           </div>
         </div>
 

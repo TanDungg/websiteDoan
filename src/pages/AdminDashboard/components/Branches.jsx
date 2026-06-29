@@ -297,7 +297,6 @@ export default function Branches() {
         onClose={() => setShowBranchModal(false)}
         title={editingBranch ? "Sửa thông tin Chi đoàn" : "Thêm Chi đoàn trực thuộc"}
         maxWidth="500px"
-        className="premium-modal"
         onSubmit={handleBranchSubmit}
         footer={
           <>
@@ -351,7 +350,6 @@ export default function Branches() {
         onClose={() => setShowTypeModal(false)}
         title="Quản lý Phân loại Chi đoàn"
         maxWidth="600px"
-        className="premium-modal"
         footer={
           <button
             type="button"
