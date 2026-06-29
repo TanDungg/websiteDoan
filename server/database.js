@@ -1074,13 +1074,54 @@ const initializeDatabase = async () => {
       await addAuditColsMssql("gallery");
       await addAuditColsMssql("gallery_photos");
 
-      // Drop display_order from bch_members
-      await sql.query("IF COL_LENGTH('bch_members', 'display_order') IS NOT NULL ALTER TABLE bch_members DROP COLUMN display_order;");
+      // Drop display_order from bch_members (safely handling default constraint)
+      await sql.query(`
+        IF COL_LENGTH('bch_members', 'display_order') IS NOT NULL
+        BEGIN
+          DECLARE @ConstraintNameBch NVARCHAR(200)
+          SELECT @ConstraintNameBch = name 
+          FROM sys.default_constraints 
+          WHERE parent_object_id = object_id('bch_members') 
+            AND parent_column_id = column_property(object_id('bch_members'), 'display_order', 'ColumnId')
+          IF @ConstraintNameBch IS NOT NULL
+            EXEC('ALTER TABLE bch_members DROP CONSTRAINT ' + @ConstraintNameBch)
+          ALTER TABLE bch_members DROP COLUMN display_order
+        END
+      `);
 
-      // Drop columns from branches
-      await sql.query("IF COL_LENGTH('branches', 'display_order') IS NOT NULL ALTER TABLE branches DROP COLUMN display_order;");
+      // Drop display_order from branches (safely handling default constraint)
+      await sql.query(`
+        IF COL_LENGTH('branches', 'display_order') IS NOT NULL
+        BEGIN
+          DECLARE @ConstraintNameBranches NVARCHAR(200)
+          SELECT @ConstraintNameBranches = name 
+          FROM sys.default_constraints 
+          WHERE parent_object_id = object_id('branches') 
+            AND parent_column_id = column_property(object_id('branches'), 'display_order', 'ColumnId')
+          IF @ConstraintNameBranches IS NOT NULL
+            EXEC('ALTER TABLE branches DROP CONSTRAINT ' + @ConstraintNameBranches)
+          ALTER TABLE branches DROP COLUMN display_order
+        END
+      `);
+
+      // Drop group_name from branches
       await sql.query("IF COL_LENGTH('branches', 'group_name') IS NOT NULL ALTER TABLE branches DROP COLUMN group_name;");
-      await sql.query("IF COL_LENGTH('branches', 'member_count') IS NOT NULL ALTER TABLE branches DROP COLUMN member_count;");
+
+      // Drop member_count from branches (safely handling default constraint)
+      await sql.query(`
+        IF COL_LENGTH('branches', 'member_count') IS NOT NULL
+        BEGIN
+          DECLARE @ConstraintNameMember NVARCHAR(200)
+          SELECT @ConstraintNameMember = name 
+          FROM sys.default_constraints 
+          WHERE parent_object_id = object_id('branches') 
+            AND parent_column_id = column_property(object_id('branches'), 'member_count', 'ColumnId')
+          IF @ConstraintNameMember IS NOT NULL
+            EXEC('ALTER TABLE branches DROP CONSTRAINT ' + @ConstraintNameMember)
+          ALTER TABLE branches DROP COLUMN member_count
+        END
+      `);
+
       await sql.query("IF COL_LENGTH('branches', 'branch_type_id') IS NULL ALTER TABLE branches ADD branch_type_id NVARCHAR(50);");
 
       await sql.query("ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);");
