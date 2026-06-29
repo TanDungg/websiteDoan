@@ -16,12 +16,12 @@ export default function Introduction() {
     data,
     loading,
     execute: loadIntro,
-  } = useApi(
-    useCallback(() => apiService.get("/api/intro"), [])
-  );
+  } = useApi(useCallback(() => apiService.get("/api/intro"), []));
 
   useEffect(() => {
-    loadIntro().catch((err) => console.error("Failed to load introduction:", err));
+    loadIntro().catch((err) =>
+      console.error("Failed to load introduction:", err),
+    );
   }, [loadIntro]);
 
   if (loading) {
@@ -57,6 +57,31 @@ export default function Introduction() {
     <div className="intro-container container">
       <h1 className="section-title">Giới thiệu Đoàn xã Tam Anh</h1>
 
+      {/* Stats Banner Row */}
+      <div className="intro-stats-banner">
+        <div className="stat-card">
+          <div className="stat-icon-wrapper">
+            <Users size={28} />
+          </div>
+          <span className="stat-num">{settings.statMembers}</span>
+          <span className="stat-label">Đoàn viên sinh hoạt</span>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon-wrapper">
+            <CalendarDays size={28} />
+          </div>
+          <span className="stat-num">{settings.statBranches}</span>
+          <span className="stat-label">Chi đoàn trực thuộc</span>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon-wrapper">
+            <Award size={28} />
+          </div>
+          <span className="stat-num">2022 - 2027</span>
+          <span className="stat-label">Nhiệm kỳ Ban Chấp hành</span>
+        </div>
+      </div>
+
       {/* Overview Intro */}
       <section className="intro-overview card">
         <div className="intro-text-content">
@@ -80,21 +105,12 @@ export default function Introduction() {
             </div>
           </div>
         </div>
-        <div className="intro-stats-wrapper">
-          <div className="stat-card">
-            <div className="stat-icon-wrapper">
-              <Users size={28} />
-            </div>
-            <span className="stat-num">{settings.statMembers}</span>
-            <span className="stat-label">Đoàn viên sinh hoạt</span>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon-wrapper">
-              <CalendarDays size={28} />
-            </div>
-            <span className="stat-num">{settings.statBranches}</span>
-            <span className="stat-label">Chi đoàn trực thuộc</span>
-          </div>
+        <div className="intro-image-wrapper">
+          <img
+            src="https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=800&q=80"
+            alt="Hoạt động tình nguyện Đoàn xã Tam Anh"
+            className="intro-banner-img"
+          />
         </div>
       </section>
 

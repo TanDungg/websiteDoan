@@ -84,20 +84,23 @@
   color: #334155; /* Slate-700 */
 }
 
-/* Intro stats column with sticky position to fill space */
-.intro-stats-wrapper {
-  display: flex;
-  flex-direction: column;
+/* Stats Banner Row spanning full width */
+.intro-stats-banner {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 24px;
-  position: sticky;
-  top: 100px;
-  align-self: start;
+  margin-bottom: 30px;
 }
 
-@media (max-width: 991px) {
-  .intro-stats-wrapper {
-    flex-direction: row;
-    position: static;
+@media (min-width: 576px) {
+  .intro-stats-banner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .intro-stats-banner {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -335,4 +338,33 @@
   color: var(--primary);
   font-size: 1.1rem;
   line-height: 1;
+}
+
+/* Intro banner image illustration container */
+.intro-image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  padding: 10px;
+  height: fit-content;
+  align-self: center;
+  transition: var(--transition-normal);
+}
+
+.intro-image-wrapper:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+
+.intro-banner-img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  object-fit: cover;
 }
