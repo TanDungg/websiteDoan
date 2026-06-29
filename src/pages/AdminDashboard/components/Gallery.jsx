@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Image } from "lucide-react";
+import { Plus, Trash2, Image, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Gallery() {
   const [gallery, setGallery] = useState([]);
@@ -7,6 +7,34 @@ export default function Gallery() {
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [galleryTitle, setGalleryTitle] = useState("");
   const [showGalleryModal, setShowGalleryModal] = useState(false);
+  
+  const [activeAlbum, setActiveAlbum] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+
+  const openLightbox = (album, index) => {
+    setActiveAlbum(album);
+    setLightboxIndex(index);
+  };
+
+  const closeLightbox = () => {
+    setActiveAlbum(null);
+    setLightboxIndex(null);
+  };
+
+  const showPrev = (e) => {
+    e.stopPropagation();
+    if (!activeAlbum || activeAlbum.images.length === 0) return;
+    setLightboxIndex(
+      (prev) =>
+        (prev - 1 + activeAlbum.images.length) % activeAlbum.images.length,
+    );
+  };
+
+  const showNext = (e) => {
+    e.stopPropagation();
+    if (!activeAlbum || activeAlbum.images.length === 0) return;
+    setLightboxIndex((prev) => (prev + 1) % activeAlbum.images.length);
+  };
 
   const loadGallery = () => {
     fetch("/api/gallery")
@@ -145,7 +173,10 @@ export default function Gallery() {
             <div className="gallery-grid-admin">
               {gallery.map((item) => (
                 <div key={item.id} className="gallery-item-admin-card" style={{ position: "relative" }}>
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", overflow: "hidden" }}>
+                  <div 
+                    style={{ position: "relative", width: "100%", aspectRatio: "4/3", overflow: "hidden", cursor: "pointer" }}
+                    onClick={() => openLightbox(item, 0)}
+                  >
                     <img
                       src={item.images[0]?.imageUrl || "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80"}
                       alt={item.title}
@@ -168,7 +199,12 @@ export default function Gallery() {
                     </span>
                   </div>
                   <div className="gallery-item-admin-info">
-                    <p className="gallery-item-admin-title" title={item.title}>
+                    <p 
+                      className="gallery-item-admin-title" 
+                      title={item.title}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => openLightbox(item, 0)}
+                    >
                       {item.title}
                     </p>
                     <div className="gallery-item-admin-actions">
@@ -327,6 +363,114 @@ export default function Gallery() {
               >
                 {uploadingGallery ? "Đang tải lên..." : "Bắt đầu đăng tải"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {activeAlbum !== null && lightboxIndex !== null && activeAlbum.images.length > 0 && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.95)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: "20px"
+        }} onClick={closeLightbox}>
+          {/* Close button */}
+          <button style={{
+            position: "absolute",
+            top: "20px",
+            right: "20px",
+            background: "none",
+            border: "none",
+            color: "#fff",
+            cursor: "pointer",
+            padding: "8px"
+          }} onClick={closeLightbox} aria-label="Close Lightbox">
+            <X size={32} />
+          </button>
+          
+          {/* Navigation Buttons */}
+          {activeAlbum.images.length > 1 && (
+            <>
+              <button style={{
+                position: "absolute",
+                left: "20px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "none",
+                borderRadius: "50%",
+                width: "48px",
+                height: "48px",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer"
+              }} onClick={showPrev} aria-label="Previous Image">
+                <ChevronLeft size={28} />
+              </button>
+              <button style={{
+                position: "absolute",
+                right: "20px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "none",
+                borderRadius: "50%",
+                width: "48px",
+                height: "48px",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer"
+              }} onClick={showNext} aria-label="Next Image">
+                <ChevronRight size={28} />
+              </button>
+            </>
+          )}
+
+          {/* Content */}
+          <div style={{
+            backgroundColor: "#0f172a",
+            borderRadius: "12px",
+            overflow: "hidden",
+            maxWidth: "800px",
+            width: "100%",
+            maxHeight: "80vh",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative"
+          }} onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={activeAlbum.images[lightboxIndex].imageUrl} 
+              alt={activeAlbum.title} 
+              style={{
+                maxWidth: "100%",
+                maxHeight: "65vh",
+                objectFit: "contain",
+                margin: "0 auto"
+              }}
+            />
+            <div style={{
+              backgroundColor: "rgba(30, 41, 59, 0.9)",
+              padding: "15px 20px",
+              borderTop: "1px solid #334155",
+              color: "#fff"
+            }}>
+              <h4 style={{ fontSize: "1rem", marginBottom: "4px", color: "#fff" }}>{activeAlbum.title}</h4>
+              <p style={{ fontSize: "0.75rem", color: "#94a3b8", margin: 0 }}>
+                Ảnh {lightboxIndex + 1} / {activeAlbum.images.length}
+              </p>
             </div>
           </div>
         </div>

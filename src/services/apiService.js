@@ -4,7 +4,9 @@ class ApiService {
       const response = await fetch(url, { method: "GET", ...config });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Lỗi tải dữ liệu (Mã lỗi: ${response.status})`);
+        throw new Error(
+          errData.error || `Lỗi tải dữ liệu (Mã lỗi: ${response.status})`,
+        );
       }
       return await response.json();
     } catch (error) {
@@ -12,17 +14,28 @@ class ApiService {
     }
   }
 
-  async post(url, data, isShowMessage = true, messageSuccess = "Thêm mới thành công!", config = {}) {
+  async post(
+    url,
+    data,
+    isShowMessage = true,
+    messageSuccess = "Thêm mới thành công!",
+    config = {},
+  ) {
     try {
       const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(config.headers || {}) },
+        headers: {
+          "Content-Type": "application/json",
+          ...(config.headers || {}),
+        },
         body: JSON.stringify(data),
-        ...config
+        ...config,
       });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Lỗi gửi dữ liệu (Mã lỗi: ${response.status})`);
+        throw new Error(
+          errData.error || `Lỗi gửi dữ liệu (Mã lỗi: ${response.status})`,
+        );
       }
       const result = await response.json();
       if (isShowMessage) {
@@ -38,13 +51,18 @@ class ApiService {
     try {
       const response = await fetch(url, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...(config.headers || {}) },
+        headers: {
+          "Content-Type": "application/json",
+          ...(config.headers || {}),
+        },
         body: JSON.stringify(data),
-        ...config
+        ...config,
       });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Lỗi cập nhật dữ liệu (Mã lỗi: ${response.status})`);
+        throw new Error(
+          errData.error || `Lỗi cập nhật dữ liệu (Mã lỗi: ${response.status})`,
+        );
       }
       const result = await response.json();
       this.handleSuccess(messageSuccess);
@@ -59,7 +77,9 @@ class ApiService {
       const response = await fetch(url, { method: "DELETE", ...config });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Lỗi xóa dữ liệu (Mã lỗi: ${response.status})`);
+        throw new Error(
+          errData.error || `Lỗi xóa dữ liệu (Mã lỗi: ${response.status})`,
+        );
       }
       const result = await response.json();
       this.handleSuccess(messageSuccess);
