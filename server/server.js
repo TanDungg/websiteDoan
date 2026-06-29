@@ -605,9 +605,24 @@ app.get("/api/gallery", async (req, res) => {
         };
       }
       if (row.image_url) {
+        let fileName = "";
+        try {
+          const urlParts = row.image_url.split("/");
+          const baseName = urlParts[urlParts.length - 1];
+          const prefix = `gallery-${row.photo_id}-`;
+          if (baseName.startsWith(prefix)) {
+            fileName = baseName.substring(prefix.length);
+          } else {
+            fileName = baseName;
+          }
+        } catch (err) {
+          fileName = "Hình ảnh";
+        }
+
         albumsMap[albumId].images.push({
           id: row.photo_id,
           imageUrl: row.image_url,
+          fileName: fileName,
         });
       }
     });
