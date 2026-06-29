@@ -50,13 +50,13 @@ export default function Intro() {
   return (
     <div className="panel-wrapper">
       <div className="panel-header">
-        <h3>Cấu hình Trang Giới thiệu</h3>
+        <h3>Giới thiệu chi đoàn</h3>
       </div>
 
       <div className="card" style={{ padding: "24px" }}>
         <form onSubmit={handleIntroSettingsSubmit} className="admin-intro-form">
           <FormItem
-            label="Giới thiệu chung"
+            label=""
             type="editor"
             required
             value={introSettings.historyContent}
@@ -68,8 +68,6 @@ export default function Intro() {
             }
             placeholder="Nhập giới thiệu..."
           />
-
-
 
           <div style={{ textAlign: "right", marginTop: "15px" }}>
             <button type="submit" className="btn btn-primary">

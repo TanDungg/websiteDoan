@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Compass, Heart, BookOpen, Image } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Heart,
+  BookOpen,
+  Image,
+} from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import { galleryList } from "../../data/mockData";
@@ -13,9 +20,7 @@ export default function Home() {
     data,
     loading,
     execute: loadPosts,
-  } = useApi(
-    useCallback(() => apiService.get("/api/posts"), [])
-  );
+  } = useApi(useCallback(() => apiService.get("/api/posts"), []));
 
   const posts = data || [];
 
@@ -59,9 +64,18 @@ export default function Home() {
       {/* Slider Banner Section */}
       {hotNews.length > 0 && (
         <section className="hero-slider">
-          <div className="slider-wrapper" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+          <div
+            className="slider-wrapper"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
             {hotNews.map((news) => (
-              <div key={news.id} className="slide-item" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.75)), url(${news.imageUrl})` }}>
+              <div
+                key={news.id}
+                className="slide-item"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.75)), url(${news.imageUrl})`,
+                }}
+              >
                 <div className="slide-content container">
                   <span className="slide-tag">Tin nổi bật</span>
                   <h2 className="slide-title">{news.title}</h2>
@@ -75,17 +89,25 @@ export default function Home() {
           </div>
           {hotNews.length > 1 && (
             <>
-              <button className="slider-arrow arrow-left" onClick={prevSlide} aria-label="Previous Slide">
+              <button
+                className="slider-arrow arrow-left"
+                onClick={prevSlide}
+                aria-label="Previous Slide"
+              >
                 <ChevronLeft size={24} />
               </button>
-              <button className="slider-arrow arrow-right" onClick={nextSlide} aria-label="Next Slide">
+              <button
+                className="slider-arrow arrow-right"
+                onClick={nextSlide}
+                aria-label="Next Slide"
+              >
                 <ChevronRight size={24} />
               </button>
               <div className="slider-dots">
                 {hotNews.map((_, index) => (
                   <button
                     key={index}
-                    className={`dot-item ${index === currentSlide ? 'active' : ''}`}
+                    className={`dot-item ${index === currentSlide ? "active" : ""}`}
                     onClick={() => setCurrentSlide(index)}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -103,21 +125,30 @@ export default function Home() {
             <Compass size={28} />
           </div>
           <h3>Xung kích</h3>
-          <p>Luôn đi đầu trong mọi phong trào, hoạt động cộng đồng, sẵn sàng đảm nhận việc khó khăn.</p>
+          <p>
+            Luôn đi đầu trong mọi phong trào, hoạt động cộng đồng, sẵn sàng đảm
+            nhận việc khó khăn.
+          </p>
         </div>
         <div className="value-card card">
           <div className="value-icon-wrapper red">
             <Heart size={28} />
           </div>
           <h3>Tình nguyện</h3>
-          <p>Cống hiến sức trẻ vì sự an sinh xã hội, giúp đỡ các gia đình chính sách và trẻ em nghèo.</p>
+          <p>
+            Cống hiến sức trẻ vì sự an sinh xã hội, giúp đỡ các gia đình chính
+            sách và trẻ em nghèo.
+          </p>
         </div>
         <div className="value-card card">
           <div className="value-icon-wrapper gold">
             <BookOpen size={28} />
           </div>
           <h3>Sáng tạo</h3>
-          <p>Khơi nguồn các mô hình kinh tế, áp dụng công nghệ chuyển đổi số vào hoạt động Đoàn.</p>
+          <p>
+            Khơi nguồn các mô hình kinh tế, áp dụng công nghệ chuyển đổi số vào
+            hoạt động Đoàn.
+          </p>
         </div>
       </section>
 
@@ -144,7 +175,11 @@ export default function Home() {
               <div className="home-gallery-grid">
                 {galleryList.slice(0, 4).map((g) => (
                   <div key={g.id} className="home-gallery-item card">
-                    <img src={g.imageUrl} alt={g.title} className="home-gallery-img" />
+                    <img
+                      src={g.imageUrl}
+                      alt={g.title}
+                      className="home-gallery-img"
+                    />
                     <div className="home-gallery-overlay">
                       <Image size={24} className="gallery-overlay-icon" />
                       <p className="home-gallery-title">{g.title}</p>

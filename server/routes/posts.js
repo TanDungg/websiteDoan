@@ -81,7 +81,8 @@ router.get("/:id", async (req, res) => {
 
 // POST /api/posts -> mounted on /api/posts, so POST /
 router.post("/", async (req, res) => {
-  const { id, title, summary, content, category, imageUrl, author, isHot } = req.body;
+  const { id, title, summary, content, category, imageUrl, author, isHot } =
+    req.body;
   const crypto = require("crypto");
   const postId =
     id || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
@@ -120,7 +121,8 @@ router.post("/", async (req, res) => {
 // PUT /api/posts/:id -> mounted on /api/posts, so PUT /:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { title, summary, content, category, imageUrl, author, isHot } = req.body;
+  const { title, summary, content, category, imageUrl, author, isHot } =
+    req.body;
   const updatedBy = "admin";
   const updatedAt = new Date().toISOString();
   try {

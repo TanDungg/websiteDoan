@@ -273,7 +273,7 @@ export default function Posts() {
           />
         </div>
 
-        <div style={{ display: "flex", gap: "20px", marginBottom: "15px" }}>
+        <div style={{ display: "flex", gap: "20px" }}>
           <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
             <label className="form-label">Chuyên mục *</label>
             <select
@@ -298,7 +298,12 @@ export default function Posts() {
               marginBottom: 0,
             }}
           >
-            <label className="form-label" style={{ opacity: 0, userSelect: "none", marginBottom: "6px" }}>Ghim tin nổi bật</label>
+            <label
+              className="form-label"
+              style={{ opacity: 0, userSelect: "none" }}
+            >
+              Ghim tin nổi bật
+            </label>
             <div
               style={{
                 display: "flex",
@@ -316,7 +321,9 @@ export default function Posts() {
             >
               <button
                 type="button"
-                onClick={() => setPostForm({ ...postForm, isHot: !postForm.isHot })}
+                onClick={() =>
+                  setPostForm({ ...postForm, isHot: !postForm.isHot })
+                }
                 style={{
                   position: "relative",
                   width: "42px",
@@ -328,7 +335,7 @@ export default function Posts() {
                   padding: 0,
                   transition: "background-color 0.2s ease",
                   display: "inline-flex",
-                  alignItems: "center"
+                  alignItems: "center",
                 }}
               >
                 <div
@@ -341,22 +348,24 @@ export default function Posts() {
                     borderRadius: "50%",
                     backgroundColor: "#ffffff",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                    transition: "left 0.2s ease"
+                    transition: "left 0.2s ease",
                   }}
                 />
               </button>
-              
+
               <span
                 style={{
                   fontWeight: 600,
                   fontSize: "0.85rem",
                   color: postForm.isHot ? "#166534" : "#475569",
                   cursor: "pointer",
-                  userSelect: "none"
+                  userSelect: "none",
                 }}
-                onClick={() => setPostForm({ ...postForm, isHot: !postForm.isHot })}
+                onClick={() =>
+                  setPostForm({ ...postForm, isHot: !postForm.isHot })
+                }
               >
-                Ghim Tin nổi bật ở Banner Trang chủ
+                Ghim tin nổi bật ở Banner Trang chủ
               </span>
             </div>
           </div>
