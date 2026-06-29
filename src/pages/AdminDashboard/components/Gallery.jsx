@@ -58,7 +58,7 @@ export default function Gallery() {
     setUploadingGallery(true);
 
     try {
-      for (const fileObj of selectedFiles) {
+      const uploadPromises = selectedFiles.map(async (fileObj) => {
         const base64Data = await fileObj.base64Promise;
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
@@ -73,7 +73,7 @@ export default function Gallery() {
         const uploadData = await uploadRes.json();
 
         if (uploadData.success) {
-          await fetch("/api/gallery", {
+          const saveRes = await fetch("/api/gallery", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -85,8 +85,16 @@ export default function Gallery() {
               imageUrl: uploadData.filePath || uploadData.url,
             }),
           });
+          const saveData = await saveRes.json();
+          if (!saveRes.ok) {
+            throw new Error(saveData.error || "Lỗi lưu thư viện");
+          }
+        } else {
+          throw new Error(uploadData.error || "Lỗi tải tệp lên máy chủ");
         }
-      }
+      });
+
+      await Promise.all(uploadPromises);
 
       alert("Đã đăng tải thành công tất cả hình ảnh lên thư viện!");
       setSelectedFiles([]);
