@@ -81,7 +81,7 @@ router.get("/:id", async (req, res) => {
 
 // POST /api/posts -> mounted on /api/posts, so POST /
 router.post("/", async (req, res) => {
-  const { id, title, summary, content, category, imageUrl, author } = req.body;
+  const { id, title, summary, content, category, imageUrl, author, isHot } = req.body;
   const crypto = require("crypto");
   const postId =
     id || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
@@ -101,7 +101,7 @@ router.post("/", async (req, res) => {
         imageUrl,
         author,
         date,
-        isHot: false,
+        isHot: isHot === true || isHot === "true" ? 1 : 0,
         createdBy,
         createdAt,
       },
@@ -120,15 +120,26 @@ router.post("/", async (req, res) => {
 // PUT /api/posts/:id -> mounted on /api/posts, so PUT /:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { title, summary, content, category, imageUrl, author } = req.body;
+  const { title, summary, content, category, imageUrl, author, isHot } = req.body;
   const updatedBy = "admin";
   const updatedAt = new Date().toISOString();
   try {
     await runQuery(
       `UPDATE posts 
-       SET title = @title, summary = @summary, content = @content, category = @category, image_url = @imageUrl, author = @author, updated_by = @updatedBy, updated_at = @updatedAt
+       SET title = @title, summary = @summary, content = @content, category = @category, image_url = @imageUrl, author = @author, is_hot = @isHot, updated_by = @updatedBy, updated_at = @updatedAt
        WHERE id = @id`,
-      { id, title, summary, content, category, imageUrl, author, updatedBy, updatedAt },
+      {
+        id,
+        title,
+        summary,
+        content,
+        category,
+        imageUrl,
+        author,
+        isHot: isHot === true || isHot === "true" ? 1 : 0,
+        updatedBy,
+        updatedAt,
+      },
     );
     res.json({ success: true, message: "Cập nhật bài viết thành công!" });
   } catch (err) {

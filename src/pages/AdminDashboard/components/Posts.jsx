@@ -17,6 +17,7 @@ export default function Posts() {
     category: "hoat-dong",
     imageUrl: "",
     author: "BCH Đoàn xã",
+    isHot: false,
   });
 
   const loadPosts = () => {
@@ -42,6 +43,7 @@ export default function Posts() {
         category: post.category,
         imageUrl: post.imageUrl || "",
         author: post.author,
+        isHot: post.isHot || false,
       });
     } else {
       setEditingPost(null);
@@ -53,6 +55,7 @@ export default function Posts() {
         category: "hoat-dong",
         imageUrl: "",
         author: "BCH Đoàn xã",
+        isHot: false,
       });
     }
     setShowPostModal(true);
@@ -283,6 +286,21 @@ export default function Posts() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="form-group" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 0 12px" }}>
+          <input
+            type="checkbox"
+            id="post-is-hot"
+            style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "var(--primary)" }}
+            checked={postForm.isHot}
+            onChange={(e) =>
+              setPostForm({ ...postForm, isHot: e.target.checked })
+            }
+          />
+          <label htmlFor="post-is-hot" className="form-label" style={{ marginBottom: 0, cursor: "pointer", fontWeight: 600, color: "var(--text-main)" }}>
+            Tin nổi bật (Ghim lên Slider biểu ngữ Banner tại trang chủ)
+          </label>
         </div>
 
         <div className="form-group">

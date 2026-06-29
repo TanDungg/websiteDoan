@@ -197,6 +197,7 @@ function runMockQuery(queryText, params = {}) {
       post.category = params.category;
       post.image_url = params.imageUrl;
       post.author = params.author;
+      post.is_hot = params.isHot ? 1 : 0;
     }
     return { rows: [], rowCount: post ? 1 : 0 };
   }
