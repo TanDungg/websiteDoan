@@ -45,7 +45,7 @@ router.post("/", async (req, res) => {
     res.status(201).json({ success: true, message: "Thêm đoàn viên thành công!", id });
   } catch (err) {
     console.error("POST /api/union-members error:", err);
-    res.status(500).json({ error: "Lỗi thêm đoàn viên" });
+    res.status(500).json({ error: "Lỗi thêm đoàn viên", details: err.message });
   }
 });
 

@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
       .json({ success: true, message: "Thêm chi đoàn thành công!", id });
   } catch (err) {
     console.error("POST /api/branches error:", err);
-    res.status(500).json({ error: "Lỗi thêm chi đoàn trực thuộc" });
+    res.status(500).json({ error: "Lỗi thêm chi đoàn trực thuộc", details: err.message });
   }
 });
 

@@ -870,6 +870,9 @@ const initializeDatabase = async () => {
         await addAuditCols("bch_members");
         await addAuditCols("gallery");
         await addAuditCols("gallery_photos");
+        await addAuditCols("branch_types");
+        await addAuditCols("branches");
+        await addAuditCols("union_members");
 
         // Clean display_order from bch_members
         await client.query(
@@ -1224,6 +1227,9 @@ const initializeDatabase = async () => {
       await addAuditColsMssql("bch_members");
       await addAuditColsMssql("gallery");
       await addAuditColsMssql("gallery_photos");
+      await addAuditColsMssql("branch_types");
+      await addAuditColsMssql("branches");
+      await addAuditColsMssql("union_members");
 
       // Drop display_order from bch_members (safely handling default constraint)
       await sql.query(`
