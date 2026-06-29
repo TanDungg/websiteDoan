@@ -57,7 +57,7 @@ const mockIntroSettings = {
   historyContent: "",
   statMembers: "0",
   statBranches: "0",
-  branchesContent: ""
+  branchesContent: "",
 };
 
 // --- Mock Database Store ---
@@ -93,7 +93,7 @@ function initMockDbStore() {
       history_content: mockIntroSettings.historyContent,
       stat_members: mockIntroSettings.statMembers,
       stat_branches: mockIntroSettings.statBranches,
-      branches_content: mockIntroSettings.branchesContent
+      branches_content: mockIntroSettings.branchesContent,
     },
     bchMembers: mockBchMembers.map((m) => ({
       id: m.id,
@@ -103,24 +103,24 @@ function initMockDbStore() {
       phone: m.phone,
       image_url: m.imageUrl,
       responsibility: m.responsibility,
-      created_by: m.createdBy || 'admin',
+      created_by: m.createdBy || "admin",
       created_at: m.createdAt || new Date().toISOString(),
-      updated_by: m.updatedBy || 'admin',
-      updated_at: m.updatedAt || new Date().toISOString()
+      updated_by: m.updatedBy || "admin",
+      updated_at: m.updatedAt || new Date().toISOString(),
     })),
     gallery: [],
     galleryPhotos: [],
     branchTypes: [],
     branches: [],
-    unionMembers: []
+    unionMembers: [],
   };
 }
 
 function runMockQuery(queryText, params = {}) {
-  const normalizedQuery = queryText.replace(/\s+/g, ' ').trim();
+  const normalizedQuery = queryText.replace(/\s+/g, " ").trim();
 
   // 1. Authenticate admins
-  if (normalizedQuery.includes('FROM admins')) {
+  if (normalizedQuery.includes("FROM admins")) {
     const user = mockDbStore.admins.find(
       (u) => u.username === params.username && u.password === params.password,
     );
@@ -128,7 +128,10 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 2. Select posts
-  if (normalizedQuery.includes('FROM posts') && normalizedQuery.startsWith('SELECT')) {
+  if (
+    normalizedQuery.includes("FROM posts") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
     let list = [...mockDbStore.posts];
     if (params.id !== undefined) {
       list = list.filter((p) => String(p.id) === String(params.id));
@@ -137,7 +140,7 @@ function runMockQuery(queryText, params = {}) {
       list = list.filter((p) => p.category === params.category);
     }
     if (params.search !== undefined) {
-      const searchTerm = params.search.replace(/%/g, '').toLowerCase();
+      const searchTerm = params.search.replace(/%/g, "").toLowerCase();
       list = list.filter(
         (p) =>
           (p.title && p.title.toLowerCase().includes(searchTerm)) ||
@@ -146,16 +149,18 @@ function runMockQuery(queryText, params = {}) {
     }
     // Sort by date DESC
     list.sort((a, b) => {
-      const da = a.date || '';
-      const db = b.date || '';
+      const da = a.date || "";
+      const db = b.date || "";
       return db.localeCompare(da);
     });
     return { rows: list, rowCount: list.length };
   }
 
   // 3. Update posts views
-  if (normalizedQuery.includes('UPDATE posts SET views = views + 1')) {
-    const post = mockDbStore.posts.find((p) => String(p.id) === String(params.id));
+  if (normalizedQuery.includes("UPDATE posts SET views = views + 1")) {
+    const post = mockDbStore.posts.find(
+      (p) => String(p.id) === String(params.id),
+    );
     if (post) {
       post.views = (post.views || 0) + 1;
     }
@@ -163,7 +168,7 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 4. Insert into posts
-  if (normalizedQuery.includes('INSERT INTO posts')) {
+  if (normalizedQuery.includes("INSERT INTO posts")) {
     const newPost = {
       id: params.id,
       title: params.title,
@@ -181,8 +186,10 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 5. Update posts general
-  if (normalizedQuery.startsWith('UPDATE posts')) {
-    const post = mockDbStore.posts.find((p) => String(p.id) === String(params.id));
+  if (normalizedQuery.startsWith("UPDATE posts")) {
+    const post = mockDbStore.posts.find(
+      (p) => String(p.id) === String(params.id),
+    );
     if (post) {
       post.title = params.title;
       post.summary = params.summary;
@@ -195,25 +202,30 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 6. Delete from posts
-  if (normalizedQuery.includes('DELETE FROM posts')) {
+  if (normalizedQuery.includes("DELETE FROM posts")) {
     const originalLength = mockDbStore.posts.length;
-    mockDbStore.posts = mockDbStore.posts.filter((p) => String(p.id) !== String(params.id));
+    mockDbStore.posts = mockDbStore.posts.filter(
+      (p) => String(p.id) !== String(params.id),
+    );
     return { rows: [], rowCount: originalLength - mockDbStore.posts.length };
   }
 
   // 7. Select documents
-  if (normalizedQuery.includes('FROM documents') && normalizedQuery.startsWith('SELECT')) {
+  if (
+    normalizedQuery.includes("FROM documents") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
     let list = [...mockDbStore.documents];
     list.sort((a, b) => {
-      const da = a.date || '';
-      const db = b.date || '';
+      const da = a.date || "";
+      const db = b.date || "";
       return db.localeCompare(da);
     });
     return { rows: list, rowCount: list.length };
   }
 
   // 8. Insert into documents
-  if (normalizedQuery.includes('INSERT INTO documents')) {
+  if (normalizedQuery.includes("INSERT INTO documents")) {
     const newDoc = {
       id: params.id,
       title: params.title,
@@ -227,27 +239,33 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 9. Delete from documents
-  if (normalizedQuery.includes('DELETE FROM documents')) {
+  if (normalizedQuery.includes("DELETE FROM documents")) {
     const originalLength = mockDbStore.documents.length;
     mockDbStore.documents = mockDbStore.documents.filter(
       (d) => String(d.id) !== String(params.id),
     );
-    return { rows: [], rowCount: originalLength - mockDbStore.documents.length };
+    return {
+      rows: [],
+      rowCount: originalLength - mockDbStore.documents.length,
+    };
   }
 
   // 10. Select feedbacks
-  if (normalizedQuery.includes('FROM feedbacks') && normalizedQuery.startsWith('SELECT')) {
+  if (
+    normalizedQuery.includes("FROM feedbacks") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
     let list = [...mockDbStore.feedbacks];
     list.sort((a, b) => {
-      const da = a.date || '';
-      const db = b.date || '';
+      const da = a.date || "";
+      const db = b.date || "";
       return db.localeCompare(da);
     });
     return { rows: list, rowCount: list.length };
   }
 
   // 11. Insert into feedbacks
-  if (normalizedQuery.includes('INSERT INTO feedbacks')) {
+  if (normalizedQuery.includes("INSERT INTO feedbacks")) {
     const newFeedback = {
       id: params.id,
       full_name: params.fullName,
@@ -263,23 +281,29 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 12. Delete from feedbacks
-  if (normalizedQuery.includes('DELETE FROM feedbacks')) {
+  if (normalizedQuery.includes("DELETE FROM feedbacks")) {
     const originalLength = mockDbStore.feedbacks.length;
     mockDbStore.feedbacks = mockDbStore.feedbacks.filter(
       (f) => String(f.id) !== String(params.id),
     );
-    return { rows: [], rowCount: originalLength - mockDbStore.feedbacks.length };
+    return {
+      rows: [],
+      rowCount: originalLength - mockDbStore.feedbacks.length,
+    };
   }
 
   // 13. Select bch_members
-  if (normalizedQuery.includes('FROM bch_members') && normalizedQuery.startsWith('SELECT')) {
+  if (
+    normalizedQuery.includes("FROM bch_members") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
     const list = [...mockDbStore.bchMembers];
     list.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
     return { rows: list, rowCount: list.length };
   }
 
   // 14. Insert into bch_members
-  if (normalizedQuery.includes('INSERT INTO bch_members')) {
+  if (normalizedQuery.includes("INSERT INTO bch_members")) {
     const newMember = {
       id: params.id,
       name: params.name,
@@ -288,15 +312,17 @@ function runMockQuery(queryText, params = {}) {
       phone: params.phone,
       image_url: params.imageUrl,
       responsibility: params.responsibility,
-      display_order: parseInt(params.displayOrder) || 0
+      display_order: parseInt(params.displayOrder) || 0,
     };
     mockDbStore.bchMembers.push(newMember);
     return { rows: [], rowCount: 1 };
   }
 
   // 15. Update bch_members
-  if (normalizedQuery.startsWith('UPDATE bch_members')) {
-    const member = mockDbStore.bchMembers.find(m => String(m.id) === String(params.id));
+  if (normalizedQuery.startsWith("UPDATE bch_members")) {
+    const member = mockDbStore.bchMembers.find(
+      (m) => String(m.id) === String(params.id),
+    );
     if (member) {
       member.name = params.name;
       member.position = params.position;
@@ -310,19 +336,27 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 16. Delete from bch_members
-  if (normalizedQuery.includes('DELETE FROM bch_members')) {
+  if (normalizedQuery.includes("DELETE FROM bch_members")) {
     const originalLength = mockDbStore.bchMembers.length;
-    mockDbStore.bchMembers = mockDbStore.bchMembers.filter(m => String(m.id) !== String(params.id));
-    return { rows: [], rowCount: originalLength - mockDbStore.bchMembers.length };
+    mockDbStore.bchMembers = mockDbStore.bchMembers.filter(
+      (m) => String(m.id) !== String(params.id),
+    );
+    return {
+      rows: [],
+      rowCount: originalLength - mockDbStore.bchMembers.length,
+    };
   }
 
   // 17. Select intro_settings
-  if (normalizedQuery.includes('FROM intro_settings') && normalizedQuery.startsWith('SELECT')) {
+  if (
+    normalizedQuery.includes("FROM intro_settings") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
     return { rows: [mockDbStore.intro], rowCount: 1 };
   }
 
   // 18. Update intro_settings
-  if (normalizedQuery.startsWith('UPDATE intro_settings')) {
+  if (normalizedQuery.startsWith("UPDATE intro_settings")) {
     mockDbStore.intro.history_content = params.historyContent;
     mockDbStore.intro.stat_members = params.statMembers;
     mockDbStore.intro.stat_branches = params.statBranches;
@@ -331,168 +365,213 @@ function runMockQuery(queryText, params = {}) {
   }
 
   // 19. Select gallery (Relational join)
-  if (normalizedQuery.includes('from gallery g left join gallery_photos gp') || normalizedQuery.includes('from gallery')) {
+  if (
+    normalizedQuery.includes("from gallery g left join gallery_photos gp") ||
+    normalizedQuery.includes("from gallery")
+  ) {
     const list = [];
-    mockDbStore.gallery.forEach(g => {
-      const photos = mockDbStore.galleryPhotos.filter(gp => String(gp.gallery_id) === String(g.id));
+    mockDbStore.gallery.forEach((g) => {
+      const photos = mockDbStore.galleryPhotos.filter(
+        (gp) => String(gp.gallery_id) === String(g.id),
+      );
       if (photos.length === 0) {
         list.push({
           id: g.id,
           title: g.title,
           date: g.date,
           photo_id: null,
-          image_url: null
+          image_url: null,
         });
       } else {
-        photos.forEach(gp => {
+        photos.forEach((gp) => {
           list.push({
             id: g.id,
             title: g.title,
             date: g.date,
             photo_id: gp.id,
-            image_url: gp.image_url
+            image_url: gp.image_url,
           });
         });
       }
     });
-    list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     return { rows: list, rowCount: list.length };
   }
 
   // 20. Insert into gallery (Relational)
-  if (normalizedQuery.includes('insert into gallery') && !normalizedQuery.includes('gallery_photos')) {
+  if (
+    normalizedQuery.includes("insert into gallery") &&
+    !normalizedQuery.includes("gallery_photos")
+  ) {
     const newAlbum = {
       id: params.id,
       title: params.title,
-      date: params.date
+      date: params.date,
     };
     mockDbStore.gallery.push(newAlbum);
     return { rows: [], rowCount: 1 };
   }
 
   // 20b. Insert into gallery_photos
-  if (normalizedQuery.includes('insert into gallery_photos')) {
+  if (normalizedQuery.includes("insert into gallery_photos")) {
     const newPhoto = {
       id: params.id,
       gallery_id: params.galleryId,
-      image_url: params.imageUrl
+      image_url: params.imageUrl,
     };
     mockDbStore.galleryPhotos.push(newPhoto);
     return { rows: [], rowCount: 1 };
   }
 
   // 20c. Select from gallery_photos by gallery_id
-  if (normalizedQuery.includes('from gallery_photos where gallery_id')) {
-    const photos = mockDbStore.galleryPhotos.filter(gp => String(gp.gallery_id) === String(params.id));
-    return { rows: photos.map(gp => ({ image_url: gp.image_url })), rowCount: photos.length };
+  if (normalizedQuery.includes("from gallery_photos where gallery_id")) {
+    const photos = mockDbStore.galleryPhotos.filter(
+      (gp) => String(gp.gallery_id) === String(params.id),
+    );
+    return {
+      rows: photos.map((gp) => ({ image_url: gp.image_url })),
+      rowCount: photos.length,
+    };
   }
 
   // 21. Delete from gallery
-  if (normalizedQuery.includes('delete from gallery')) {
+  if (normalizedQuery.includes("delete from gallery")) {
     const originalLength = mockDbStore.gallery.length;
-    mockDbStore.gallery = mockDbStore.gallery.filter(item => String(item.id) !== String(params.id));
-    mockDbStore.galleryPhotos = mockDbStore.galleryPhotos.filter(gp => String(gp.gallery_id) !== String(params.id));
+    mockDbStore.gallery = mockDbStore.gallery.filter(
+      (item) => String(item.id) !== String(params.id),
+    );
+    mockDbStore.galleryPhotos = mockDbStore.galleryPhotos.filter(
+      (gp) => String(gp.gallery_id) !== String(params.id),
+    );
     return { rows: [], rowCount: originalLength - mockDbStore.gallery.length };
   }
 
   // 22. Select branch_types
-  if (normalizedQuery.includes('FROM branch_types') && normalizedQuery.startsWith('SELECT')) {
+  if (
+    normalizedQuery.includes("FROM branch_types") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
     const list = [...mockDbStore.branchTypes];
-    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     return { rows: list, rowCount: list.length };
   }
 
   // 22b. Insert into branch_types
-  if (normalizedQuery.includes('INSERT INTO branch_types')) {
+  if (normalizedQuery.includes("INSERT INTO branch_types")) {
     const newType = {
       id: params.id,
       name: params.name,
-      created_by: params.createdBy || 'admin',
+      created_by: params.createdBy || "admin",
       created_at: params.createdAt || new Date().toISOString(),
-      updated_by: params.updatedBy || 'admin',
-      updated_at: params.updatedAt || new Date().toISOString()
+      updated_by: params.updatedBy || "admin",
+      updated_at: params.updatedAt || new Date().toISOString(),
     };
     mockDbStore.branchTypes.push(newType);
     return { rows: [], rowCount: 1 };
   }
 
   // 22c. Update branch_types
-  if (normalizedQuery.startsWith('UPDATE branch_types')) {
-    const bType = mockDbStore.branchTypes.find(t => String(t.id) === String(params.id));
+  if (normalizedQuery.startsWith("UPDATE branch_types")) {
+    const bType = mockDbStore.branchTypes.find(
+      (t) => String(t.id) === String(params.id),
+    );
     if (bType) {
       bType.name = params.name;
-      bType.updated_by = params.updatedBy || 'admin';
+      bType.updated_by = params.updatedBy || "admin";
       bType.updated_at = params.updatedAt || new Date().toISOString();
     }
     return { rows: [], rowCount: bType ? 1 : 0 };
   }
 
   // 22d. Delete from branch_types
-  if (normalizedQuery.includes('DELETE FROM branch_types')) {
+  if (normalizedQuery.includes("DELETE FROM branch_types")) {
     const originalLength = mockDbStore.branchTypes.length;
-    mockDbStore.branchTypes = mockDbStore.branchTypes.filter(t => String(t.id) !== String(params.id));
-    mockDbStore.branches = mockDbStore.branches.filter(b => String(b.branch_type_id) !== String(params.id));
-    return { rows: [], rowCount: originalLength - mockDbStore.branchTypes.length };
+    mockDbStore.branchTypes = mockDbStore.branchTypes.filter(
+      (t) => String(t.id) !== String(params.id),
+    );
+    mockDbStore.branches = mockDbStore.branches.filter(
+      (b) => String(b.branch_type_id) !== String(params.id),
+    );
+    return {
+      rows: [],
+      rowCount: originalLength - mockDbStore.branchTypes.length,
+    };
   }
 
   // 23. Select branches
-  if (normalizedQuery.includes('FROM branches') && normalizedQuery.startsWith('SELECT')) {
-    const list = mockDbStore.branches.map(b => {
-      const t = mockDbStore.branchTypes.find(type => String(type.id) === String(b.branch_type_id));
+  if (
+    normalizedQuery.includes("FROM branches") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
+    const list = mockDbStore.branches.map((b) => {
+      const t = mockDbStore.branchTypes.find(
+        (type) => String(type.id) === String(b.branch_type_id),
+      );
       return {
         id: b.id,
         name: b.name,
         branch_type_id: b.branch_type_id,
-        group_name: t ? t.name : '',
+        group_name: t ? t.name : "",
         created_by: b.created_by,
         created_at: b.created_at,
         updated_by: b.updated_by,
-        updated_at: b.updated_at
+        updated_at: b.updated_at,
       };
     });
-    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     return { rows: list, rowCount: list.length };
   }
 
   // 23b. Insert into branches
-  if (normalizedQuery.includes('INSERT INTO branches')) {
+  if (normalizedQuery.includes("INSERT INTO branches")) {
     const newBranch = {
       id: params.id,
       name: params.name,
       branch_type_id: params.branchTypeId,
-      created_by: params.createdBy || 'admin',
+      created_by: params.createdBy || "admin",
       created_at: params.createdAt || new Date().toISOString(),
-      updated_by: params.updatedBy || 'admin',
-      updated_at: params.updatedAt || new Date().toISOString()
+      updated_by: params.updatedBy || "admin",
+      updated_at: params.updatedAt || new Date().toISOString(),
     };
     mockDbStore.branches.push(newBranch);
     return { rows: [], rowCount: 1 };
   }
 
   // 23c. Update branches
-  if (normalizedQuery.startsWith('UPDATE branches')) {
-    const branch = mockDbStore.branches.find(b => String(b.id) === String(params.id));
+  if (normalizedQuery.startsWith("UPDATE branches")) {
+    const branch = mockDbStore.branches.find(
+      (b) => String(b.id) === String(params.id),
+    );
     if (branch) {
       branch.name = params.name;
       branch.branch_type_id = params.branchTypeId;
-      branch.updated_by = params.updatedBy || 'admin';
+      branch.updated_by = params.updatedBy || "admin";
       branch.updated_at = params.updatedAt || new Date().toISOString();
     }
     return { rows: [], rowCount: branch ? 1 : 0 };
   }
 
   // 23d. Delete from branches
-  if (normalizedQuery.includes('DELETE FROM branches')) {
+  if (normalizedQuery.includes("DELETE FROM branches")) {
     const originalLength = mockDbStore.branches.length;
-    mockDbStore.branches = mockDbStore.branches.filter(b => String(b.id) !== String(params.id));
-    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(m => String(m.branch_id) !== String(params.id));
+    mockDbStore.branches = mockDbStore.branches.filter(
+      (b) => String(b.id) !== String(params.id),
+    );
+    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(
+      (m) => String(m.branch_id) !== String(params.id),
+    );
     return { rows: [], rowCount: originalLength - mockDbStore.branches.length };
   }
 
   // 24. Select union_members
-  if (normalizedQuery.includes('FROM union_members') && normalizedQuery.startsWith('SELECT')) {
-    const list = mockDbStore.unionMembers.map(m => {
-      const b = mockDbStore.branches.find(branch => String(branch.id) === String(m.branch_id));
+  if (
+    normalizedQuery.includes("FROM union_members") &&
+    normalizedQuery.startsWith("SELECT")
+  ) {
+    const list = mockDbStore.unionMembers.map((m) => {
+      const b = mockDbStore.branches.find(
+        (branch) => String(branch.id) === String(m.branch_id),
+      );
       return {
         id: m.id,
         name: m.name,
@@ -500,21 +579,21 @@ function runMockQuery(queryText, params = {}) {
         phone: m.phone,
         email: m.email,
         branch_id: m.branch_id,
-        branch_name: b ? b.name : '',
+        branch_name: b ? b.name : "",
         join_date: m.join_date,
         status: m.status,
         created_by: m.created_by,
         created_at: m.created_at,
         updated_by: m.updated_by,
-        updated_at: m.updated_at
+        updated_at: m.updated_at,
       };
     });
-    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     return { rows: list, rowCount: list.length };
   }
 
   // 24b. Insert into union_members
-  if (normalizedQuery.includes('INSERT INTO union_members')) {
+  if (normalizedQuery.includes("INSERT INTO union_members")) {
     const newMember = {
       id: params.id,
       name: params.name,
@@ -523,19 +602,21 @@ function runMockQuery(queryText, params = {}) {
       email: params.email,
       branch_id: params.branchId,
       join_date: params.joinDate,
-      status: params.status || 'Sinh hoạt',
-      created_by: params.createdBy || 'admin',
+      status: params.status || "Sinh hoạt",
+      created_by: params.createdBy || "admin",
       created_at: params.createdAt || new Date().toISOString(),
-      updated_by: params.updatedBy || 'admin',
-      updated_at: params.updatedAt || new Date().toISOString()
+      updated_by: params.updatedBy || "admin",
+      updated_at: params.updatedAt || new Date().toISOString(),
     };
     mockDbStore.unionMembers.push(newMember);
     return { rows: [], rowCount: 1 };
   }
 
   // 24c. Update union_members
-  if (normalizedQuery.startsWith('UPDATE union_members')) {
-    const member = mockDbStore.unionMembers.find(m => String(m.id) === String(params.id));
+  if (normalizedQuery.startsWith("UPDATE union_members")) {
+    const member = mockDbStore.unionMembers.find(
+      (m) => String(m.id) === String(params.id),
+    );
     if (member) {
       member.name = params.name;
       member.dob = params.dob;
@@ -544,17 +625,22 @@ function runMockQuery(queryText, params = {}) {
       member.branch_id = params.branchId;
       member.join_date = params.joinDate;
       member.status = params.status;
-      member.updated_by = params.updatedBy || 'admin';
+      member.updated_by = params.updatedBy || "admin";
       member.updated_at = params.updatedAt || new Date().toISOString();
     }
     return { rows: [], rowCount: member ? 1 : 0 };
   }
 
   // 24d. Delete from union_members
-  if (normalizedQuery.includes('DELETE FROM union_members')) {
+  if (normalizedQuery.includes("DELETE FROM union_members")) {
     const originalLength = mockDbStore.unionMembers.length;
-    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(m => String(m.id) !== String(params.id));
-    return { rows: [], rowCount: originalLength - mockDbStore.unionMembers.length };
+    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(
+      (m) => String(m.id) !== String(params.id),
+    );
+    return {
+      rows: [],
+      rowCount: originalLength - mockDbStore.unionMembers.length,
+    };
   }
 
   return { rows: [], rowCount: 0 };
@@ -687,10 +773,12 @@ const initializeDatabase = async () => {
         `);
         // Migration: check if old gallery table structure exists
         const oldGalleryCheck = await client.query(
-          "SELECT column_name FROM information_schema.columns WHERE table_name='gallery' AND column_name='image_url'"
+          "SELECT column_name FROM information_schema.columns WHERE table_name='gallery' AND column_name='image_url'",
         );
         if (oldGalleryCheck.rows.length > 0) {
-          console.log("Migrating gallery table structure: Dropping old gallery table...");
+          console.log(
+            "Migrating gallery table structure: Dropping old gallery table...",
+          );
           await client.query("DROP TABLE IF EXISTS gallery_photos CASCADE;");
           await client.query("DROP TABLE IF EXISTS gallery CASCADE;");
         }
@@ -762,10 +850,18 @@ const initializeDatabase = async () => {
 
         // Migration updates for existing tables
         const addAuditCols = async (tbl) => {
-          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_by VARCHAR(100);`);
-          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_at VARCHAR(30);`);
-          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_by VARCHAR(100);`);
-          await client.query(`ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_at VARCHAR(30);`);
+          await client.query(
+            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_by VARCHAR(100);`,
+          );
+          await client.query(
+            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_at VARCHAR(30);`,
+          );
+          await client.query(
+            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_by VARCHAR(100);`,
+          );
+          await client.query(
+            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_at VARCHAR(30);`,
+          );
         };
         await addAuditCols("posts");
         await addAuditCols("documents");
@@ -775,18 +871,36 @@ const initializeDatabase = async () => {
         await addAuditCols("gallery_photos");
 
         // Clean display_order from bch_members
-        await client.query("ALTER TABLE bch_members DROP COLUMN IF EXISTS display_order;");
+        await client.query(
+          "ALTER TABLE bch_members DROP COLUMN IF EXISTS display_order;",
+        );
 
         // Clean branches columns and add new relation column
-        await client.query("ALTER TABLE branches DROP COLUMN IF EXISTS display_order;");
-        await client.query("ALTER TABLE branches DROP COLUMN IF EXISTS group_name;");
-        await client.query("ALTER TABLE branches DROP COLUMN IF EXISTS member_count;");
-        await client.query("ALTER TABLE branches ADD COLUMN IF NOT EXISTS branch_type_id VARCHAR(50);");
+        await client.query(
+          "ALTER TABLE branches DROP COLUMN IF EXISTS display_order;",
+        );
+        await client.query(
+          "ALTER TABLE branches DROP COLUMN IF EXISTS group_name;",
+        );
+        await client.query(
+          "ALTER TABLE branches DROP COLUMN IF EXISTS member_count;",
+        );
+        await client.query(
+          "ALTER TABLE branches ADD COLUMN IF NOT EXISTS branch_type_id VARCHAR(50);",
+        );
 
-        await client.query("ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT;");
-        await client.query("ALTER TABLE bch_members ALTER COLUMN image_url TYPE TEXT;");
-        await client.query("ALTER TABLE gallery_photos ALTER COLUMN image_url TYPE TEXT;");
-        await client.query("ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);");
+        await client.query(
+          "ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT;",
+        );
+        await client.query(
+          "ALTER TABLE bch_members ALTER COLUMN image_url TYPE TEXT;",
+        );
+        await client.query(
+          "ALTER TABLE gallery_photos ALTER COLUMN image_url TYPE TEXT;",
+        );
+        await client.query(
+          "ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);",
+        );
 
         // Seed
         const adminCount = await client.query("SELECT COUNT(*) FROM admins");
@@ -834,27 +948,46 @@ const initializeDatabase = async () => {
             await client.query(
               `INSERT INTO bch_members (id, name, position, email, phone, image_url, responsibility, display_order)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-              [m.id, m.name, m.position, m.email, m.phone, m.imageUrl, m.responsibility, m.displayOrder]
+              [
+                m.id,
+                m.name,
+                m.position,
+                m.email,
+                m.phone,
+                m.imageUrl,
+                m.responsibility,
+                m.displayOrder,
+              ],
             );
           }
         }
 
-        const introCount = await client.query("SELECT COUNT(*) FROM intro_settings");
+        const introCount = await client.query(
+          "SELECT COUNT(*) FROM intro_settings",
+        );
         if (parseInt(introCount.rows[0].count) === 0) {
           await client.query(
             `INSERT INTO intro_settings (id, history_content, stat_members, stat_branches, branches_content)
              VALUES ($1, $2, $3, $4, $5)`,
-            [mockIntroSettings.id, mockIntroSettings.historyContent, mockIntroSettings.statMembers, mockIntroSettings.statBranches, mockIntroSettings.branchesContent]
+            [
+              mockIntroSettings.id,
+              mockIntroSettings.historyContent,
+              mockIntroSettings.statMembers,
+              mockIntroSettings.statBranches,
+              mockIntroSettings.branchesContent,
+            ],
           );
         }
 
-        const branchesCount = await client.query("SELECT COUNT(*) FROM branches");
+        const branchesCount = await client.query(
+          "SELECT COUNT(*) FROM branches",
+        );
         if (parseInt(branchesCount.rows[0].count) === 0) {
           for (const b of mockBranches) {
             await client.query(
               `INSERT INTO branches (id, name, group_name, display_order, member_count)
                VALUES ($1, $2, $3, $4, $5)`,
-              [b.id, b.name, b.groupName, b.displayOrder, b.memberCount]
+              [b.id, b.name, b.groupName, b.displayOrder, b.memberCount],
             );
           }
         }
@@ -865,7 +998,9 @@ const initializeDatabase = async () => {
       }
     } catch (err) {
       console.warn("⚠️ Failed to connect to PostgreSQL:", err.message);
-      console.warn("⚠️ Falling back to built-in IN-MEMORY mock database store.");
+      console.warn(
+        "⚠️ Falling back to built-in IN-MEMORY mock database store.",
+      );
       useMockDb = true;
       initMockDbStore();
     }
@@ -885,8 +1020,15 @@ const initializeDatabase = async () => {
         `);
         await sql.close();
       } catch (masterErr) {
-        console.warn("⚠️ Cannot verify/create database via 'master' (might lack permissions):", masterErr.message);
-        try { await sql.close(); } catch (_) { /* ignore */ }
+        console.warn(
+          "⚠️ Cannot verify/create database via 'master' (might lack permissions):",
+          masterErr.message,
+        );
+        try {
+          await sql.close();
+        } catch (_) {
+          /* ignore */
+        }
       }
 
       // 2. Connect to the target database
@@ -1062,10 +1204,18 @@ const initializeDatabase = async () => {
 
       // Migration: Add audit columns to existing MS SQL Server tables
       const addAuditColsMssql = async (tbl) => {
-        await sql.query(`IF COL_LENGTH('${tbl}', 'created_by') IS NULL ALTER TABLE ${tbl} ADD created_by NVARCHAR(100);`);
-        await sql.query(`IF COL_LENGTH('${tbl}', 'created_at') IS NULL ALTER TABLE ${tbl} ADD created_at NVARCHAR(30);`);
-        await sql.query(`IF COL_LENGTH('${tbl}', 'updated_by') IS NULL ALTER TABLE ${tbl} ADD updated_by NVARCHAR(100);`);
-        await sql.query(`IF COL_LENGTH('${tbl}', 'updated_at') IS NULL ALTER TABLE ${tbl} ADD updated_at NVARCHAR(30);`);
+        await sql.query(
+          `IF COL_LENGTH('${tbl}', 'created_by') IS NULL ALTER TABLE ${tbl} ADD created_by NVARCHAR(100);`,
+        );
+        await sql.query(
+          `IF COL_LENGTH('${tbl}', 'created_at') IS NULL ALTER TABLE ${tbl} ADD created_at NVARCHAR(30);`,
+        );
+        await sql.query(
+          `IF COL_LENGTH('${tbl}', 'updated_by') IS NULL ALTER TABLE ${tbl} ADD updated_by NVARCHAR(100);`,
+        );
+        await sql.query(
+          `IF COL_LENGTH('${tbl}', 'updated_at') IS NULL ALTER TABLE ${tbl} ADD updated_at NVARCHAR(30);`,
+        );
       };
       await addAuditColsMssql("posts");
       await addAuditColsMssql("documents");
@@ -1082,7 +1232,7 @@ const initializeDatabase = async () => {
           SELECT @ConstraintNameBch = name 
           FROM sys.default_constraints 
           WHERE parent_object_id = object_id('bch_members') 
-            AND parent_column_id = column_property(object_id('bch_members'), 'display_order', 'ColumnId')
+            AND parent_column_id = COLUMNPROPERTY(object_id('bch_members'), 'display_order', 'ColumnId')
           IF @ConstraintNameBch IS NOT NULL
             EXEC('ALTER TABLE bch_members DROP CONSTRAINT ' + @ConstraintNameBch)
           ALTER TABLE bch_members DROP COLUMN display_order
@@ -1097,7 +1247,7 @@ const initializeDatabase = async () => {
           SELECT @ConstraintNameBranches = name 
           FROM sys.default_constraints 
           WHERE parent_object_id = object_id('branches') 
-            AND parent_column_id = column_property(object_id('branches'), 'display_order', 'ColumnId')
+            AND parent_column_id = COLUMNPROPERTY(object_id('branches'), 'display_order', 'ColumnId')
           IF @ConstraintNameBranches IS NOT NULL
             EXEC('ALTER TABLE branches DROP CONSTRAINT ' + @ConstraintNameBranches)
           ALTER TABLE branches DROP COLUMN display_order
@@ -1105,7 +1255,9 @@ const initializeDatabase = async () => {
       `);
 
       // Drop group_name from branches
-      await sql.query("IF COL_LENGTH('branches', 'group_name') IS NOT NULL ALTER TABLE branches DROP COLUMN group_name;");
+      await sql.query(
+        "IF COL_LENGTH('branches', 'group_name') IS NOT NULL ALTER TABLE branches DROP COLUMN group_name;",
+      );
 
       // Drop member_count from branches (safely handling default constraint)
       await sql.query(`
@@ -1115,25 +1267,35 @@ const initializeDatabase = async () => {
           SELECT @ConstraintNameMember = name 
           FROM sys.default_constraints 
           WHERE parent_object_id = object_id('branches') 
-            AND parent_column_id = column_property(object_id('branches'), 'member_count', 'ColumnId')
+            AND parent_column_id = COLUMNPROPERTY(object_id('branches'), 'member_count', 'ColumnId')
           IF @ConstraintNameMember IS NOT NULL
             EXEC('ALTER TABLE branches DROP CONSTRAINT ' + @ConstraintNameMember)
           ALTER TABLE branches DROP COLUMN member_count
         END
       `);
 
-      await sql.query("IF COL_LENGTH('branches', 'branch_type_id') IS NULL ALTER TABLE branches ADD branch_type_id NVARCHAR(50);");
+      await sql.query(
+        "IF COL_LENGTH('branches', 'branch_type_id') IS NULL ALTER TABLE branches ADD branch_type_id NVARCHAR(50);",
+      );
 
-      await sql.query("ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);");
-      await sql.query("ALTER TABLE bch_members ALTER COLUMN image_url NVARCHAR(MAX);");
-      await sql.query("ALTER TABLE gallery_photos ALTER COLUMN image_url NVARCHAR(MAX);");
+      await sql.query(
+        "ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);",
+      );
+      await sql.query(
+        "ALTER TABLE bch_members ALTER COLUMN image_url NVARCHAR(MAX);",
+      );
+      await sql.query(
+        "ALTER TABLE gallery_photos ALTER COLUMN image_url NVARCHAR(MAX);",
+      );
       await sql.query(`
         IF COL_LENGTH('gallery_photos', 'file_name') IS NULL
         ALTER TABLE gallery_photos ADD file_name NVARCHAR(255);
       `);
 
       // Seed Admin
-      const adminCheck = await sql.query("SELECT COUNT(*) as count FROM admins");
+      const adminCheck = await sql.query(
+        "SELECT COUNT(*) as count FROM admins",
+      );
       if (adminCheck.recordset[0].count === 0) {
         const request = new sql.Request();
         request.input("username", mockAdmin.username);
@@ -1186,7 +1348,9 @@ const initializeDatabase = async () => {
       }
 
       // Seed BCH Members
-      const bchCheck = await sql.query("SELECT COUNT(*) as count FROM bch_members");
+      const bchCheck = await sql.query(
+        "SELECT COUNT(*) as count FROM bch_members",
+      );
       if (bchCheck.recordset[0].count === 0) {
         for (const m of mockBchMembers) {
           const request = new sql.Request();
@@ -1206,7 +1370,9 @@ const initializeDatabase = async () => {
       }
 
       // Seed Intro Settings
-      const introCheck = await sql.query("SELECT COUNT(*) as count FROM intro_settings");
+      const introCheck = await sql.query(
+        "SELECT COUNT(*) as count FROM intro_settings",
+      );
       if (introCheck.recordset[0].count === 0) {
         const request = new sql.Request();
         request.input("id", mockIntroSettings.id);
@@ -1221,7 +1387,9 @@ const initializeDatabase = async () => {
       }
 
       // Seed Branches
-      const branchesCheck = await sql.query("SELECT COUNT(*) as count FROM branches");
+      const branchesCheck = await sql.query(
+        "SELECT COUNT(*) as count FROM branches",
+      );
       if (branchesCheck.recordset[0].count === 0) {
         for (const b of mockBranches) {
           const request = new sql.Request();
@@ -1239,8 +1407,13 @@ const initializeDatabase = async () => {
 
       console.log("MS SQL Server schema checked and seeded.");
     } catch (err) {
-      console.warn("⚠️ Failed to connect to Microsoft SQL Server:", err.message);
-      console.warn("⚠️ Falling back to built-in IN-MEMORY mock database store.");
+      console.warn(
+        "⚠️ Failed to connect to Microsoft SQL Server:",
+        err.message,
+      );
+      console.warn(
+        "⚠️ Falling back to built-in IN-MEMORY mock database store.",
+      );
       useMockDb = true;
       initMockDbStore();
     }
