@@ -82,12 +82,16 @@ export default function Introduction() {
         </div>
         <div className="intro-stats-wrapper">
           <div className="stat-card">
-            <Users size={32} className="stat-icon" />
+            <div className="stat-icon-wrapper">
+              <Users size={28} />
+            </div>
             <span className="stat-num">{settings.statMembers}</span>
             <span className="stat-label">Đoàn viên sinh hoạt</span>
           </div>
           <div className="stat-card">
-            <CalendarDays size={32} className="stat-icon" />
+            <div className="stat-icon-wrapper">
+              <CalendarDays size={28} />
+            </div>
             <span className="stat-num">{settings.statBranches}</span>
             <span className="stat-label">Chi đoàn trực thuộc</span>
           </div>
