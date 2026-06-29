@@ -115,17 +115,32 @@ app.get("/api/posts/:id", async (req, res) => {
 app.post("/api/posts", async (req, res) => {
   const { id, title, summary, content, category, imageUrl, author } = req.body;
   const crypto = require("crypto");
-  const postId = id || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
+  const postId =
+    id || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
   const date = new Date().toISOString().split("T")[0];
   try {
     await runQuery(
       `INSERT INTO posts (id, title, summary, content, category, image_url, author, date, views, is_hot)
        VALUES (@id, @title, @summary, @content, @category, @imageUrl, @author, @date, 0, @isHot)`,
-      { id: postId, title, summary, content, category, imageUrl, author, date, isHot: false },
+      {
+        id: postId,
+        title,
+        summary,
+        content,
+        category,
+        imageUrl,
+        author,
+        date,
+        isHot: false,
+      },
     );
     res
       .status(201)
-      .json({ success: true, message: "Đăng bài viết thành công!", id: postId });
+      .json({
+        success: true,
+        message: "Đăng bài viết thành công!",
+        id: postId,
+      });
   } catch (err) {
     console.error("Create post API error:", err);
     res.status(500).json({ error: "Lỗi đăng bài viết" });
@@ -173,7 +188,10 @@ app.delete("/api/posts/:id", async (req, res) => {
     }
 
     // Also delete the cover image if it is legacy (for safety and backward compatibility)
-    const postRes = await runQuery("SELECT image_url FROM posts WHERE id = @id", { id });
+    const postRes = await runQuery(
+      "SELECT image_url FROM posts WHERE id = @id",
+      { id },
+    );
     if (postRes.rows.length > 0) {
       const coverUrl = postRes.rows[0].image_url;
       if (coverUrl && coverUrl.startsWith("/uploads/")) {
@@ -182,14 +200,19 @@ app.delete("/api/posts/:id", async (req, res) => {
         if (fs.existsSync(actualPath)) {
           try {
             fs.unlinkSync(actualPath);
-          } catch (_) { /* ignore */ }
+          } catch (_) {
+            /* ignore */
+          }
         }
       }
     }
 
     // 2. Delete post from DB
     await runQuery("DELETE FROM posts WHERE id = @id", { id });
-    res.json({ success: true, message: "Xóa bài viết và các tệp đính kèm thành công!" });
+    res.json({
+      success: true,
+      message: "Xóa bài viết và các tệp đính kèm thành công!",
+    });
   } catch (err) {
     console.error("Delete post API error:", err);
     res.status(500).json({ error: "Lỗi xóa bài viết" });
@@ -535,7 +558,9 @@ app.post("/api/upload", (req, res) => {
   }
   try {
     const crypto = require("crypto");
-    const resolvedFileId = fileId || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
+    const resolvedFileId =
+      fileId ||
+      (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
     const base64Data = fileData.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
@@ -549,8 +574,9 @@ app.post("/api/upload", (req, res) => {
       success: true,
       fileId: resolvedFileId,
       filePath: `/uploads/${uniqueFileName}`,
+      url: `/uploads/${uniqueFileName}`,
       fileName: fileName,
-      fileType: fileType || "cover"
+      fileType: fileType || "cover",
     });
   } catch (err) {
     console.error("File upload error:", err);

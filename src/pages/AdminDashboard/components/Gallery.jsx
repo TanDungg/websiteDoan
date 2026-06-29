@@ -82,7 +82,7 @@ export default function Gallery() {
               title:
                 galleryTitle.trim() ||
                 fileObj.file.name.replace(/\.[^/.]+$/, ""),
-              imageUrl: uploadData.url,
+              imageUrl: uploadData.filePath || uploadData.url,
             }),
           });
         }
