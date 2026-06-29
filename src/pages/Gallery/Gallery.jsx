@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { X, ZoomIn, ChevronLeft, ChevronRight, Image } from "lucide-react";
+import apiService from "src/services/apiService";
+import { useApi } from "src/hooks/useApi";
 import "./Gallery.css";
 
 export default function Gallery() {
-  const [gallery, setGallery] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeAlbum, setActiveAlbum] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
+  const {
+    data: gallery = [],
+    loading,
+    execute: loadGallery,
+  } = useApi(
+    useCallback(() => apiService.get("/api/gallery"), [])
+  );
+
   useEffect(() => {
-    fetch("/api/gallery")
-      .then((res) => res.json())
-      .then((data) => {
-        setGallery(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading gallery:", err);
-        setLoading(false);
-      });
-  }, []);
+    loadGallery().catch((err) => console.error("Error loading gallery:", err));
+  }, [loadGallery]);
 
   const openLightbox = (album, index) => {
     setActiveAlbum(album);
