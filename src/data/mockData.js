@@ -10,7 +10,7 @@ export const newsList = [];
 export const bchMembers = [
   {
     id: 1,
-    name: "Đồng chí Trần Văn B",
+    name: "Trần Văn B",
     position: "Bí thư Đoàn xã",
     email: "tranvanb.tamanh@danang.gov.vn",
     phone: "0905.123.xxx",
@@ -21,7 +21,7 @@ export const bchMembers = [
   },
   {
     id: 2,
-    name: "Đồng chí Nguyễn Thị C",
+    name: "Nguyễn Thị C",
     position: "Phó Bí thư Đoàn xã",
     email: "nguyenthic.tamanh@danang.gov.vn",
     phone: "0905.456.xxx",
@@ -32,7 +32,7 @@ export const bchMembers = [
   },
   {
     id: 3,
-    name: "Đồng chí Lê Hoàng D",
+    name: "Lê Hoàng D",
     position: "Ủy viên BTV Đoàn xã",
     email: "lehoangd.tamanh@gmail.com",
     phone: "0905.789.xxx",

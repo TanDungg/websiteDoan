@@ -99,7 +99,7 @@ export default function Posts() {
     }
 
     if (!finalImageUrl) {
-      alert("Đồng chí vui lòng chọn ảnh bìa bài viết!");
+      alert("Bạn vui lòng chọn ảnh bìa bài viết!");
       return;
     }
 
@@ -128,7 +128,7 @@ export default function Posts() {
   };
 
   const handleDeletePost = (id) => {
-    if (window.confirm("Đồng chí có chắc chắn muốn xóa bài viết này không?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
       fetch(`/api/posts/${id}`, {
         method: "DELETE",
       })

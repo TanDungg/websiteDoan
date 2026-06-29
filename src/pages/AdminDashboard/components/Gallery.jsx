@@ -136,7 +136,7 @@ export default function Gallery() {
   const handleDeleteGalleryItem = (id) => {
     if (
       window.confirm(
-        "Đồng chí có chắc chắn muốn xóa album này và toàn bộ ảnh bên trong khỏi thư viện?",
+        "Bạn có chắc chắn muốn xóa album này và toàn bộ ảnh bên trong khỏi thư viện?"
       )
     ) {
       fetch(`/api/gallery/${id}`, {

@@ -96,7 +96,7 @@ export default function Branches() {
   const handleDeleteType = (id) => {
     if (
       window.confirm(
-        "Đồng chí có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!"
+        "Bạn có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!"
       )
     ) {
       fetch(`/api/branch-types/${id}`, {
@@ -131,7 +131,7 @@ export default function Branches() {
   const handleBranchSubmit = (e) => {
     e.preventDefault();
     if (!branchForm.branchTypeId) {
-      alert("Đồng chí vui lòng thiết lập phân loại cho chi đoàn này trước!");
+      alert("Bạn vui lòng thiết lập phân loại cho chi đoàn này trước!");
       return;
     }
 
@@ -159,7 +159,7 @@ export default function Branches() {
   const handleDeleteBranch = (id) => {
     if (
       window.confirm(
-        "Đồng chí có chắc chắn muốn xóa chi đoàn trực thuộc này không?"
+        "Bạn có chắc chắn muốn xóa chi đoàn trực thuộc này không?"
       )
     ) {
       fetch(`/api/branches/${id}`, {

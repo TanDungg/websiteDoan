@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
     );
     res.status(201).json({
       success: true,
-      message: "Gửi góp ý thành công! Xin cảm ơn đồng chí!",
+      message: "Gửi góp ý thành công! Xin cảm ơn bạn!",
     });
   } catch (err) {
     console.error("Submit feedback API error:", err);

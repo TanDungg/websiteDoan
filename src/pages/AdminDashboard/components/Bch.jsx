@@ -88,7 +88,7 @@ export default function Bch() {
 
   const handleDeleteMember = (id) => {
     if (
-      window.confirm("Đồng chí có chắc chắn muốn xóa thành viên BCH này không?")
+      window.confirm("Bạn có chắc chắn muốn xóa thành viên BCH này không?")
     ) {
       fetch(`/api/bch-members/${id}`, {
         method: "DELETE",

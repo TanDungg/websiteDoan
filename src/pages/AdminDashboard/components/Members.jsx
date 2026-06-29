@@ -73,7 +73,7 @@ export default function Members() {
   const handleMemberSubmit = (e) => {
     e.preventDefault();
     if (!memberForm.branchId) {
-      alert("Đồng chí vui lòng chọn chi đoàn sinh hoạt!");
+      alert("Bạn vui lòng chọn chi đoàn sinh hoạt!");
       return;
     }
 
@@ -101,7 +101,7 @@ export default function Members() {
   const handleDeleteMember = (id) => {
     if (
       window.confirm(
-        "Đồng chí có chắc chắn muốn xóa đoàn viên này ra khỏi hệ thống không?"
+        "Bạn có chắc chắn muốn xóa đoàn viên này ra khỏi hệ thống không?"
       )
     ) {
       fetch(`/api/union-members/${id}`, {

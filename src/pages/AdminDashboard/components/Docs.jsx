@@ -50,7 +50,7 @@ export default function Docs() {
   };
 
   const handleDeleteDoc = (id) => {
-    if (window.confirm("Đồng chí có chắc chắn muốn xóa văn bản này không?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa văn bản này không?")) {
       fetch(`/api/documents/${id}`, {
         method: "DELETE",
       })

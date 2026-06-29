@@ -146,7 +146,7 @@ export default function Contact() {
             <div className="submit-success-state">
               <CheckCircle2 size={64} className="success-icon" />
               <h2>Gửi đóng góp thành công!</h2>
-              <p>Cảm ơn đồng chí đã gửi ý kiến đóng góp. Ban Chấp hành Đoàn xã Tam Anh sẽ tiếp thu, xử lý phản hồi và liên hệ lại trong thời gian sớm nhất.</p>
+              <p>Cảm ơn bạn đã gửi ý kiến đóng góp. Ban Chấp hành Đoàn xã Tam Anh sẽ tiếp thu, xử lý phản hồi và liên hệ lại trong thời gian sớm nhất.</p>
               <button className="btn btn-primary" onClick={() => setIsSubmitted(false)}>
                 Gửi góp ý mới
               </button>

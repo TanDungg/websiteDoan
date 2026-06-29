@@ -114,7 +114,7 @@ export default function Introduction() {
             Ban Chấp hành đương nhiệm (Nhiệm kỳ 2022 - 2027)
           </h2>
           <p className="bch-intro-text">
-            Ban Chấp hành Đoàn xã Tam Anh gồm các đồng chí cán bộ đoàn nhiệt
+            Ban Chấp hành Đoàn xã Tam Anh gồm các bạn cán bộ đoàn nhiệt
             huyết, có trình độ năng lực chuyên môn, luôn nỗ lực vì sự phát triển
             của công tác Đoàn và phong trào thanh thiếu nhi địa bàn.
           </p>
