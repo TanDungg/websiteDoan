@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Edit, Check } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Plus, Trash2, Edit, Check, Upload, Image, X } from "lucide-react";
 import { newsCategories } from "src/data/mockData";
 import { Table, Modal, RichTextEditor } from "src/components";
 import { generateUUID } from "src/utils/Commons";
 
 export default function Posts() {
+  const fileInputRef = useRef(null);
   const [posts, setPosts] = useState([]);
   const [showPostModal, setShowPostModal] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [tempImage, setTempImage] = useState(null);
+  const [isImageCardHovered, setIsImageCardHovered] = useState(false);
   const [postForm, setPostForm] = useState({
     id: "",
     title: "",
@@ -326,65 +328,126 @@ export default function Posts() {
 
         <div className="form-group" style={{ marginTop: "15px" }}>
           <label className="form-label">Ảnh bìa bài viết *</label>
-          {tempImage || postForm.imageUrl ? (
-            <div style={{ position: "relative", width: "100%", height: "180px", borderRadius: "8px", overflow: "hidden", border: "1px solid #cbd5e1", backgroundColor: "#f1f5f9" }}>
-              <img
-                src={tempImage ? tempImage.previewUrl : postForm.imageUrl}
-                alt="Preview Cover"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-              <button
-                type="button"
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  backgroundColor: "rgba(239, 68, 68, 0.9)",
-                  color: "#fff",
-                  border: "none",
-                  padding: "6px 12px",
-                  borderRadius: "4px",
-                  fontSize: "0.8rem",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                  transition: "all 0.2s"
-                }}
-                onClick={() => {
-                  setTempImage(null);
-                  setPostForm({ ...postForm, imageUrl: "" });
-                }}
-              >
-                Gỡ bỏ ảnh bìa
-              </button>
-            </div>
-          ) : (
-            <div style={{
-              border: "2px dashed #cbd5e1",
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleImageUpload}
+          />
+          
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "190px",
               borderRadius: "8px",
+              overflow: "hidden",
+              border: isImageCardHovered ? "2px dashed var(--primary)" : "2px dashed #cbd5e1",
               backgroundColor: "#f8fafc",
-              padding: "24px",
-              textAlign: "center",
               cursor: "pointer",
-              transition: "all 0.2s"
-            }}>
-              <label style={{ cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "1.8rem" }}>📁</span>
-                <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "#334155" }}>
-                  Nhấp để tải ảnh bìa từ máy tính
+              transition: "all 0.2s ease-in-out",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            onMouseEnter={() => setIsImageCardHovered(true)}
+            onMouseLeave={() => setIsImageCardHovered(false)}
+          >
+            {tempImage || postForm.imageUrl ? (
+              <>
+                <img
+                  src={tempImage ? tempImage.previewUrl : postForm.imageUrl}
+                  alt="Preview Cover"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+                
+                {/* Overlay on hover to tell user they can click to change directly */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundColor: "rgba(15, 23, 42, 0.6)",
+                    backdropFilter: "blur(3px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    opacity: isImageCardHovered ? 1 : 0,
+                    transition: "opacity 0.2s ease",
+                    color: "#fff"
+                  }}
+                >
+                  <Upload size={28} />
+                  <span style={{ fontWeight: 600, fontSize: "0.85rem" }}>
+                    Nhấp chuột để chọn ảnh bìa khác
+                  </span>
+                </div>
+
+                {/* Stop propagation so clicking X doesn't open the file picker */}
+                <button
+                  type="button"
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(239, 68, 68, 0.9)",
+                    color: "#fff",
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
+                    transition: "transform 0.2s ease",
+                    zIndex: 10
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTempImage(null);
+                    setPostForm({ ...postForm, imageUrl: "" });
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = "scale(1.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = "scale(1)";
+                  }}
+                  title="Gỡ bỏ ảnh bìa"
+                >
+                  <X size={16} />
+                </button>
+              </>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "20px" }}>
+                <div style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  backgroundColor: isImageCardHovered ? "var(--primary-light)" : "#e2e8f0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: isImageCardHovered ? "var(--primary)" : "#64748b",
+                  transition: "all 0.2s"
+                }}>
+                  <Image size={24} />
+                </div>
+                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "#334155" }}>
+                  Kéo thả hoặc nhấp chuột để tải ảnh bìa lên
                 </span>
                 <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
                   Định dạng hỗ trợ: JPG, PNG, WEBP, GIF
                 </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleImageUpload}
-                />
-              </label>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           <div style={{ display: "flex", gap: "10px", marginTop: "10px", alignItems: "center" }}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#64748b", whiteSpace: "nowrap" }}>
