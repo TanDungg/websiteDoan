@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check } from "lucide-react";
-import Table from "../../../components/Table/Table";
+import { Table, Modal } from "../../../components";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -174,94 +174,80 @@ export default function Branches() {
       />
 
       {/* MODAL: ADD/EDIT BRANCH */}
-      {showBranchModal && (
-        <div className="modal-overlay">
-          <div className="modal-container card animate-fade-in" style={{ maxWidth: "500px" }}>
-            <div className="modal-header">
-              <h3>
-                {editingBranch
-                  ? "Sửa thông tin Chi đoàn"
-                  : "Thêm Chi đoàn trực thuộc"}
-              </h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowBranchModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleBranchSubmit} className="modal-form">
-              <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Tên chi đoàn *</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    value={branchForm.name}
-                    onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
-                    placeholder="Ví dụ: Chi đoàn Thôn Tam Anh 1"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Khối / Nhóm *</label>
-                  <input
-                    list="group-options"
-                    type="text"
-                    className="form-control"
-                    required
-                    value={branchForm.groupName}
-                    onChange={(e) =>
-                      setBranchForm({
-                        ...branchForm,
-                        groupName: e.target.value,
-                      })
-                    }
-                    placeholder="Nhập hoặc chọn khối/nhóm"
-                  />
-                  <datalist id="group-options">
-                    <option value="Chi đoàn Địa bàn Dân cư" />
-                    <option value="Chi đoàn Lực lượng vũ trang" />
-                    <option value="Chi đoàn Khối Trường học" />
-                    <option value="Chi đoàn Khối Cơ quan - Doanh nghiệp" />
-                  </datalist>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Thứ tự hiển thị *</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    required
-                    value={branchForm.displayOrder}
-                    onChange={(e) =>
-                      setBranchForm({
-                        ...branchForm,
-                        displayOrder: parseInt(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowBranchModal(false)}
-                >
-                  Hủy bỏ
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  <Check size={16} />
-                  <span>{editingBranch ? "Cập nhật" : "Thêm mới"}</span>
-                </button>
-              </div>
-            </form>
-          </div>
+      <Modal
+        isOpen={showBranchModal}
+        onClose={() => setShowBranchModal(false)}
+        title={editingBranch ? "Sửa thông tin Chi đoàn" : "Thêm Chi đoàn trực thuộc"}
+        maxWidth="500px"
+        onSubmit={handleBranchSubmit}
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => setShowBranchModal(false)}
+            >
+              Hủy bỏ
+            </button>
+            <button type="submit" className="btn btn-primary">
+              <Check size={16} />
+              <span>{editingBranch ? "Cập nhật" : "Thêm mới"}</span>
+            </button>
+          </>
+        }
+      >
+        <div className="form-group">
+          <label className="form-label">Tên chi đoàn *</label>
+          <input
+            type="text"
+            className="form-control"
+            required
+            value={branchForm.name}
+            onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
+            placeholder="Ví dụ: Chi đoàn Thôn Tam Anh 1"
+          />
         </div>
-      )}
+
+        <div className="form-group">
+          <label className="form-label">Khối / Nhóm *</label>
+          <input
+            list="group-options"
+            type="text"
+            className="form-control"
+            required
+            value={branchForm.groupName}
+            onChange={(e) =>
+              setBranchForm({
+                ...branchForm,
+                groupName: e.target.value,
+              })
+            }
+            placeholder="Nhập hoặc chọn khối/nhóm"
+          />
+          <datalist id="group-options">
+            <option value="Chi đoàn Địa bàn Dân cư" />
+            <option value="Chi đoàn Lực lượng vũ trang" />
+            <option value="Chi đoàn Khối Trường học" />
+            <option value="Chi đoàn Khối Cơ quan - Doanh nghiệp" />
+          </datalist>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Thứ tự hiển thị *</label>
+          <input
+            type="number"
+            className="form-control"
+            required
+            value={branchForm.displayOrder}
+            onChange={(e) =>
+              setBranchForm({
+                ...branchForm,
+                displayOrder: parseInt(e.target.value) || 0,
+              })
+            }
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

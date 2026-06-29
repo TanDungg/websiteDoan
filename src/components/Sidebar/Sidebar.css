@@ -85,6 +85,14 @@
   gap: 12px;
   align-items: center;
   cursor: pointer;
+  padding: 8px;
+  margin: 0 -8px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.recent-post-item:hover {
+  background-color: rgba(4, 105, 185, 0.06);
 }
 
 .recent-post-thumb {

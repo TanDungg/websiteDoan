@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
-import RichTextEditor from "../../../components/RichTextEditor/RichTextEditor";
+import { FormItem } from "src/components";
 
 export default function Intro() {
   const [introSettings, setIntroSettings] = useState({
@@ -18,7 +18,9 @@ export default function Intro() {
           setIntroSettings(data.settings);
         }
       })
-      .catch((err) => console.error("Error fetching admin intro details:", err));
+      .catch((err) =>
+        console.error("Error fetching admin intro details:", err),
+      );
   };
 
   useEffect(() => {
@@ -53,21 +55,19 @@ export default function Intro() {
 
       <div className="card" style={{ padding: "24px" }}>
         <form onSubmit={handleIntroSettingsSubmit} className="admin-intro-form">
-          <div className="form-group">
-            <label className="form-label">
-              Lịch sử & Sứ mệnh (Trình soạn thảo trực quan) *
-            </label>
-            <RichTextEditor
-              value={introSettings.historyContent}
-              onChange={(val) =>
-                setIntroSettings({
-                  ...introSettings,
-                  historyContent: val,
-                })
-              }
-              placeholder="Nhập lịch sử hình thành, hoạt động..."
-            />
-          </div>
+          <FormItem
+            label="Giới thiệu chung"
+            type="editor"
+            required
+            value={introSettings.historyContent}
+            onChange={(val) =>
+              setIntroSettings({
+                ...introSettings,
+                historyContent: val,
+              })
+            }
+            placeholder="Nhập giới thiệu..."
+          />
 
           <div
             className="row"
@@ -77,40 +77,32 @@ export default function Intro() {
               marginBottom: "15px",
             }}
           >
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Số lượng đoàn viên *</label>
-              <input
-                type="text"
-                className="form-control"
-                required
-                value={introSettings.statMembers}
-                onChange={(e) =>
-                  setIntroSettings({
-                    ...introSettings,
-                    statMembers: e.target.value,
-                  })
-                }
-                placeholder="Ví dụ: 120"
-              />
-            </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">
-                Số lượng chi đoàn trực thuộc *
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                required
-                value={introSettings.statBranches}
-                onChange={(e) =>
-                  setIntroSettings({
-                    ...introSettings,
-                    statBranches: e.target.value,
-                  })
-                }
-                placeholder="Ví dụ: 12"
-              />
-            </div>
+            <FormItem
+              label="Số lượng đoàn viên"
+              required
+              style={{ flex: 1 }}
+              value={introSettings.statMembers}
+              onChange={(val) =>
+                setIntroSettings({
+                  ...introSettings,
+                  statMembers: val,
+                })
+              }
+              placeholder="Ví dụ: 120"
+            />
+            <FormItem
+              label="Số lượng chi đoàn trực thuộc"
+              required
+              style={{ flex: 1 }}
+              value={introSettings.statBranches}
+              onChange={(val) =>
+                setIntroSettings({
+                  ...introSettings,
+                  statBranches: val,
+                })
+              }
+              placeholder="Ví dụ: 12"
+            />
           </div>
 
           <div style={{ textAlign: "right", marginTop: "15px" }}>

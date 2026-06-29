@@ -113,18 +113,19 @@ app.get("/api/posts/:id", async (req, res) => {
 });
 
 app.post("/api/posts", async (req, res) => {
-  const { title, summary, content, category, imageUrl, author } = req.body;
-  const id = Date.now().toString();
+  const { id, title, summary, content, category, imageUrl, author } = req.body;
+  const crypto = require("crypto");
+  const postId = id || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
   const date = new Date().toISOString().split("T")[0];
   try {
     await runQuery(
       `INSERT INTO posts (id, title, summary, content, category, image_url, author, date, views, is_hot)
        VALUES (@id, @title, @summary, @content, @category, @imageUrl, @author, @date, 0, 0)`,
-      { id, title, summary, content, category, imageUrl, author, date },
+      { id: postId, title, summary, content, category, imageUrl, author, date },
     );
     res
       .status(201)
-      .json({ success: true, message: "Đăng bài viết thành công!", id });
+      .json({ success: true, message: "Đăng bài viết thành công!", id: postId });
   } catch (err) {
     console.error("Create post API error:", err);
     res.status(500).json({ error: "Lỗi đăng bài viết" });
@@ -151,8 +152,44 @@ app.put("/api/posts/:id", async (req, res) => {
 app.delete("/api/posts/:id", async (req, res) => {
   const { id } = req.params;
   try {
+    const fs = require("fs");
+    const uploadsPath = path.join(__dirname, "uploads");
+
+    // 1. Delete all files starting with "postId-" from the uploads folder
+    if (fs.existsSync(uploadsPath)) {
+      try {
+        const files = fs.readdirSync(uploadsPath);
+        for (const file of files) {
+          if (file.startsWith(`${id}-`)) {
+            const actualPath = path.join(uploadsPath, file);
+            if (fs.existsSync(actualPath)) {
+              fs.unlinkSync(actualPath);
+            }
+          }
+        }
+      } catch (fileErr) {
+        console.error("Error deleting post files from disk:", fileErr);
+      }
+    }
+
+    // Also delete the cover image if it is legacy (for safety and backward compatibility)
+    const postRes = await runQuery("SELECT image_url FROM posts WHERE id = @id", { id });
+    if (postRes.rows.length > 0) {
+      const coverUrl = postRes.rows[0].image_url;
+      if (coverUrl && coverUrl.startsWith("/uploads/")) {
+        const legacyFileName = coverUrl.replace("/uploads/", "");
+        const actualPath = path.join(uploadsPath, legacyFileName);
+        if (fs.existsSync(actualPath)) {
+          try {
+            fs.unlinkSync(actualPath);
+          } catch (_) { /* ignore */ }
+        }
+      }
+    }
+
+    // 2. Delete post from DB
     await runQuery("DELETE FROM posts WHERE id = @id", { id });
-    res.json({ success: true, message: "Xóa bài viết thành công!" });
+    res.json({ success: true, message: "Xóa bài viết và các tệp đính kèm thành công!" });
   } catch (err) {
     console.error("Delete post API error:", err);
     res.status(500).json({ error: "Lỗi xóa bài viết" });
@@ -490,21 +527,31 @@ app.use("/uploads", express.static(uploadsPath));
 
 // API: File Upload
 app.post("/api/upload", (req, res) => {
-  const { fileData, fileName } = req.body;
+  const { fileData, fileName, fileId, postId, fileType } = req.body;
   if (!fileData || !fileName) {
     return res
       .status(400)
       .json({ error: "Thiếu dữ liệu tệp tin hoặc tên tệp!" });
   }
   try {
+    const crypto = require("crypto");
+    const resolvedFileId = fileId || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
     const base64Data = fileData.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
-    const uniqueFileName = `${Date.now()}-${fileName.replace(/\s+/g, "_")}`;
+    const prefix = postId ? `${postId}-` : "";
+    const typePrefix = fileType ? `${fileType}-` : "";
+    const uniqueFileName = `${prefix}${typePrefix}${resolvedFileId}-${fileName.replace(/\s+/g, "_")}`;
     const filePath = path.join(uploadsPath, uniqueFileName);
 
     fs.writeFileSync(filePath, buffer);
-    res.json({ success: true, url: `/uploads/${uniqueFileName}` });
+    res.json({
+      success: true,
+      fileId: resolvedFileId,
+      filePath: `/uploads/${uniqueFileName}`,
+      fileName: fileName,
+      fileType: fileType || "cover"
+    });
   } catch (err) {
     console.error("File upload error:", err);
     res.status(500).json({ error: "Lỗi tải tệp lên máy chủ" });

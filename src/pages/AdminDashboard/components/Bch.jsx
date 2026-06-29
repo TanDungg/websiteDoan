@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check } from "lucide-react";
-import Table from "../../../components/Table/Table";
+import { Table } from "../../../components";
 
 export default function Bch() {
   const [bchMembers, setBchMembers] = useState([]);

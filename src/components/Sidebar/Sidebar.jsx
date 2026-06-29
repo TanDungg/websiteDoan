@@ -67,7 +67,11 @@ export default function Sidebar() {
         <div className="recent-posts-list">
           {recentPosts.length > 0 ? (
             recentPosts.map((post) => (
-              <div key={post.id} className="recent-post-item">
+              <div
+                key={post.id}
+                className="recent-post-item"
+                onClick={() => navigate(`/tin-tuc/${post.id}`)}
+              >
                 <img
                   src={post.imageUrl}
                   alt={post.title}

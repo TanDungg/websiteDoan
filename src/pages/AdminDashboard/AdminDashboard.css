@@ -220,6 +220,20 @@
   border: 1px solid var(--border-color-dark);
 }
 
+.image-preview-placeholder {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-color-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #64748b;
+  background-color: #f8fafc;
+  text-align: center;
+}
+
 .image-upload-btn-label {
   padding: 8px 16px;
   background-color: var(--primary-light);

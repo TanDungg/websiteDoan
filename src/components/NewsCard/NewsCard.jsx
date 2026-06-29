@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { newsCategories } from '../../data/mockData';
 import './NewsCard.css';
 
 export default function NewsCard({ news }) {
   const { id, title, summary, imageUrl, date, author, category } = news;
+  const navigate = useNavigate();
   
   // Find category display name
   const catName = newsCategories.find(c => c.id === category)?.name || 'Tin tức';
@@ -17,7 +18,7 @@ export default function NewsCard({ news }) {
   };
 
   return (
-    <article className="card news-card">
+    <article className="card news-card" onClick={() => navigate(`/tin-tuc/${id}`)}>
       <div className="card-image-wrapper">
         <img src={imageUrl} alt={title} className="card-image" loading="lazy" />
         <span className={`badge badge-${category} card-badge`}>{catName}</span>

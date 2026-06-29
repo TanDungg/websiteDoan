@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, FileText, Check } from "lucide-react";
-import Table from "../../../components/Table/Table";
+import { Table } from "../../../components";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);

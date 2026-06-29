@@ -16,6 +16,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
 
     // Configure CKEditor 4 to look like Microsoft Word
     const editor = window.CKEDITOR.replace(textareaRef.current, {
+      versionCheck: false,
       placeholder: placeholder || 'Nhập nội dung...',
       height: 280,
       // Load standard toolbar configuration for Word-like features
