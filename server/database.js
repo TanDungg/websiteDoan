@@ -11,6 +11,14 @@ console.log(
 // --- PostgreSQL Pool Setup ---
 let pgPool = null;
 if (isPg) {
+  try {
+    const connStr = process.env.DATABASE_URL;
+    const maskConnStr = connStr.replace(/:([^:@]+)@/, ":******@");
+    console.log(`[DB Connection String]: ${maskConnStr}`);
+  } catch (e) {
+    console.warn("Failed to print connection string debug info");
+  }
+
   pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl:
