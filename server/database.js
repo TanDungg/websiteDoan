@@ -48,58 +48,16 @@ const mockPosts = [];
 
 const mockDocs = [];
 
-const mockBchMembers = [
-  {
-    id: "1",
-    name: 'Đồng chí Trần Văn B',
-    position: 'Bí thư Đoàn xã',
-    email: 'tranvanb.tamanh@danang.gov.vn',
-    phone: '0905.123.xxx',
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80',
-    responsibility: 'Phụ trách chung công tác Đoàn và phong trào thanh thiếu nhi xã Tam Anh. Đại diện pháp nhân của Đoàn xã.',
-    displayOrder: 1
-  },
-  {
-    id: "2",
-    name: 'Đồng chí Nguyễn Thị C',
-    position: 'Phó Bí thư Đoàn xã',
-    email: 'nguyenthic.tamanh@danang.gov.vn',
-    phone: '0905.456.xxx',
-    imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&h=400&q=80',
-    responsibility: 'Trực tiếp phụ trách công tác Tổ chức - Kiểm tra, phong trào học sinh trường học và Đội Thiếu niên Tiền phong.',
-    displayOrder: 2
-  },
-  {
-    id: "3",
-    name: 'Đồng chí Lê Hoàng D',
-    position: 'Ủy viên BTV Đoàn xã',
-    email: 'lehoangd.tamanh@gmail.com',
-    phone: '0905.789.xxx',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80',
-    responsibility: 'Phụ trách mảng văn thể mỹ, phong trào khởi nghiệp thanh niên và khối Chi đoàn nông nghiệp.',
-    displayOrder: 3
-  }
-];
+const mockBchMembers = [];
 
-const mockBranches = [
-  { id: "b1", name: "Chi đoàn Thôn Tam Anh 1", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 1, memberCount: 35 },
-  { id: "b2", name: "Chi đoàn Thôn Tam Anh 2", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 2, memberCount: 28 },
-  { id: "b3", name: "Chi đoàn Thôn Tam Anh 3", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 3, memberCount: 30 },
-  { id: "b4", name: "Chi đoàn Thôn Tam Anh 4", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 4, memberCount: 25 },
-  { id: "b5", name: "Chi đoàn Thôn Tam Anh 5", groupName: "Chi đoàn Địa bàn Dân cư", displayOrder: 5, memberCount: 22 },
-  { id: "b6", name: "Chi đoàn Công an xã", groupName: "Chi đoàn Lực lượng vũ trang", displayOrder: 6, memberCount: 15 },
-  { id: "b7", name: "Chi đoàn Quân sự xã (Trung đội dân quân cơ động)", groupName: "Chi đoàn Lực lượng vũ trang", displayOrder: 7, memberCount: 18 },
-  { id: "b8", name: "Chi đoàn Trường Tiểu học Tam Anh", groupName: "Chi đoàn Khối Trường học", displayOrder: 8, memberCount: 20 },
-  { id: "b9", name: "Chi đoàn Trường THCS Tam Anh", groupName: "Chi đoàn Khối Trường học", displayOrder: 9, memberCount: 22 },
-  { id: "b10", name: "Chi đoàn Trường Mầm non Hướng Dương", groupName: "Chi đoàn Khối Trường học", displayOrder: 10, memberCount: 17 }
-];
+const mockBranches = [];
 
 const mockIntroSettings = {
   id: 1,
-  historyContent: `<p>Đoàn TNCS Hồ Chí Minh xã Tam Anh, Thành phố Đà Nẵng là tổ chức chính trị - xã hội của thanh niên Việt Nam tại địa bàn xã Tam Anh. Dưới sự lãnh đạo trực tiếp của Đảng ủy xã Tam Anh và Đoàn TNCS Hồ Chí Minh cấp trên, Đoàn xã luôn giữ vai trò xung kích, đi đầu trong các phong trào hành động cách mạng của thanh niên tại địa phương.</p><p>Trải qua nhiều nhiệm kỳ hoạt động, Đoàn xã Tam Anh đã không ngừng lớn mạnh, quy tụ và đoàn kết các tầng lớp thanh thiếu nhi tích cực tham gia phát triển kinh tế, giữ vững an ninh chính trị, trật tự an toàn xã hội, bảo vệ môi trường, xây dựng nông thôn mới và phát triển đô thị.</p>`,
-  statMembers: "350+",
-  statBranches: "12",
-  branchesContent: `<div class="unit-category"><h3>Chi đoàn Địa bàn Dân cư</h3><ul><li>Chi đoàn Thôn Tam Anh 1</li><li>Chi đoàn Thôn Tam Anh 2</li><li>Chi đoàn Thôn Tam Anh 3</li><li>Chi đoàn Thôn Tam Anh 4</li><li>Chi đoàn Thôn Tam Anh 5</li></ul></div><div class="unit-category"><h3>Chi đoàn Lực lượng vũ trang</h3><ul><li>Chi đoàn Công an xã</li><li>Chi đoàn Quân sự xã (Trung đội dân quân cơ động)</li></ul></div><div class="unit-category"><h3>Chi đoàn Khối Trường học</h3><ul><li>Chi đoàn Trường Tiểu học Tam Anh</li><li>Chi đoàn Trường THCS Tam Anh</li><li>Chi đoàn Trường Mầm non Hướng Dương</li></ul></div>`
+  historyContent: "",
+  statMembers: "0",
+  statBranches: "0",
+  branchesContent: ""
 };
 
 // --- Mock Database Store ---
