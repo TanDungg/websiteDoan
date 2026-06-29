@@ -14,7 +14,7 @@ export default function News() {
   const [searchText, setSearchText] = useState("");
 
   const {
-    data: posts = [],
+    data,
     loading,
     execute: loadPosts,
   } = useApi(
@@ -33,6 +33,8 @@ export default function News() {
       return apiService.get(url);
     }, [])
   );
+
+  const posts = data || [];
 
   // Sync state with URL search param
   const urlSearch = searchParams.get("search") || "";

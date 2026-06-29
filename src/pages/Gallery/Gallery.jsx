@@ -9,12 +9,14 @@ export default function Gallery() {
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const {
-    data: gallery = [],
+    data,
     loading,
     execute: loadGallery,
   } = useApi(
     useCallback(() => apiService.get("/api/gallery"), [])
   );
+
+  const gallery = data || [];
 
   useEffect(() => {
     loadGallery().catch((err) => console.error("Error loading gallery:", err));

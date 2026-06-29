@@ -10,12 +10,14 @@ import "./Home.css";
 
 export default function Home() {
   const {
-    data: posts = [],
+    data,
     loading,
     execute: loadPosts,
   } = useApi(
     useCallback(() => apiService.get("/api/posts"), [])
   );
+
+  const posts = data || [];
 
   useEffect(() => {
     loadPosts().catch((err) => console.error("Failed to load posts:", err));

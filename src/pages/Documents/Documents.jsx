@@ -9,12 +9,14 @@ export default function Documents() {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const {
-    data: docs = [],
+    data,
     loading,
     execute: loadDocs,
   } = useApi(
     useCallback(() => apiService.get("/api/documents"), [])
   );
+
+  const docs = data || [];
 
   useEffect(() => {
     loadDocs().catch((err) => console.error("Error loading documents:", err));
