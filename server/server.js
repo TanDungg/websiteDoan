@@ -548,7 +548,7 @@ app.use("/uploads", express.static(uploadsPath));
 
 // API: File Upload
 app.post("/api/upload", (req, res) => {
-  const { fileData, fileName, fileId, postId, fileType } = req.body;
+  const { fileData, fileName, fileId, fileType } = req.body;
   if (!fileData || !fileName) {
     return res
       .status(400)
@@ -559,20 +559,12 @@ app.post("/api/upload", (req, res) => {
     const resolvedFileId =
       fileId ||
       (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
-    const base64Data = fileData.replace(/^data:image\/\w+;base64,/, "");
-    const buffer = Buffer.from(base64Data, "base64");
 
-    const prefix = postId ? `${postId}-` : "";
-    const typePrefix = fileType ? `${fileType}-` : "";
-    const uniqueFileName = `${prefix}${typePrefix}${resolvedFileId}-${fileName.replace(/\s+/g, "_")}`;
-    const filePath = path.join(uploadsPath, uniqueFileName);
-
-    fs.writeFileSync(filePath, buffer);
     res.json({
       success: true,
       fileId: resolvedFileId,
-      filePath: `/uploads/${uniqueFileName}`,
-      url: `/uploads/${uniqueFileName}`,
+      filePath: fileData,
+      url: fileData,
       fileName: fileName,
       fileType: fileType || "cover",
     });
@@ -587,7 +579,7 @@ app.post("/api/upload", (req, res) => {
 app.get("/api/gallery", async (req, res) => {
   try {
     const result = await runQuery(
-      `SELECT g.id, g.title, g.date, gp.id AS photo_id, gp.image_url 
+      `SELECT g.id, g.title, g.date, gp.id AS photo_id, gp.image_url, gp.file_name 
        FROM gallery g 
        LEFT JOIN gallery_photos gp ON g.id = gp.gallery_id 
        ORDER BY g.date DESC`
@@ -605,24 +597,10 @@ app.get("/api/gallery", async (req, res) => {
         };
       }
       if (row.image_url) {
-        let fileName = "";
-        try {
-          const urlParts = row.image_url.split("/");
-          const baseName = urlParts[urlParts.length - 1];
-          const prefix = `gallery-${row.photo_id}-`;
-          if (baseName.startsWith(prefix)) {
-            fileName = baseName.substring(prefix.length);
-          } else {
-            fileName = baseName;
-          }
-        } catch (err) {
-          fileName = "Hình ảnh";
-        }
-
         albumsMap[albumId].images.push({
           id: row.photo_id,
           imageUrl: row.image_url,
-          fileName: fileName,
+          fileName: row.file_name || "Hình ảnh",
         });
       }
     });
@@ -661,20 +639,13 @@ app.post("/api/gallery", async (req, res) => {
       const photoId = crypto.randomUUID
         ? crypto.randomUUID()
         : Date.now().toString() + Math.random().toString(36).substring(2, 5);
-      const base64Data = fileData.replace(/^data:image\/\w+;base64,/, "");
-      const buffer = Buffer.from(base64Data, "base64");
 
-      const uniqueFileName = `gallery-${photoId}-${fileName.replace(/\s+/g, "_")}`;
-      const filePath = path.join(uploadsPath, uniqueFileName);
-
-      fs.writeFileSync(filePath, buffer);
-
-      const imageUrl = `/uploads/${uniqueFileName}`;
+      const imageUrl = fileData;
 
       await runQuery(
-        `INSERT INTO gallery_photos (id, gallery_id, image_url)
-         VALUES (@id, @galleryId, @imageUrl)`,
-        { id: photoId, galleryId, imageUrl }
+        `INSERT INTO gallery_photos (id, gallery_id, image_url, file_name)
+         VALUES (@id, @galleryId, @imageUrl, @fileName)`,
+        { id: photoId, galleryId, imageUrl, fileName }
       );
     }
     res.status(201).json({

@@ -541,7 +541,7 @@ const initializeDatabase = async () => {
             summary TEXT,
             content TEXT,
             category VARCHAR(50),
-            image_url VARCHAR(512),
+            image_url TEXT,
             date VARCHAR(20),
             author VARCHAR(100),
             views INTEGER DEFAULT 0,
@@ -577,7 +577,7 @@ const initializeDatabase = async () => {
             position VARCHAR(100) NOT NULL,
             email VARCHAR(100),
             phone VARCHAR(20),
-            image_url VARCHAR(512),
+            image_url TEXT,
             responsibility TEXT,
             display_order INTEGER DEFAULT 0
           );
@@ -613,7 +613,8 @@ const initializeDatabase = async () => {
           CREATE TABLE IF NOT EXISTS gallery_photos (
             id VARCHAR(50) PRIMARY KEY,
             gallery_id VARCHAR(50) NOT NULL REFERENCES gallery(id) ON DELETE CASCADE,
-            image_url VARCHAR(512) NOT NULL
+            image_url TEXT NOT NULL,
+            file_name VARCHAR(255)
           );
         `);
         await client.query(`
@@ -624,6 +625,12 @@ const initializeDatabase = async () => {
             display_order INTEGER DEFAULT 0
           );
         `);
+
+        // Migration: ensure image_url columns can store large base64 strings and file_name column exists
+        await client.query("ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT;");
+        await client.query("ALTER TABLE bch_members ALTER COLUMN image_url TYPE TEXT;");
+        await client.query("ALTER TABLE gallery_photos ALTER COLUMN image_url TYPE TEXT;");
+        await client.query("ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);");
 
         // Seed
         const adminCount = await client.query("SELECT COUNT(*) FROM admins");
@@ -746,7 +753,7 @@ const initializeDatabase = async () => {
           summary NVARCHAR(MAX),
           content NVARCHAR(MAX),
           category NVARCHAR(50),
-          image_url NVARCHAR(512),
+          image_url NVARCHAR(MAX),
           date NVARCHAR(20),
           author NVARCHAR(100),
           views INT DEFAULT 0,
@@ -788,7 +795,7 @@ const initializeDatabase = async () => {
           position NVARCHAR(100) NOT NULL,
           email NVARCHAR(100),
           phone NVARCHAR(20),
-          image_url NVARCHAR(512),
+          image_url NVARCHAR(MAX),
           responsibility NVARCHAR(MAX),
           display_order INT DEFAULT 0
         );
@@ -826,7 +833,8 @@ const initializeDatabase = async () => {
         CREATE TABLE gallery_photos (
           id NVARCHAR(50) PRIMARY KEY,
           gallery_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES gallery(id) ON DELETE CASCADE,
-          image_url NVARCHAR(512) NOT NULL
+          image_url NVARCHAR(MAX) NOT NULL,
+          file_name NVARCHAR(255)
         );
       `);
 
@@ -838,6 +846,15 @@ const initializeDatabase = async () => {
           group_name NVARCHAR(150) NOT NULL,
           display_order INT DEFAULT 0
         );
+      `);
+
+      // Migration: ensure image_url columns can store large base64 strings and file_name column exists
+      await sql.query("ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);");
+      await sql.query("ALTER TABLE bch_members ALTER COLUMN image_url NVARCHAR(MAX);");
+      await sql.query("ALTER TABLE gallery_photos ALTER COLUMN image_url NVARCHAR(MAX);");
+      await sql.query(`
+        IF COL_LENGTH('gallery_photos', 'file_name') IS NULL
+        ALTER TABLE gallery_photos ADD file_name NVARCHAR(255);
       `);
 
       // Seed Admin
