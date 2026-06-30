@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check, Settings } from "lucide-react";
-import { Table, Modal } from "../../../components";
+import { Table, Modal, FormItem } from "../../../components";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -70,10 +70,14 @@ export default function Branches() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert("Thêm phân loại chi đoàn thành công!");
         setNewTypeName("");
         loadData();
       })
-      .catch((err) => console.error("Error adding branch type:", err));
+      .catch((err) => {
+        console.error("Error adding branch type:", err);
+        alert("Có lỗi xảy ra khi thêm phân loại!");
+      });
   };
 
   const handleUpdateType = (id) => {
@@ -86,11 +90,15 @@ export default function Branches() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert("Cập nhật phân loại chi đoàn thành công!");
         setEditingType(null);
         setEditTypeName("");
         loadData();
       })
-      .catch((err) => console.error("Error updating branch type:", err));
+      .catch((err) => {
+        console.error("Error updating branch type:", err);
+        alert("Có lỗi xảy ra khi cập nhật phân loại!");
+      });
   };
 
   const handleDeleteType = (id) => {
@@ -104,9 +112,13 @@ export default function Branches() {
       })
         .then((res) => res.json())
         .then(() => {
+          alert("Xóa phân loại chi đoàn thành công!");
           loadData();
         })
-        .catch((err) => console.error("Error deleting branch type:", err));
+        .catch((err) => {
+          console.error("Error deleting branch type:", err);
+          alert("Có lỗi xảy ra khi xóa phân loại!");
+        });
     }
   };
 
@@ -147,6 +159,7 @@ export default function Branches() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert(editingBranch ? "Cập nhật chi đoàn thành công!" : "Thêm chi đoàn mới thành công!");
         setShowBranchModal(false);
         loadData();
       })
@@ -314,34 +327,26 @@ export default function Branches() {
           </>
         }
       >
-        <div className="form-group">
-          <label className="form-label">Tên chi đoàn *</label>
-          <input
-            type="text"
-            className="form-control"
-            required
-            value={branchForm.name}
-            onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
-            placeholder="Ví dụ: Chi đoàn Thôn Tam Anh 1"
-          />
-        </div>
+        <FormItem
+          label="Tên chi đoàn"
+          type="text"
+          required
+          placeholder="Ví dụ: Chi đoàn Thôn Tam Anh 1"
+          value={branchForm.name}
+          onChange={(val) => setBranchForm({ ...branchForm, name: val })}
+        />
 
-        <div className="form-group">
-          <label className="form-label">Phân loại Chi đoàn *</label>
-          <select
-            className="form-control"
-            required
-            value={branchForm.branchTypeId}
-            onChange={(e) => setBranchForm({ ...branchForm, branchTypeId: e.target.value })}
-          >
-            <option value="" disabled>-- Chọn phân loại chi đoàn --</option>
-            {branchTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FormItem
+          label="Phân loại Chi đoàn"
+          type="select"
+          required
+          value={branchForm.branchTypeId}
+          onChange={(val) => setBranchForm({ ...branchForm, branchTypeId: val })}
+          options={[
+            { value: "", label: "-- Chọn phân loại chi đoàn --" },
+            ...branchTypes.map((type) => ({ value: type.id, label: type.name }))
+          ]}
+        />
       </Modal>
 
       {/* MODAL: MANAGE BRANCH TYPES */}

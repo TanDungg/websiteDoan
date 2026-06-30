@@ -2,18 +2,23 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(2, 132, 199, 0.05);
   background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  transition: var(--transition-normal);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  box-shadow:
+    0 6px 20px rgba(15, 23, 42, 0.04),
+    0 2px 4px rgba(15, 23, 42, 0.02);
 }
 
 .news-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-  border-color: rgba(2, 132, 199, 0.15);
+  transform: translateY(-8px) scale(1.005);
+  box-shadow:
+    0 20px 35px -10px rgba(2, 132, 199, 0.15),
+    0 10px 20px -8px rgba(0, 0, 0, 0.04);
+  border-color: rgba(2, 132, 199, 0.35);
 }
 
 .card-image-wrapper {
@@ -41,8 +46,37 @@
   position: absolute;
   top: 15px;
   left: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   z-index: 1;
+  font-size: 0.72rem !important;
+  padding: 5px 12px !important;
+  border-radius: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-transform: uppercase;
+}
+
+.card-badge.badge-hoat-dong {
+  background-color: rgba(2, 132, 199, 0.88) !important;
+  color: #ffffff !important;
+}
+
+.card-badge.badge-guong-sang {
+  background-color: rgba(217, 119, 6, 0.88) !important;
+  color: #ffffff !important;
+}
+
+.card-badge.badge-thong-bao {
+  background-color: rgba(220, 38, 38, 0.88) !important;
+  color: #ffffff !important;
+}
+
+.card-badge.badge-tin-dia-phuong {
+  background-color: rgba(5, 150, 105, 0.88) !important;
+  color: #ffffff !important;
 }
 
 .card-info {
@@ -68,24 +102,25 @@
 }
 
 .card-title {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   font-family: var(--font-display);
   color: var(--text-main);
-  line-height: 1.45;
+  line-height: 1.4;
   margin-bottom: 12px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 2.9em; /* Ensure fixed height for alignment */
+  height: 1.8em; /* Ensure fixed height for alignment */
 }
 
 .card-title a {
   transition: var(--transition-fast);
+  color: var(--text-main);
 }
 
-.card-title a:hover {
+.news-card:hover .card-title a {
   color: var(--primary);
 }
 

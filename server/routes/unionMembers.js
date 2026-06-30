@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
         email,
         branchId,
         joinDate,
-        status: status || "Sinh hoạt",
+        status: status || "Đoàn viên",
         createdBy,
         createdAt,
       }

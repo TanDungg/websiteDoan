@@ -12,7 +12,6 @@ export default function FormItem({
   rows = 3, // Dành cho kiểu textarea
   style = {}, // Định dạng kiểu CSS tùy biến cho container bao ngoài
   className = "", // Class CSS bổ sung cho thẻ input
-  requiredMark = false, // Nếu true, hiển thị dấu sao màu đỏ. (Thông thường CSS của label đã xử lý, thuộc tính này để điều khiển thủ công khi cần)
   ...restProps // Các thuộc tính thẻ input khác (disabled, min, max, v.v.)
 }) {
   const renderContent = () => {
@@ -75,7 +74,7 @@ export default function FormItem({
       {label && (
         <label className="form-label">
           {label}
-          {required && requiredMark && (
+          {required && (
             <span style={{ color: "red", marginLeft: "4px" }}>*</span>
           )}
         </label>

@@ -9,24 +9,20 @@
 }
 
 .sidebar-widget h4 {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-family: var(--font-display);
   color: var(--text-main);
   margin-bottom: 20px;
   position: relative;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
+  padding-left: 12px;
+  border-left: 4px solid var(--primary);
+  border-bottom: none;
+  padding-bottom: 0;
+  font-weight: 800;
 }
 
 .sidebar-widget h4::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 45px;
-  height: 3px;
-  background-color: var(--primary);
-  border-radius: 1.5px;
+  display: none;
 }
 
 /* Search widget */
@@ -171,8 +167,26 @@
 
 /* Hotline & support widget */
 .support-widget {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
-  border: 1.5px dashed rgba(2, 132, 199, 0.4) !important;
+  background-color: var(--bg-card) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-left: 5px solid var(--primary) !important;
+  padding: 24px 24px 24px 20px !important;
+  box-shadow: var(--shadow-md) !important;
+  position: relative;
+  overflow: hidden;
+  animation: none !important;
+}
+
+.support-widget::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: var(--radius-round);
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.05) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .support-header {
@@ -207,24 +221,39 @@
   justify-content: center;
   gap: 10px;
   padding: 12px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  color: var(--text-white);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: var(--text-white) !important;
   border-radius: var(--radius-md);
   font-weight: 700;
   font-family: var(--font-display);
   font-size: 1.05rem;
   margin-bottom: 15px;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.18);
   transition: var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .hotline-number:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+  transform: translateY(-2.5px);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3);
 }
 
 .support-btn {
   width: 100%;
-  padding: 10px 14px;
-  font-size: 0.85rem;
+  padding: 12px 14px !important;
+  font-size: 0.875rem !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  color: var(--text-white) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.18) !important;
+  border: none !important;
+  transition: var(--transition-fast) !important;
+}
+
+.support-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+  transform: translateY(-2.5px) !important;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3) !important;
 }

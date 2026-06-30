@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, FileText, Check } from "lucide-react";
-import { Table } from "../../../components";
+import { Table, FormItem } from "../../../components";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
@@ -34,6 +34,7 @@ export default function Docs() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert("Đăng tải văn bản mới thành công!");
         setShowDocModal(false);
         setDocForm({
           title: "",
@@ -160,48 +161,36 @@ export default function Docs() {
             </div>
             <form onSubmit={handleDocSubmit} className="modal-form">
               <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Số hiệu văn bản *</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Ví dụ: 15-KH/ĐTN-TA"
-                    required
-                    value={docForm.docNo}
-                    onChange={(e) =>
-                      setDocForm({ ...docForm, docNo: e.target.value })
-                    }
-                  />
-                </div>
+                <FormItem
+                  label="Số hiệu văn bản"
+                  type="text"
+                  required
+                  placeholder="Ví dụ: 15-KH/ĐTN-TA"
+                  value={docForm.docNo}
+                  onChange={(val) => setDocForm({ ...docForm, docNo: val })}
+                />
 
-                <div className="form-group">
-                  <label className="form-label">Tên văn bản / Tài liệu *</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    value={docForm.title}
-                    onChange={(e) =>
-                      setDocForm({ ...docForm, title: e.target.value })
-                    }
-                  />
-                </div>
+                <FormItem
+                  label="Tên văn bản / Tài liệu"
+                  type="text"
+                  required
+                  value={docForm.title}
+                  onChange={(val) => setDocForm({ ...docForm, title: val })}
+                />
 
-                <div className="form-group">
-                  <label className="form-label">Thể loại *</label>
-                  <select
-                    className="form-control"
-                    value={docForm.category}
-                    onChange={(e) =>
-                      setDocForm({ ...docForm, category: e.target.value })
-                    }
-                  >
-                    <option value="Kế hoạch">Kế hoạch</option>
-                    <option value="Nghị quyết">Nghị quyết</option>
-                    <option value="Quyết định">Quyết định</option>
-                    <option value="Hướng dẫn">Hướng dẫn</option>
-                  </select>
-                </div>
+                <FormItem
+                  label="Thể loại"
+                  type="select"
+                  required
+                  value={docForm.category}
+                  onChange={(val) => setDocForm({ ...docForm, category: val })}
+                  options={[
+                    { value: "Kế hoạch", label: "Kế hoạch" },
+                    { value: "Nghị quyết", label: "Nghị quyết" },
+                    { value: "Quyết định", label: "Quyết định" },
+                    { value: "Hướng dẫn", label: "Hướng dẫn" },
+                  ]}
+                />
               </div>
 
               <div className="modal-actions">

@@ -144,10 +144,10 @@ export default function Sidebar() {
           Mọi phản ánh, đề xuất hoạt động của đoàn viên thanh niên và nhân dân
           vui lòng liên hệ trực tiếp:
         </p>
-        <div className="hotline-number">
+        <a href="tel:0905123xxx" className="hotline-number">
           <Phone size={20} />
           <span>0905.123.xxx (Bí thư)</span>
-        </div>
+        </a>
         <div className="support-action">
           <Link to="/lien-he" className="btn btn-primary btn-sm support-btn">
             <MessageSquare size={16} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Edit, Check, Upload, Image, X } from "lucide-react";
 import { newsCategories } from "src/data/mockData";
-import { Table, Modal, RichTextEditor } from "src/components";
+import { Table, Modal, FormItem } from "src/components";
 import { generateUUID } from "src/utils/Commons";
 
 export default function Posts() {
@@ -118,6 +118,11 @@ export default function Posts() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert(
+          editingPost
+            ? "Cập nhật bài viết thành công!"
+            : "Đăng bài viết thành công!",
+        );
         setShowPostModal(false);
         loadPosts();
       })
@@ -259,37 +264,28 @@ export default function Posts() {
           </>
         }
       >
-        <div className="form-group">
-          <label className="form-label">Tiêu đề bài viết *</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Nhập tiêu đề bài viết..."
-            required
-            value={postForm.title}
-            onChange={(e) =>
-              setPostForm({ ...postForm, title: e.target.value })
-            }
-          />
-        </div>
+        <FormItem
+          label="Tiêu đề bài viết"
+          type="text"
+          required
+          placeholder="Nhập tiêu đề bài viết..."
+          value={postForm.title}
+          onChange={(val) => setPostForm({ ...postForm, title: val })}
+        />
 
         <div style={{ display: "flex", gap: "20px" }}>
-          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-            <label className="form-label">Chuyên mục *</label>
-            <select
-              className="form-control"
-              value={postForm.category}
-              onChange={(e) =>
-                setPostForm({ ...postForm, category: e.target.value })
-              }
-            >
-              {newsCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FormItem
+            label="Chuyên mục"
+            type="select"
+            required
+            value={postForm.category}
+            onChange={(val) => setPostForm({ ...postForm, category: val })}
+            options={newsCategories.map((c) => ({
+              value: c.id,
+              label: c.name,
+            }))}
+            style={{ flex: 1, marginBottom: 0 }}
+          />
 
           <div
             className="form-group"
@@ -546,30 +542,24 @@ export default function Posts() {
           </div>
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Tóm tắt *</label>
-          <textarea
-            className="form-control"
-            rows="2"
-            required
-            placeholder="Nhập tóm tắt..."
-            value={postForm.summary}
-            onChange={(e) =>
-              setPostForm({ ...postForm, summary: e.target.value })
-            }
-          ></textarea>
-        </div>
+        <FormItem
+          label="Tóm tắt"
+          type="textarea"
+          rows="2"
+          required
+          placeholder="Nhập tóm tắt..."
+          value={postForm.summary}
+          onChange={(val) => setPostForm({ ...postForm, summary: val })}
+        />
 
-        <div className="form-group">
-          <label className="form-label">
-            Nội dung chi tiết (Trình soạn thảo trực quan) *
-          </label>
-          <RichTextEditor
-            value={postForm.content}
-            onChange={(val) => setPostForm({ ...postForm, content: val })}
-            placeholder="Nhập nội dung bài viết..."
-          />
-        </div>
+        <FormItem
+          label="Nội dung chi tiết (Trình soạn thảo trực quan)"
+          type="editor"
+          required
+          placeholder="Nhập nội dung bài viết..."
+          value={postForm.content}
+          onChange={(val) => setPostForm({ ...postForm, content: val })}
+        />
       </Modal>
     </div>
   );

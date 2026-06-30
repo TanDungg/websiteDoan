@@ -603,7 +603,7 @@ function runMockQuery(queryText, params = {}) {
       email: params.email,
       branch_id: params.branchId,
       join_date: params.joinDate,
-      status: params.status || "Sinh hoạt",
+      status: params.status || "Đoàn viên",
       created_by: params.createdBy || "admin",
       created_at: params.createdAt || new Date().toISOString(),
       updated_by: params.updatedBy || "admin",
@@ -841,7 +841,7 @@ const initializeDatabase = async () => {
             email VARCHAR(100),
             branch_id VARCHAR(50) NOT NULL REFERENCES branches(id) ON DELETE CASCADE,
             join_date VARCHAR(20),
-            status VARCHAR(50) DEFAULT 'Sinh hoạt',
+            status VARCHAR(50) DEFAULT 'Đoàn viên',
             created_by VARCHAR(100),
             created_at VARCHAR(30),
             updated_by VARCHAR(100),
@@ -870,6 +870,13 @@ const initializeDatabase = async () => {
         await addAuditCols("bch_members");
         await addAuditCols("gallery");
         await addAuditCols("gallery_photos");
+
+        // Migrate old statuses to 'Đoàn viên'
+        await client.query(`
+          UPDATE union_members 
+          SET status = 'Đoàn viên' 
+          WHERE status IN ('Sinh hoạt', 'Tạm vắng', 'Đã chuyển sinh hoạt', 'Trưởng thành Đoàn')
+        `);
 
         // Clean display_order from bch_members
         await client.query(
@@ -1195,7 +1202,7 @@ const initializeDatabase = async () => {
           email NVARCHAR(100),
           branch_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES branches(id) ON DELETE CASCADE,
           join_date NVARCHAR(20),
-          status NVARCHAR(50) DEFAULT N'Sinh hoạt',
+          status NVARCHAR(50) DEFAULT N'Đoàn viên',
           created_by NVARCHAR(100),
           created_at NVARCHAR(30),
           updated_by NVARCHAR(100),
@@ -1224,6 +1231,13 @@ const initializeDatabase = async () => {
       await addAuditColsMssql("bch_members");
       await addAuditColsMssql("gallery");
       await addAuditColsMssql("gallery_photos");
+
+      // Migrate old statuses to 'Đoàn viên'
+      await sql.query(`
+        UPDATE union_members 
+        SET status = N'Đoàn viên' 
+        WHERE status IN (N'Sinh hoạt', N'Tạm vắng', N'Đã chuyển sinh hoạt', N'Trưởng thành Đoàn')
+      `);
 
       // Drop display_order from bch_members (safely handling default constraint)
       await sql.query(`

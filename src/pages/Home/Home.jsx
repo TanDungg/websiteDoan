@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Compass,
-  Heart,
-  BookOpen,
-  Image,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Image } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import { galleryList } from "../../data/mockData";
@@ -76,13 +69,18 @@ export default function Home() {
                   backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.75)), url(${news.imageUrl})`,
                 }}
               >
-                <div className="slide-content container">
-                  <span className="slide-tag">Tin nổi bật</span>
-                  <h2 className="slide-title">{news.title}</h2>
-                  <p className="slide-summary">{news.summary}</p>
-                  <Link to={`/tin-tuc/${news.id}`} className="btn btn-primary">
-                    Xem bài viết
-                  </Link>
+                <div className="container">
+                  <div className="slide-content-card">
+                    <span className="slide-tag">Tin nổi bật</span>
+                    <h2 className="slide-title">{news.title}</h2>
+                    <p className="slide-summary">{news.summary}</p>
+                    <Link
+                      to={`/tin-tuc/${news.id}`}
+                      className="btn btn-primary"
+                    >
+                      Xem bài viết
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
@@ -117,40 +115,6 @@ export default function Home() {
           )}
         </section>
       )}
-
-      {/* Core Values / Introduction Cards */}
-      <section className="core-values container">
-        <div className="value-card card">
-          <div className="value-icon-wrapper blue">
-            <Compass size={28} />
-          </div>
-          <h3>Xung kích</h3>
-          <p>
-            Luôn đi đầu trong mọi phong trào, hoạt động cộng đồng, sẵn sàng đảm
-            nhận việc khó khăn.
-          </p>
-        </div>
-        <div className="value-card card">
-          <div className="value-icon-wrapper red">
-            <Heart size={28} />
-          </div>
-          <h3>Tình nguyện</h3>
-          <p>
-            Cống hiến sức trẻ vì sự an sinh xã hội, giúp đỡ các gia đình chính
-            sách và trẻ em nghèo.
-          </p>
-        </div>
-        <div className="value-card card">
-          <div className="value-icon-wrapper gold">
-            <BookOpen size={28} />
-          </div>
-          <h3>Sáng tạo</h3>
-          <p>
-            Khơi nguồn các mô hình kinh tế, áp dụng công nghệ chuyển đổi số vào
-            hoạt động Đoàn.
-          </p>
-        </div>
-      </section>
 
       {/* Main Layout Grid */}
       <div className="container main-layout">

@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { FormItem } from "../../../components";
 
 export default function Gallery() {
   const [gallery, setGallery] = useState([]);
@@ -144,6 +145,7 @@ export default function Gallery() {
       })
         .then((res) => res.json())
         .then(() => {
+          alert("Xóa album thành công!");
           loadGallery();
         })
         .catch((err) => {
@@ -299,18 +301,14 @@ export default function Gallery() {
                 hoạt động.
               </p>
 
-              <div className="form-group">
-                <label className="form-label">
-                  Tiêu đề chung cho bộ ảnh (Tùy chọn)
-                </label>
-                <input
-                  type="text"
-                  className="form-control gallery-title-input"
-                  placeholder="Ví dụ: Lễ ra quân chiến dịch Hè tình nguyện 2026"
-                  value={galleryTitle}
-                  onChange={(e) => setGalleryTitle(e.target.value)}
-                />
-              </div>
+              <FormItem
+                label="Tiêu đề chung cho bộ ảnh (Tùy chọn)"
+                type="text"
+                className="gallery-title-input"
+                placeholder="Ví dụ: Lễ ra quân chiến dịch Hè tình nguyện 2026"
+                value={galleryTitle}
+                onChange={(val) => setGalleryTitle(val)}
+              />
 
               <div
                 className="upload-zone-card"

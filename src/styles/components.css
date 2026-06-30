@@ -181,9 +181,9 @@
   height: 100vh;
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 24px;
+  padding: 60px 24px 24px;
   animation: overlayFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -273,7 +273,6 @@
   scrollbar-width: thin;
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .modal-actions,
@@ -294,6 +293,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
+  margin-bottom: 24px;
 }
 
 .form-label {

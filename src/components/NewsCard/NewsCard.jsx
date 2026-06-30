@@ -4,6 +4,53 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import { newsCategories } from '../../data/mockData';
 import './NewsCard.css';
 
+const getCleanSummary = (text) => {
+  if (!text) return "";
+  
+  let cleaned = text.trim();
+  
+  // Detect JSON
+  if (cleaned.startsWith("{") || cleaned.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(cleaned);
+      const textParts = [];
+      const extractText = (val) => {
+        if (typeof val === "string") {
+          // Skip UUIDs and database keys
+          if (val.length > 5 && !val.match(/^[a-f0-9-]{36}$/i)) {
+            textParts.push(val);
+          }
+        } else if (Array.isArray(val)) {
+          val.forEach(extractText);
+        } else if (val && typeof val === "object") {
+          Object.values(val).forEach(extractText);
+        }
+      };
+      extractText(parsed);
+      if (textParts.length > 0) {
+        cleaned = textParts.join(" ");
+      }
+    } catch (e) {
+      // ignore parse error
+    }
+  }
+
+  // Strip HTML
+  cleaned = cleaned.replace(/<[^>]*>/g, "");
+  
+  // Clean JSON characters
+  if (cleaned.includes("{") || cleaned.includes("[")) {
+    cleaned = cleaned.replace(/[{}"[\]]/g, " ");
+    cleaned = cleaned.replace(/\b[a-zA-Z0-9_]+:/g, " ");
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+  }
+
+  if (cleaned.length > 160) {
+    return cleaned.slice(0, 160) + "...";
+  }
+  return cleaned;
+};
+
 export default function NewsCard({ news }) {
   const { id, title, summary, imageUrl, date, author, category } = news;
   const navigate = useNavigate();
@@ -13,6 +60,7 @@ export default function NewsCard({ news }) {
 
   // Format date display (DD/MM/YYYY)
   const formatDate = (dateStr) => {
+    if (!dateStr) return "";
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${year}`;
   };
@@ -40,7 +88,7 @@ export default function NewsCard({ news }) {
           <Link to={`/tin-tuc/${id}`}>{title}</Link>
         </h3>
         
-        <p className="card-summary">{summary}</p>
+        <p className="card-summary">{getCleanSummary(summary)}</p>
         
         <Link to={`/tin-tuc/${id}`} className="card-link">
           <span>Xem chi tiết</span>

@@ -1,5 +1,5 @@
 .contact-page {
-  padding-top: 40px;
+  padding-top: 30px;
   padding-bottom: 60px;
 }
 
@@ -11,7 +11,7 @@
 
 @media (min-width: 992px) {
   .contact-grid {
-    grid-template-columns: 1fr 1.2fr;
+    grid-template-columns: 1fr 1.25fr;
   }
 }
 
@@ -27,74 +27,215 @@
   gap: 20px;
 }
 
-@media (min-width: 600px) {
-  .info-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* Base styling for contact card */
 .contact-card-info {
-  padding: 20px;
+  padding: 24px;
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 16px;
   background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  border-left: 5px solid var(--accent-color);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-card-info:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.05), 0 8px 15px -5px rgba(0, 0, 0, 0.02);
+  border-color: var(--accent-color);
+  background-color: var(--accent-light);
 }
 
 .contact-card-info .card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-round);
-  background-color: var(--primary-light);
-  color: var(--primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--accent-light);
+  color: var(--accent-color);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   padding: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-card-info:hover .card-icon {
+  background: var(--accent-color);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
 }
 
 .contact-card-info h3 {
   font-size: 0.95rem;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--text-main);
+  font-family: var(--font-display);
 }
 
-.contact-card-info p {
+/* Detail content hierarchy */
+.card-info-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-card-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.contact-card-line {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 0.85rem;
+  line-height: 1.4;
   color: var(--text-muted);
-  line-height: 1.5;
+}
+
+.contact-card-line .divider {
+  color: var(--text-muted);
+  opacity: 0.4;
+  margin: 0 2px;
+  user-select: none;
+}
+
+.contact-card-line .label {
+  font-weight: 500;
+  color: var(--text-muted);
+  opacity: 0.85;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.contact-card-line .val {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
+.contact-card-line .text-highlight {
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+/* Email link special styling and wrapping */
+.contact-card-line .email-val {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  word-break: break-all;
+  white-space: normal;
+  display: inline-block;
+  max-width: 100%;
+  text-decoration: none;
+}
+
+/* Anchor links visual styles */
+.contact-card-line a.val {
+  color: var(--text-main);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.contact-card-line a.val::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 1px;
+  background-color: var(--accent-color);
+  transition: width 0.2s ease;
+}
+
+.contact-card-info:hover .contact-card-line a.val::after {
+  width: 100%;
+}
+
+.contact-card-line a.val:hover {
+  color: var(--accent-color);
+}
+
+/* Themes for each card type */
+.contact-card-info.address-card {
+  --accent-color: #0284c7;
+  --accent-light: rgba(2, 132, 199, 0.05);
+}
+
+.contact-card-info.phone-card {
+  --accent-color: #10b981;
+  --accent-light: rgba(16, 185, 129, 0.05);
+}
+
+.contact-card-info.email-card {
+  --accent-color: #f59e0b;
+  --accent-light: rgba(245, 158, 11, 0.05);
+}
+
+.contact-card-info.worktime-card {
+  --accent-color: #6366f1;
+  --accent-light: rgba(99, 102, 241, 0.05);
 }
 
 /* Map Styling */
 .map-wrapper {
-  padding: 10px;
+  padding: 12px;
   background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.map-wrapper:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(2, 132, 199, 0.15);
 }
 
 .map-wrapper iframe {
   border-radius: var(--radius-md);
+  display: block;
 }
 
 /* Form Styling */
 .contact-form-column {
   padding: 40px;
   background-color: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.contact-form-column:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
 }
 
 .contact-form-column h2 {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: var(--primary);
   margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
 }
 
 .form-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.925rem;
   color: var(--text-muted);
   margin-bottom: 30px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .form-row-double {
@@ -106,15 +247,37 @@
 @media (min-width: 600px) {
   .form-row-double {
     grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 }
 
-
-
 .submit-form-btn {
   width: 100%;
-  padding: 12px 20px;
+  padding: 14px 24px;
   margin-top: 15px;
+  background: linear-gradient(135deg, var(--primary), #0284c7);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-form-btn:hover {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3);
+}
+
+.submit-form-btn:active {
+  transform: translateY(0);
 }
 
 /* Success submit state */

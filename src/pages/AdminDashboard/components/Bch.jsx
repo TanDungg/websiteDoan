@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check } from "lucide-react";
-import { Table } from "../../../components";
+import { Table, FormItem } from "../../../components";
 
 export default function Bch() {
   const [bchMembers, setBchMembers] = useState([]);
@@ -77,6 +77,7 @@ export default function Bch() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert(editingMember ? "Cập nhật thành viên BCH thành công!" : "Thêm thành viên BCH mới thành công!");
         setShowMemberModal(false);
         loadBch();
       })
@@ -257,58 +258,40 @@ export default function Bch() {
             </div>
             <form onSubmit={handleMemberSubmit} className="modal-form">
               <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Họ và tên *</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    value={memberForm.name}
-                    onChange={(e) =>
-                      setMemberForm({ ...memberForm, name: e.target.value })
-                    }
-                  />
-                </div>
+                <FormItem
+                  label="Họ và tên"
+                  type="text"
+                  required
+                  value={memberForm.name}
+                  onChange={(val) => setMemberForm({ ...memberForm, name: val })}
+                />
 
-                <div className="form-group">
-                  <label className="form-label">Chức danh / Chức vụ *</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    placeholder="Ví dụ: Bí thư Đoàn xã"
-                    value={memberForm.position}
-                    onChange={(e) =>
-                      setMemberForm({ ...memberForm, position: e.target.value })
-                    }
-                  />
-                </div>
+                <FormItem
+                  label="Chức danh / Chức vụ"
+                  type="text"
+                  required
+                  placeholder="Ví dụ: Bí thư Đoàn xã"
+                  value={memberForm.position}
+                  onChange={(val) => setMemberForm({ ...memberForm, position: val })}
+                />
 
                 <div className="row" style={{ display: "flex", gap: "15px" }}>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Số điện thoại *</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      required
-                      value={memberForm.phone}
-                      onChange={(e) =>
-                        setMemberForm({ ...memberForm, phone: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Email *</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      required
-                      value={memberForm.email}
-                      onChange={(e) =>
-                        setMemberForm({ ...memberForm, email: e.target.value })
-                      }
-                    />
-                  </div>
+                  <FormItem
+                    label="Số điện thoại"
+                    type="text"
+                    required
+                    value={memberForm.phone}
+                    onChange={(val) => setMemberForm({ ...memberForm, phone: val })}
+                    style={{ flex: 1 }}
+                  />
+                  <FormItem
+                    label="Email"
+                    type="email"
+                    required
+                    value={memberForm.email}
+                    onChange={(val) => setMemberForm({ ...memberForm, email: val })}
+                    style={{ flex: 1 }}
+                  />
                 </div>
 
                 <div className="form-group">
@@ -348,39 +331,22 @@ export default function Bch() {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">
-                    Phân công nhiệm vụ / Trách nhiệm
-                  </label>
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    placeholder="Ví dụ: Phụ trách chung, Chỉ đạo toàn diện công tác Đoàn và phong trào thanh thiếu nhi xã..."
-                    value={memberForm.responsibility}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        responsibility: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+                <FormItem
+                  label="Phân công nhiệm vụ / Trách nhiệm"
+                  type="textarea"
+                  rows="2"
+                  placeholder="Ví dụ: Phụ trách chung, Chỉ đạo toàn diện công tác Đoàn và phong trào thanh thiếu nhi xã..."
+                  value={memberForm.responsibility}
+                  onChange={(val) => setMemberForm({ ...memberForm, responsibility: val })}
+                />
 
-                <div className="form-group">
-                  <label className="form-label">Thứ tự hiển thị *</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    required
-                    value={memberForm.displayOrder}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        displayOrder: parseInt(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
+                <FormItem
+                  label="Thứ tự hiển thị"
+                  type="number"
+                  required
+                  value={memberForm.displayOrder}
+                  onChange={(val) => setMemberForm({ ...memberForm, displayOrder: parseInt(val) || 0 })}
+                />
               </div>
 
               <div className="modal-actions">

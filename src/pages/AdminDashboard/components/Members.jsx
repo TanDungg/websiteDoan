@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check, Calendar, Phone, Mail, Clock } from "lucide-react";
-import { Table, Modal } from "../../../components";
+import { Table, Modal, FormItem } from "../../../components";
 
 export default function Members() {
   const [members, setMembers] = useState([]);
@@ -14,7 +14,7 @@ export default function Members() {
     email: "",
     branchId: "",
     joinDate: "",
-    status: "Sinh hoạt",
+    status: "Đoàn viên",
   });
 
   const loadData = () => {
@@ -53,7 +53,7 @@ export default function Members() {
         email: member.email || "",
         branchId: member.branch_id || "",
         joinDate: member.join_date || "",
-        status: member.status || "Sinh hoạt",
+        status: member.status || "Đoàn viên",
       });
     } else {
       setEditingMember(null);
@@ -64,7 +64,7 @@ export default function Members() {
         email: "",
         branchId: branches[0]?.id || "",
         joinDate: new Date().toISOString().split("T")[0],
-        status: "Sinh hoạt",
+        status: "Đoàn viên",
       });
     }
     setShowMemberModal(true);
@@ -89,6 +89,7 @@ export default function Members() {
     })
       .then((res) => res.json())
       .then(() => {
+        alert(editingMember ? "Cập nhật thông tin đoàn viên thành công!" : "Tiếp nhận đoàn viên thành công!");
         setShowMemberModal(false);
         loadData();
       })
@@ -163,7 +164,7 @@ export default function Members() {
       ),
     },
     {
-      title: "Trạng thái",
+      title: "Chức vụ",
       dataIndex: "status",
       key: "status",
       width: "15%",
@@ -171,15 +172,18 @@ export default function Members() {
         let badgeBg = "#ebf8ff";
         let badgeColor = "#2b6cb0";
 
-        if (status === "Trưởng thành Đoàn") {
-          badgeBg = "#f0fff4";
-          badgeColor = "#2f855a";
-        } else if (status === "Tạm vắng") {
+        if (status === "Bí thư") {
+          badgeBg = "#fed7d7";
+          badgeColor = "#c53030";
+        } else if (status === "Phó Bí thư") {
           badgeBg = "#feebc8";
           badgeColor = "#c05621";
-        } else if (status === "Đã chuyển sinh hoạt") {
-          badgeBg = "#edf2f7";
+        } else if (status === "Ủy viên") {
+          badgeBg = "#e2e8f0";
           badgeColor = "#4a5568";
+        } else if (status === "Đoàn viên") {
+          badgeBg = "#f0fff4";
+          badgeColor = "#2f855a";
         }
 
         return (
@@ -289,93 +293,78 @@ export default function Members() {
           </>
         }
       >
-        <div className="form-group">
-          <label className="form-label">Họ và tên đoàn viên *</label>
-          <input
-            type="text"
-            className="form-control"
-            required
-            value={memberForm.name}
-            onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
-            placeholder="Ví dụ: Nguyễn Văn A"
+        <FormItem
+          label="Họ và tên đoàn viên"
+          type="text"
+          required
+          placeholder="Ví dụ: Nguyễn Văn A"
+          value={memberForm.name}
+          onChange={(val) => setMemberForm({ ...memberForm, name: val })}
+        />
+
+        <div style={{ display: "flex", gap: "15px" }}>
+          <FormItem
+            label="Ngày sinh"
+            type="date"
+            value={memberForm.dob}
+            onChange={(val) => setMemberForm({ ...memberForm, dob: val })}
+            style={{ flex: 1 }}
+          />
+          <FormItem
+            label="Ngày vào Đoàn"
+            type="date"
+            value={memberForm.joinDate}
+            onChange={(val) => setMemberForm({ ...memberForm, joinDate: val })}
+            style={{ flex: 1 }}
           />
         </div>
 
         <div style={{ display: "flex", gap: "15px" }}>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Ngày sinh</label>
-            <input
-              type="date"
-              className="form-control"
-              value={memberForm.dob}
-              onChange={(e) => setMemberForm({ ...memberForm, dob: e.target.value })}
-            />
-          </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Ngày vào Đoàn</label>
-            <input
-              type="date"
-              className="form-control"
-              value={memberForm.joinDate}
-              onChange={(e) => setMemberForm({ ...memberForm, joinDate: e.target.value })}
-            />
-          </div>
+          <FormItem
+            label="Số điện thoại"
+            type="text"
+            placeholder="Ví dụ: 0905xxxxxx"
+            value={memberForm.phone}
+            onChange={(val) => setMemberForm({ ...memberForm, phone: val })}
+            style={{ flex: 1 }}
+          />
+          <FormItem
+            label="Email"
+            type="email"
+            placeholder="Vi dụ: nguyenvana@gmail.com"
+            value={memberForm.email}
+            onChange={(val) => setMemberForm({ ...memberForm, email: val })}
+            style={{ flex: 1 }}
+          />
         </div>
 
         <div style={{ display: "flex", gap: "15px" }}>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Số điện thoại</label>
-            <input
-              type="text"
-              className="form-control"
-              value={memberForm.phone}
-              onChange={(e) => setMemberForm({ ...memberForm, phone: e.target.value })}
-              placeholder="Ví dụ: 0905xxxxxx"
-            />
-          </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              value={memberForm.email}
-              onChange={(e) => setMemberForm({ ...memberForm, email: e.target.value })}
-              placeholder="Vi dụ: nguyenvana@gmail.com"
-            />
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: "15px" }}>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Chi đoàn sinh hoạt *</label>
-            <select
-              className="form-control"
-              required
-              value={memberForm.branchId}
-              onChange={(e) => setMemberForm({ ...memberForm, branchId: e.target.value })}
-            >
-              <option value="" disabled>-- Chọn Chi đoàn --</option>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Trạng thái sinh hoạt *</label>
-            <select
-              className="form-control"
-              required
-              value={memberForm.status}
-              onChange={(e) => setMemberForm({ ...memberForm, status: e.target.value })}
-            >
-              <option value="Sinh hoạt">Sinh hoạt</option>
-              <option value="Tạm vắng">Tạm vắng</option>
-              <option value="Đã chuyển sinh hoạt">Đã chuyển sinh hoạt</option>
-              <option value="Trưởng thành Đoàn">Trưởng thành Đoàn</option>
-            </select>
-          </div>
+          <FormItem
+            label="Chi đoàn sinh hoạt"
+            type="select"
+            required
+            value={memberForm.branchId}
+            onChange={(val) => setMemberForm({ ...memberForm, branchId: val })}
+            options={[
+              { value: "", label: "-- Chọn Chi đoàn --" },
+              ...branches.map((b) => ({ value: b.id, label: b.name }))
+            ]}
+            style={{ flex: 1 }}
+          />
+          <FormItem
+            label="Chức vụ"
+            type="select"
+            required
+            value={memberForm.status}
+            onChange={(val) => setMemberForm({ ...memberForm, status: val })}
+            options={[
+              { value: "Đoàn viên", label: "Đoàn viên" },
+              { value: "Ủy viên", label: "Ủy viên" },
+              { value: "Phó Bí thư", label: "Phó Bí thư" },
+              { value: "Bí thư", label: "Bí thư" }
+            ]}
+            style={{ flex: 1 }}
+          />
         </div>
       </Modal>
     </div>
