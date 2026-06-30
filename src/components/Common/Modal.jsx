@@ -31,11 +31,22 @@ export default function Modal({
   const sizeClass = size ? `modal-${size}` : "";
   const containerStyle = maxWidth ? { maxWidth } : {};
 
-  // Đóng modal khi click vào vùng overlay bên ngoài (không click vào thân modal)
-  const handleOverlayClick = (e) => {
-    if (e.target.classList.contains("modal-overlay") && onClose) {
+  // Đóng modal khi click vào vùng overlay bên ngoài (tránh tự đóng khi bôi đen kéo chuột ra ngoài)
+  let clickStartedOnOverlay = false;
+
+  const handleMouseDown = (e) => {
+    clickStartedOnOverlay = e.target.classList.contains("modal-overlay");
+  };
+
+  const handleMouseUp = (e) => {
+    if (
+      clickStartedOnOverlay &&
+      e.target.classList.contains("modal-overlay") &&
+      onClose
+    ) {
       onClose();
     }
+    clickStartedOnOverlay = false;
   };
 
   const modalContent = (
@@ -67,7 +78,11 @@ export default function Modal({
   );
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
+    <div
+      className="modal-overlay"
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    >
       {modalContent}
     </div>
   );
