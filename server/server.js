@@ -22,16 +22,16 @@ app.use("/uploads", express.static(uploadsPath));
 
 // API Routers Mount
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api/posts", require("./routes/posts"));
-app.use("/api/documents", require("./routes/documents"));
-app.use("/api/feedbacks", require("./routes/feedbacks"));
-app.use("/api/bch-members", require("./routes/bch"));
-app.use("/api/intro", require("./routes/intro"));
-app.use("/api/branches", require("./routes/branches"));
-app.use("/api/branch-types", require("./routes/branchTypes"));
-app.use("/api/union-members", require("./routes/unionMembers"));
+app.use("/api/baiViet", require("./routes/baiViet"));
+app.use("/api/vanBan", require("./routes/vanBan"));
+app.use("/api/gopY", require("./routes/gopY"));
+app.use("/api/thanhVienBch", require("./routes/thanhVienBch"));
+app.use("/api/gioiThieu", require("./routes/gioiThieu"));
+app.use("/api/chiDoan", require("./routes/chiDoan"));
+app.use("/api/loaiChiDoan", require("./routes/loaiChiDoan"));
+app.use("/api/doanVien", require("./routes/doanVien"));
 app.use("/api/upload", require("./routes/upload"));
-app.use("/api/gallery", require("./routes/gallery"));
+app.use("/api/albumAnh", require("./routes/albumAnh"));
 
 // Serve static React build in production
 const distPath = path.join(__dirname, "../dist");

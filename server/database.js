@@ -11,14 +11,6 @@ console.log(
 // --- PostgreSQL Pool Setup ---
 let pgPool = null;
 if (isPg) {
-  try {
-    const connStr = process.env.DATABASE_URL;
-    const maskConnStr = connStr.replace(/:([^:@]+)@/, ":******@");
-    console.log(`[DB Connection String]: ${maskConnStr}`);
-  } catch (e) {
-    console.warn("Failed to print connection string debug info");
-  }
-
   pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl:
@@ -36,29 +28,13 @@ const sqlConfig = {
   server: process.env.DB_SERVER || "localhost",
   database: process.env.DB_NAME || "tamanh_youth",
   options: {
-    encrypt: false, // Set to true if using Azure
-    trustServerCertificate: true, // Required for local development
+    encrypt: false,
+    trustServerCertificate: true,
   },
 };
 
-// Seeding Data definitions
-const mockAdmin = { username: "admin", password: "admin123" };
-
-const mockPosts = [];
-
-const mockDocs = [];
-
-const mockBchMembers = [];
-
-const mockBranches = [];
-
-const mockIntroSettings = {
-  id: 1,
-  historyContent: "",
-  statMembers: "0",
-  statBranches: "0",
-  branchesContent: "",
-};
+// Seed admin default
+const mockAdmin = { tenDangNhap: "admin", matKhau: "admin123" };
 
 // --- Mock Database Store ---
 let useMockDb = false;
@@ -66,609 +42,183 @@ let mockDbStore = null;
 
 function initMockDbStore() {
   mockDbStore = {
-    admins: [mockAdmin],
-    posts: mockPosts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      summary: p.summary,
-      content: p.content,
-      category: p.category,
-      image_url: p.imageUrl,
-      date: p.date,
-      author: p.author,
-      views: p.views || 0,
-      is_hot: p.isHot ? 1 : 0,
-    })),
-    documents: mockDocs.map((d) => ({
-      id: d.id,
-      title: d.title,
-      doc_no: d.docNo,
-      date: d.date,
-      category: d.category,
-      file_url: d.fileUrl,
-    })),
-    feedbacks: [],
+    taiKhoanAdmin: [mockAdmin],
+    baiViet: [],
+    vanBan: [],
+    gopY: [],
     intro: {
-      id: mockIntroSettings.id,
-      history_content: mockIntroSettings.historyContent,
-      stat_members: mockIntroSettings.statMembers,
-      stat_branches: mockIntroSettings.statBranches,
-      branches_content: mockIntroSettings.branchesContent,
+      id: 1,
+      lichSu: "",
+      soLuongDoanVien: "0",
+      soLuongChiDoan: "0",
+      thongTinChiDoan: "",
     },
-    bchMembers: mockBchMembers.map((m) => ({
-      id: m.id,
-      name: m.name,
-      position: m.position,
-      email: m.email,
-      phone: m.phone,
-      image_url: m.imageUrl,
-      responsibility: m.responsibility,
-      created_by: m.createdBy || "admin",
-      created_at: m.createdAt || new Date().toISOString(),
-      updated_by: m.updatedBy || "admin",
-      updated_at: m.updatedAt || new Date().toISOString(),
-    })),
-    gallery: [],
-    galleryPhotos: [],
-    branchTypes: [],
-    branches: [],
-    unionMembers: [],
+    thanhVienBch: [],
+    albumAnh: [],
+    anhAlbum: [],
+    loaiChiDoan: [],
+    chiDoan: [],
+    doanVien: [],
   };
 }
 
 function runMockQuery(queryText, params = {}) {
-  const normalizedQuery = queryText.replace(/\s+/g, " ").trim();
+  const normalized = queryText.replace(/\s+/g, " ").trim();
+  const tblMatch = 
+    queryText.match(/FROM\s+"(\w+)"/i)?.[1] || 
+    queryText.match(/INTO\s+"(\w+)"/i)?.[1] || 
+    queryText.match(/UPDATE\s+"(\w+)"/i)?.[1] || 
+    queryText.match(/DELETE\s+FROM\s+"(\w+)"/i)?.[1];
 
-  // 1. Authenticate admins
-  if (normalizedQuery.includes("FROM admins")) {
-    const user = mockDbStore.admins.find(
-      (u) => u.username === params.username && u.password === params.password,
-    );
-    return { rows: user ? [user] : [], rowCount: user ? 1 : 0 };
+  if (!tblMatch || !mockDbStore[tblMatch]) {
+    // If it's a count query or special query
+    if (normalized.includes("COUNT(*) AS count FROM \"chiDoan\"")) {
+      return { rows: [{ count: mockDbStore.chiDoan.length }], rowCount: 1 };
+    }
+    if (normalized.includes("COUNT(*) AS count FROM \"doanVien\"")) {
+      return { rows: [{ count: mockDbStore.doanVien.length }], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 0 };
   }
 
-  // 2. Select posts
-  if (
-    normalizedQuery.includes("FROM posts") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    let list = [...mockDbStore.posts];
+  const table = mockDbStore[tblMatch];
+
+  // 1. SELECT queries
+  if (normalized.startsWith("SELECT")) {
+    if (tblMatch === "taiKhoanAdmin") {
+      const user = table.find(
+        (u) => u.tenDangNhap === params.tenDangNhap && u.matKhau === params.matKhau
+      );
+      return { rows: user ? [user] : [], rowCount: user ? 1 : 0 };
+    }
+
+    if (tblMatch === "intro") {
+      return { rows: [table], rowCount: 1 };
+    }
+
+    let list = [...table];
+
+    // Filter by ID
     if (params.id !== undefined) {
-      list = list.filter((p) => String(p.id) === String(params.id));
+      list = list.filter((item) => String(item.id) === String(params.id));
     }
-    if (params.category !== undefined) {
-      list = list.filter((p) => p.category === params.category);
-    }
-    if (params.search !== undefined) {
-      const searchTerm = params.search.replace(/%/g, "").toLowerCase();
-      list = list.filter(
-        (p) =>
-          (p.title && p.title.toLowerCase().includes(searchTerm)) ||
-          (p.summary && p.summary.toLowerCase().includes(searchTerm)),
-      );
-    }
-    // Sort by date DESC
-    list.sort((a, b) => {
-      const da = a.date || "";
-      const db = b.date || "";
-      return db.localeCompare(da);
-    });
-    return { rows: list, rowCount: list.length };
-  }
 
-  // 3. Update posts views
-  if (normalizedQuery.includes("UPDATE posts SET views = views + 1")) {
-    const post = mockDbStore.posts.find(
-      (p) => String(p.id) === String(params.id),
-    );
-    if (post) {
-      post.views = (post.views || 0) + 1;
-    }
-    return { rows: [], rowCount: post ? 1 : 0 };
-  }
-
-  // 4. Insert into posts
-  if (normalizedQuery.includes("INSERT INTO posts")) {
-    const newPost = {
-      id: params.id,
-      title: params.title,
-      summary: params.summary,
-      content: params.content,
-      category: params.category,
-      image_url: params.imageUrl,
-      author: params.author,
-      date: params.date,
-      views: 0,
-      is_hot: params.isHot ? 1 : 0,
-    };
-    mockDbStore.posts.push(newPost);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 5. Update posts general
-  if (normalizedQuery.startsWith("UPDATE posts")) {
-    const post = mockDbStore.posts.find(
-      (p) => String(p.id) === String(params.id),
-    );
-    if (post) {
-      post.title = params.title;
-      post.summary = params.summary;
-      post.content = params.content;
-      post.category = params.category;
-      post.image_url = params.imageUrl;
-      post.author = params.author;
-      post.is_hot = params.isHot ? 1 : 0;
-    }
-    return { rows: [], rowCount: post ? 1 : 0 };
-  }
-
-  // 6. Delete from posts
-  if (normalizedQuery.includes("DELETE FROM posts")) {
-    const originalLength = mockDbStore.posts.length;
-    mockDbStore.posts = mockDbStore.posts.filter(
-      (p) => String(p.id) !== String(params.id),
-    );
-    return { rows: [], rowCount: originalLength - mockDbStore.posts.length };
-  }
-
-  // 7. Select documents
-  if (
-    normalizedQuery.includes("FROM documents") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    let list = [...mockDbStore.documents];
-    list.sort((a, b) => {
-      const da = a.date || "";
-      const db = b.date || "";
-      return db.localeCompare(da);
-    });
-    return { rows: list, rowCount: list.length };
-  }
-
-  // 8. Insert into documents
-  if (normalizedQuery.includes("INSERT INTO documents")) {
-    const newDoc = {
-      id: params.id,
-      title: params.title,
-      doc_no: params.docNo,
-      date: params.date,
-      category: params.category,
-      file_url: params.fileUrl,
-    };
-    mockDbStore.documents.push(newDoc);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 9. Delete from documents
-  if (normalizedQuery.includes("DELETE FROM documents")) {
-    const originalLength = mockDbStore.documents.length;
-    mockDbStore.documents = mockDbStore.documents.filter(
-      (d) => String(d.id) !== String(params.id),
-    );
-    return {
-      rows: [],
-      rowCount: originalLength - mockDbStore.documents.length,
-    };
-  }
-
-  // 10. Select feedbacks
-  if (
-    normalizedQuery.includes("FROM feedbacks") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    let list = [...mockDbStore.feedbacks];
-    list.sort((a, b) => {
-      const da = a.date || "";
-      const db = b.date || "";
-      return db.localeCompare(da);
-    });
-    return { rows: list, rowCount: list.length };
-  }
-
-  // 11. Insert into feedbacks
-  if (normalizedQuery.includes("INSERT INTO feedbacks")) {
-    const newFeedback = {
-      id: params.id,
-      full_name: params.fullName,
-      phone: params.phone,
-      email: params.email,
-      unit: params.unit,
-      subject: params.subject,
-      message: params.message,
-      date: params.date,
-    };
-    mockDbStore.feedbacks.push(newFeedback);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 12. Delete from feedbacks
-  if (normalizedQuery.includes("DELETE FROM feedbacks")) {
-    const originalLength = mockDbStore.feedbacks.length;
-    mockDbStore.feedbacks = mockDbStore.feedbacks.filter(
-      (f) => String(f.id) !== String(params.id),
-    );
-    return {
-      rows: [],
-      rowCount: originalLength - mockDbStore.feedbacks.length,
-    };
-  }
-
-  // 13. Select bch_members
-  if (
-    normalizedQuery.includes("FROM bch_members") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    const list = [...mockDbStore.bchMembers];
-    list.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-    return { rows: list, rowCount: list.length };
-  }
-
-  // 14. Insert into bch_members
-  if (normalizedQuery.includes("INSERT INTO bch_members")) {
-    const newMember = {
-      id: params.id,
-      name: params.name,
-      position: params.position,
-      email: params.email,
-      phone: params.phone,
-      image_url: params.imageUrl,
-      responsibility: params.responsibility,
-      display_order: parseInt(params.displayOrder) || 0,
-    };
-    mockDbStore.bchMembers.push(newMember);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 15. Update bch_members
-  if (normalizedQuery.startsWith("UPDATE bch_members")) {
-    const member = mockDbStore.bchMembers.find(
-      (m) => String(m.id) === String(params.id),
-    );
-    if (member) {
-      member.name = params.name;
-      member.position = params.position;
-      member.email = params.email;
-      member.phone = params.phone;
-      member.image_url = params.imageUrl;
-      member.responsibility = params.responsibility;
-      member.display_order = parseInt(params.displayOrder) || 0;
-    }
-    return { rows: [], rowCount: member ? 1 : 0 };
-  }
-
-  // 16. Delete from bch_members
-  if (normalizedQuery.includes("DELETE FROM bch_members")) {
-    const originalLength = mockDbStore.bchMembers.length;
-    mockDbStore.bchMembers = mockDbStore.bchMembers.filter(
-      (m) => String(m.id) !== String(params.id),
-    );
-    return {
-      rows: [],
-      rowCount: originalLength - mockDbStore.bchMembers.length,
-    };
-  }
-
-  // 17. Select intro_settings
-  if (
-    normalizedQuery.includes("FROM intro_settings") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    return { rows: [mockDbStore.intro], rowCount: 1 };
-  }
-
-  // 18. Update intro_settings
-  if (normalizedQuery.startsWith("UPDATE intro_settings")) {
-    mockDbStore.intro.history_content = params.historyContent;
-    mockDbStore.intro.stat_members = params.statMembers;
-    mockDbStore.intro.stat_branches = params.statBranches;
-    mockDbStore.intro.branches_content = params.branchesContent;
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 19. Select gallery (Relational join)
-  if (
-    normalizedQuery.includes("from gallery g left join gallery_photos gp") ||
-    normalizedQuery.includes("from gallery")
-  ) {
-    const list = [];
-    mockDbStore.gallery.forEach((g) => {
-      const photos = mockDbStore.galleryPhotos.filter(
-        (gp) => String(gp.gallery_id) === String(g.id),
-      );
-      if (photos.length === 0) {
-        list.push({
-          id: g.id,
-          title: g.title,
-          date: g.date,
-          photo_id: null,
-          image_url: null,
-        });
-      } else {
-        photos.forEach((gp) => {
-          list.push({
-            id: g.id,
-            title: g.title,
-            date: g.date,
-            photo_id: gp.id,
-            image_url: gp.image_url,
-          });
-        });
+    // Custom filtering for specific tables
+    if (tblMatch === "baiViet") {
+      if (params.category !== undefined) {
+        list = list.filter((item) => item.danhMuc === params.category);
       }
-    });
-    list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-    return { rows: list, rowCount: list.length };
-  }
-
-  // 20. Insert into gallery (Relational)
-  if (
-    normalizedQuery.includes("insert into gallery") &&
-    !normalizedQuery.includes("gallery_photos")
-  ) {
-    const newAlbum = {
-      id: params.id,
-      title: params.title,
-      date: params.date,
-    };
-    mockDbStore.gallery.push(newAlbum);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 20b. Insert into gallery_photos
-  if (normalizedQuery.includes("insert into gallery_photos")) {
-    const newPhoto = {
-      id: params.id,
-      gallery_id: params.galleryId,
-      image_url: params.imageUrl,
-    };
-    mockDbStore.galleryPhotos.push(newPhoto);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 20c. Select from gallery_photos by gallery_id
-  if (normalizedQuery.includes("from gallery_photos where gallery_id")) {
-    const photos = mockDbStore.galleryPhotos.filter(
-      (gp) => String(gp.gallery_id) === String(params.id),
-    );
-    return {
-      rows: photos.map((gp) => ({ image_url: gp.image_url })),
-      rowCount: photos.length,
-    };
-  }
-
-  // 21. Delete from gallery
-  if (normalizedQuery.includes("delete from gallery")) {
-    const originalLength = mockDbStore.gallery.length;
-    mockDbStore.gallery = mockDbStore.gallery.filter(
-      (item) => String(item.id) !== String(params.id),
-    );
-    mockDbStore.galleryPhotos = mockDbStore.galleryPhotos.filter(
-      (gp) => String(gp.gallery_id) !== String(params.id),
-    );
-    return { rows: [], rowCount: originalLength - mockDbStore.gallery.length };
-  }
-
-  // 22. Select branch_types
-  if (
-    normalizedQuery.includes("FROM branch_types") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    const list = [...mockDbStore.branchTypes];
-    list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    return { rows: list, rowCount: list.length };
-  }
-
-  // 22b. Insert into branch_types
-  if (normalizedQuery.includes("INSERT INTO branch_types")) {
-    const newType = {
-      id: params.id,
-      name: params.name,
-      created_by: params.createdBy || "admin",
-      created_at: params.createdAt || new Date().toISOString(),
-      updated_by: params.updatedBy || "admin",
-      updated_at: params.updatedAt || new Date().toISOString(),
-    };
-    mockDbStore.branchTypes.push(newType);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 22c. Update branch_types
-  if (normalizedQuery.startsWith("UPDATE branch_types")) {
-    const bType = mockDbStore.branchTypes.find(
-      (t) => String(t.id) === String(params.id),
-    );
-    if (bType) {
-      bType.name = params.name;
-      bType.updated_by = params.updatedBy || "admin";
-      bType.updated_at = params.updatedAt || new Date().toISOString();
+      if (params.search !== undefined) {
+        const term = params.search.replace(/%/g, "").toLowerCase();
+        list = list.filter(
+          (item) =>
+            (item.tieuDe && item.tieuDe.toLowerCase().includes(term)) ||
+            (item.tomTat && item.tomTat.toLowerCase().includes(term))
+        );
+      }
+      // Sort by date/ngayDang descending
+      list.sort((a, b) => (b.ngayDang || "").localeCompare(a.ngayDang || ""));
     }
-    return { rows: [], rowCount: bType ? 1 : 0 };
-  }
 
-  // 22d. Delete from branch_types
-  if (normalizedQuery.includes("DELETE FROM branch_types")) {
-    const originalLength = mockDbStore.branchTypes.length;
-    mockDbStore.branchTypes = mockDbStore.branchTypes.filter(
-      (t) => String(t.id) !== String(params.id),
-    );
-    mockDbStore.branches = mockDbStore.branches.filter(
-      (b) => String(b.branch_type_id) !== String(params.id),
-    );
-    return {
-      rows: [],
-      rowCount: originalLength - mockDbStore.branchTypes.length,
-    };
-  }
+    if (tblMatch === "vanBan") {
+      list.sort((a, b) => (b.ngayBanHanh || "").localeCompare(a.ngayBanHanh || ""));
+    }
 
-  // 23. Select branches
-  if (
-    normalizedQuery.includes("FROM branches") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    const list = mockDbStore.branches.map((b) => {
-      const t = mockDbStore.branchTypes.find(
-        (type) => String(type.id) === String(b.branch_type_id),
-      );
-      return {
-        id: b.id,
-        name: b.name,
-        branch_type_id: b.branch_type_id,
-        group_name: t ? t.name : "",
-        created_by: b.created_by,
-        created_at: b.created_at,
-        updated_by: b.updated_by,
-        updated_at: b.updated_at,
-      };
-    });
-    list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    if (tblMatch === "gopY") {
+      list.sort((a, b) => (b.ngayGui || "").localeCompare(a.ngayGui || ""));
+    }
+
+    if (tblMatch === "thanhVienBch") {
+      // Sort by display order or position
+      list.sort((a, b) => (a.chucVu || 0) - (b.chucVu || 0));
+    }
+
+    if (tblMatch === "chiDoan") {
+      list = list.map((cd) => {
+        const type = mockDbStore.loaiChiDoan.find((t) => String(t.id) === String(cd.loaiChiDoanId));
+        return { ...cd, groupName: type ? type.tenLoai : "" };
+      });
+      list.sort((a, b) => (a.tenChiDoan || "").localeCompare(b.tenChiDoan || ""));
+    }
+
+    if (tblMatch === "doanVien") {
+      list = list.map((dv) => {
+        const cd = mockDbStore.chiDoan.find((b) => String(b.id) === String(dv.chiDoanId));
+        return { ...dv, branchName: cd ? cd.tenChiDoan : "" };
+      });
+      list.sort((a, b) => (a.hoTen || "").localeCompare(b.hoTen || ""));
+    }
+
+    if (tblMatch === "anhAlbum" && params.albumId !== undefined) {
+      list = list.filter((item) => String(item.albumId) === String(params.albumId));
+    }
+
     return { rows: list, rowCount: list.length };
   }
 
-  // 23b. Insert into branches
-  if (normalizedQuery.includes("INSERT INTO branches")) {
-    const newBranch = {
-      id: params.id,
-      name: params.name,
-      branch_type_id: params.branchTypeId,
-      created_by: params.createdBy || "admin",
-      created_at: params.createdAt || new Date().toISOString(),
-      updated_by: params.updatedBy || "admin",
-      updated_at: params.updatedAt || new Date().toISOString(),
-    };
-    mockDbStore.branches.push(newBranch);
+  // 2. INSERT queries
+  if (normalized.startsWith("INSERT")) {
+    if (tblMatch === "intro") {
+      mockDbStore.intro = { ...params };
+      return { rows: [], rowCount: 1 };
+    }
+    const newItem = { ...params };
+    table.push(newItem);
     return { rows: [], rowCount: 1 };
   }
 
-  // 23c. Update branches
-  if (normalizedQuery.startsWith("UPDATE branches")) {
-    const branch = mockDbStore.branches.find(
-      (b) => String(b.id) === String(params.id),
-    );
-    if (branch) {
-      branch.name = params.name;
-      branch.branch_type_id = params.branchTypeId;
-      branch.updated_by = params.updatedBy || "admin";
-      branch.updated_at = params.updatedAt || new Date().toISOString();
+  // 3. UPDATE queries
+  if (normalized.startsWith("UPDATE")) {
+    if (tblMatch === "intro") {
+      mockDbStore.intro = { ...mockDbStore.intro, ...params };
+      return { rows: [], rowCount: 1 };
     }
-    return { rows: [], rowCount: branch ? 1 : 0 };
-  }
-
-  // 23d. Delete from branches
-  if (normalizedQuery.includes("DELETE FROM branches")) {
-    const originalLength = mockDbStore.branches.length;
-    mockDbStore.branches = mockDbStore.branches.filter(
-      (b) => String(b.id) !== String(params.id),
-    );
-    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(
-      (m) => String(m.branch_id) !== String(params.id),
-    );
-    return { rows: [], rowCount: originalLength - mockDbStore.branches.length };
-  }
-
-  // 24. Select union_members
-  if (
-    normalizedQuery.includes("FROM union_members") &&
-    normalizedQuery.startsWith("SELECT")
-  ) {
-    const list = mockDbStore.unionMembers.map((m) => {
-      const b = mockDbStore.branches.find(
-        (branch) => String(branch.id) === String(m.branch_id),
-      );
-      return {
-        id: m.id,
-        name: m.name,
-        dob: m.dob,
-        phone: m.phone,
-        email: m.email,
-        branch_id: m.branch_id,
-        branch_name: b ? b.name : "",
-        join_date: m.join_date,
-        status: m.status,
-        created_by: m.created_by,
-        created_at: m.created_at,
-        updated_by: m.updated_by,
-        updated_at: m.updated_at,
-      };
-    });
-    list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    return { rows: list, rowCount: list.length };
-  }
-
-  // 24b. Insert into union_members
-  if (normalizedQuery.includes("INSERT INTO union_members")) {
-    const newMember = {
-      id: params.id,
-      name: params.name,
-      dob: params.dob,
-      phone: params.phone,
-      email: params.email,
-      branch_id: params.branchId,
-      join_date: params.joinDate,
-      status: params.status || "Đoàn viên",
-      created_by: params.createdBy || "admin",
-      created_at: params.createdAt || new Date().toISOString(),
-      updated_by: params.updatedBy || "admin",
-      updated_at: params.updatedAt || new Date().toISOString(),
-    };
-    mockDbStore.unionMembers.push(newMember);
-    return { rows: [], rowCount: 1 };
-  }
-
-  // 24c. Update union_members
-  if (normalizedQuery.startsWith("UPDATE union_members")) {
-    const member = mockDbStore.unionMembers.find(
-      (m) => String(m.id) === String(params.id),
-    );
-    if (member) {
-      member.name = params.name;
-      member.dob = params.dob;
-      member.phone = params.phone;
-      member.email = params.email;
-      member.branch_id = params.branchId;
-      member.join_date = params.joinDate;
-      member.status = params.status;
-      member.updated_by = params.updatedBy || "admin";
-      member.updated_at = params.updatedAt || new Date().toISOString();
+    const index = table.findIndex((item) => String(item.id) === String(params.id));
+    if (index !== -1) {
+      table[index] = { ...table[index], ...params };
+      return { rows: [], rowCount: 1 };
     }
-    return { rows: [], rowCount: member ? 1 : 0 };
+    return { rows: [], rowCount: 0 };
   }
 
-  // 24d. Delete from union_members
-  if (normalizedQuery.includes("DELETE FROM union_members")) {
-    const originalLength = mockDbStore.unionMembers.length;
-    mockDbStore.unionMembers = mockDbStore.unionMembers.filter(
-      (m) => String(m.id) !== String(params.id),
-    );
-    return {
-      rows: [],
-      rowCount: originalLength - mockDbStore.unionMembers.length,
-    };
+  // 4. DELETE queries
+  if (normalized.startsWith("DELETE")) {
+    const origLen = table.length;
+    mockDbStore[tblMatch] = table.filter((item) => String(item.id) !== String(params.id));
+    
+    // Cascade deletes
+    if (tblMatch === "albumAnh") {
+      mockDbStore.anhAlbum = mockDbStore.anhAlbum.filter((img) => String(img.albumId) !== String(params.id));
+    }
+    if (tblMatch === "loaiChiDoan") {
+      mockDbStore.chiDoan = mockDbStore.chiDoan.filter((cd) => String(cd.loaiChiDoanId) !== String(params.id));
+    }
+    if (tblMatch === "chiDoan") {
+      mockDbStore.doanVien = mockDbStore.doanVien.filter((dv) => String(dv.chiDoanId) !== String(params.id));
+    }
+
+    return { rows: [], rowCount: origLen - mockDbStore[tblMatch].length };
   }
 
   return { rows: [], rowCount: 0 };
 }
 
-// --- Helper: Execute queries abstractly ---
 async function runQuery(queryText, params = {}) {
   if (useMockDb) {
     return runMockQuery(queryText, params);
   }
 
   if (isPg) {
-    // Translate named params like @param to $1, $2 for Postgres
     let pgQuery = queryText;
     const values = [];
     let count = 1;
 
-    // Find all @param variables in the query
     const matches = queryText.match(/@\w+/g) || [];
     const uniqueMatches = [...new Set(matches)];
 
-    // Order matters to map params correctly
     uniqueMatches.forEach((match) => {
       const key = match.replace("@", "");
       values.push(params[key]);
-
-      // Regex replace all occurrences of this variable with $count
       const regex = new RegExp(match, "g");
       pgQuery = pgQuery.replace(regex, `$${count}`);
       count++;
@@ -687,328 +237,176 @@ async function runQuery(queryText, params = {}) {
   }
 }
 
-// Database Initialization
 const initializeDatabase = async () => {
   if (isPg) {
-    // PostgreSQL Init
     try {
       const client = await pgPool.connect();
       try {
+        // Create tables with double-quoted camelCase names
         await client.query(`
-          CREATE TABLE IF NOT EXISTS admins (
-            username VARCHAR(50) PRIMARY KEY,
-            password VARCHAR(255) NOT NULL
+          CREATE TABLE IF NOT EXISTS "taiKhoanAdmin" (
+            "tenDangNhap" VARCHAR(50) PRIMARY KEY,
+            "matKhau" VARCHAR(255) NOT NULL
           );
         `);
         await client.query(`
-          CREATE TABLE IF NOT EXISTS posts (
-            id VARCHAR(50) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            summary TEXT,
-            content TEXT,
-            category VARCHAR(50),
-            image_url TEXT,
-            date VARCHAR(20),
-            author VARCHAR(100),
-            views INTEGER DEFAULT 0,
-            is_hot BOOLEAN DEFAULT FALSE,
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "baiViet" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "tieuDe" VARCHAR(255) NOT NULL,
+            "tomTat" TEXT,
+            "noiDung" TEXT,
+            "danhMuc" VARCHAR(50),
+            "anhDaiDien" TEXT,
+            "ngayDang" VARCHAR(20),
+            "tacGia" VARCHAR(100),
+            "luotXem" INTEGER DEFAULT 0,
+            "tinNoiBat" BOOLEAN DEFAULT FALSE,
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
         await client.query(`
-          CREATE TABLE IF NOT EXISTS documents (
-            id VARCHAR(50) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            doc_no VARCHAR(100),
-            date VARCHAR(20),
-            category VARCHAR(50),
-            file_url VARCHAR(512),
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "vanBan" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "tenVanBan" VARCHAR(255) NOT NULL,
+            "soHieu" VARCHAR(100),
+            "ngayBanHanh" VARCHAR(20),
+            "loaiVanBan" VARCHAR(50),
+            "duongDanFile" VARCHAR(512),
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
         await client.query(`
-          CREATE TABLE IF NOT EXISTS feedbacks (
-            id VARCHAR(50) PRIMARY KEY,
-            full_name VARCHAR(100) NOT NULL,
-            phone VARCHAR(20),
-            email VARCHAR(100),
-            unit VARCHAR(150),
-            subject VARCHAR(255),
-            message TEXT,
-            date VARCHAR(20),
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "gopY" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "hoTen" VARCHAR(100) NOT NULL,
+            "soDienThoai" VARCHAR(20),
+            "email" VARCHAR(100),
+            "donVi" VARCHAR(150),
+            "tieuDe" VARCHAR(255),
+            "noiDung" TEXT,
+            "ngayGui" VARCHAR(20),
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
         await client.query(`
-          CREATE TABLE IF NOT EXISTS bch_members (
-            id VARCHAR(50) PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            position VARCHAR(100) NOT NULL,
-            email VARCHAR(100),
-            phone VARCHAR(20),
-            image_url TEXT,
-            responsibility TEXT,
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "thanhVienBch" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "hoTen" VARCHAR(100) NOT NULL,
+            "chucVu" INTEGER NOT NULL,
+            "email" VARCHAR(100),
+            "soDienThoai" VARCHAR(20),
+            "anhDaiDien" TEXT,
+            "nhiemVu" TEXT,
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
         await client.query(`
-          CREATE TABLE IF NOT EXISTS intro_settings (
-            id INTEGER PRIMARY KEY DEFAULT 1,
-            history_content TEXT,
-            stat_members VARCHAR(50) DEFAULT '0',
-            stat_branches VARCHAR(50) DEFAULT '0',
-            branches_content TEXT
+          CREATE TABLE IF NOT EXISTS "intro" (
+            "id" INTEGER PRIMARY KEY DEFAULT 1,
+            "lichSu" TEXT,
+            "soLuongDoanVien" VARCHAR(50) DEFAULT '0',
+            "soLuongChiDoan" VARCHAR(50) DEFAULT '0',
+            "thongTinChiDoan" TEXT
           );
         `);
-        // Migration: check if old gallery table structure exists
-        const oldGalleryCheck = await client.query(
-          "SELECT column_name FROM information_schema.columns WHERE table_name='gallery' AND column_name='image_url'",
-        );
-        if (oldGalleryCheck.rows.length > 0) {
-          console.log(
-            "Migrating gallery table structure: Dropping old gallery table...",
-          );
-          await client.query("DROP TABLE IF EXISTS gallery_photos CASCADE;");
-          await client.query("DROP TABLE IF EXISTS gallery CASCADE;");
-        }
-
         await client.query(`
-          CREATE TABLE IF NOT EXISTS gallery (
-            id VARCHAR(50) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            date VARCHAR(20),
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "albumAnh" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "tieuDe" VARCHAR(255) NOT NULL,
+            "ngayTao" VARCHAR(20),
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
-
         await client.query(`
-          CREATE TABLE IF NOT EXISTS gallery_photos (
-            id VARCHAR(50) PRIMARY KEY,
-            gallery_id VARCHAR(50) NOT NULL REFERENCES gallery(id) ON DELETE CASCADE,
-            image_url TEXT NOT NULL,
-            file_name VARCHAR(255),
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "anhAlbum" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "albumId" VARCHAR(50) NOT NULL REFERENCES "albumAnh"("id") ON DELETE CASCADE,
+            "duongDanAnh" TEXT NOT NULL,
+            "tenFile" VARCHAR(255),
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
-
         await client.query(`
-          CREATE TABLE IF NOT EXISTS branch_types (
-            id VARCHAR(50) PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "loaiChiDoan" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "tenLoai" VARCHAR(255) NOT NULL,
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
-
         await client.query(`
-          CREATE TABLE IF NOT EXISTS branches (
-            id VARCHAR(50) PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            branch_type_id VARCHAR(50) REFERENCES branch_types(id) ON DELETE CASCADE,
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "chiDoan" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "tenChiDoan" VARCHAR(255) NOT NULL,
+            "loaiChiDoanId" VARCHAR(50) REFERENCES "loaiChiDoan"("id") ON DELETE CASCADE,
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
-
         await client.query(`
-          CREATE TABLE IF NOT EXISTS union_members (
-            id VARCHAR(50) PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            dob VARCHAR(20),
-            phone VARCHAR(20),
-            email VARCHAR(100),
-            branch_id VARCHAR(50) NOT NULL REFERENCES branches(id) ON DELETE CASCADE,
-            join_date VARCHAR(20),
-            status VARCHAR(50) DEFAULT 'Đoàn viên',
-            created_by VARCHAR(100),
-            created_at VARCHAR(30),
-            updated_by VARCHAR(100),
-            updated_at VARCHAR(30)
+          CREATE TABLE IF NOT EXISTS "doanVien" (
+            "id" VARCHAR(50) PRIMARY KEY,
+            "hoTen" VARCHAR(100) NOT NULL,
+            "ngaySinh" VARCHAR(20),
+            "soDienThoai" VARCHAR(20),
+            "email" VARCHAR(100),
+            "chiDoanId" VARCHAR(50) NOT NULL REFERENCES "chiDoan"("id") ON DELETE CASCADE,
+            "ngayVaoDoan" VARCHAR(20),
+            "trangThai" VARCHAR(50) DEFAULT 'Đoàn viên',
+            "createdBy" VARCHAR(100),
+            "createdAt" VARCHAR(30),
+            "updatedBy" VARCHAR(100),
+            "updatedAt" VARCHAR(30)
           );
         `);
 
-        // Migration updates for existing tables
-        const addAuditCols = async (tbl) => {
+        // Seed admin if empty
+        const adminCheck = await client.query('SELECT COUNT(*) FROM "taiKhoanAdmin"');
+        if (parseInt(adminCheck.rows[0].count) === 0) {
           await client.query(
-            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_by VARCHAR(100);`,
+            'INSERT INTO "taiKhoanAdmin" ("tenDangNhap", "matKhau") VALUES ($1, $2)',
+            [mockAdmin.tenDangNhap, mockAdmin.matKhau]
           );
+        }
+
+        // Seed initial intro settings if empty
+        const introCheck = await client.query('SELECT COUNT(*) FROM "intro"');
+        if (parseInt(introCheck.rows[0].count) === 0) {
           await client.query(
-            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS created_at VARCHAR(30);`,
-          );
-          await client.query(
-            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_by VARCHAR(100);`,
-          );
-          await client.query(
-            `ALTER TABLE ${tbl} ADD COLUMN IF NOT EXISTS updated_at VARCHAR(30);`,
-          );
-        };
-        await addAuditCols("posts");
-        await addAuditCols("documents");
-        await addAuditCols("feedbacks");
-        await addAuditCols("bch_members");
-        await addAuditCols("gallery");
-        await addAuditCols("gallery_photos");
-
-        // Migrate old statuses to 'Đoàn viên'
-        await client.query(`
-          UPDATE union_members 
-          SET status = 'Đoàn viên' 
-          WHERE status IN ('Sinh hoạt', 'Tạm vắng', 'Đã chuyển sinh hoạt', 'Trưởng thành Đoàn')
-        `);
-
-        // Clean display_order from bch_members
-        await client.query(
-          "ALTER TABLE bch_members DROP COLUMN IF EXISTS display_order;",
-        );
-
-        // Clean branches columns and add new relation column
-        await client.query(
-          "ALTER TABLE branches DROP COLUMN IF EXISTS display_order;",
-        );
-        await client.query(
-          "ALTER TABLE branches DROP COLUMN IF EXISTS group_name;",
-        );
-        await client.query(
-          "ALTER TABLE branches DROP COLUMN IF EXISTS member_count;",
-        );
-        await client.query(
-          "ALTER TABLE branches ADD COLUMN IF NOT EXISTS branch_type_id VARCHAR(50);",
-        );
-
-        await client.query(
-          "ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT;",
-        );
-        await client.query(
-          "ALTER TABLE bch_members ALTER COLUMN image_url TYPE TEXT;",
-        );
-        await client.query(
-          "ALTER TABLE gallery_photos ALTER COLUMN image_url TYPE TEXT;",
-        );
-        await client.query(
-          "ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);",
-        );
-
-        // Seed
-        const adminCount = await client.query("SELECT COUNT(*) FROM admins");
-        if (parseInt(adminCount.rows[0].count) === 0) {
-          await client.query(
-            "INSERT INTO admins (username, password) VALUES ($1, $2)",
-            [mockAdmin.username, mockAdmin.password],
-          );
-        }
-        const postsCount = await client.query("SELECT COUNT(*) FROM posts");
-        if (parseInt(postsCount.rows[0].count) === 0) {
-          for (const p of mockPosts) {
-            await client.query(
-              `INSERT INTO posts (id, title, summary, content, category, image_url, date, author, views, is_hot)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-              [
-                p.id,
-                p.title,
-                p.summary,
-                p.content,
-                p.category,
-                p.imageUrl,
-                p.date,
-                p.author,
-                p.views,
-                p.isHot,
-              ],
-            );
-          }
-        }
-        const docsCount = await client.query("SELECT COUNT(*) FROM documents");
-        if (parseInt(docsCount.rows[0].count) === 0) {
-          for (const d of mockDocs) {
-            await client.query(
-              `INSERT INTO documents (id, title, doc_no, date, category, file_url)
-               VALUES ($1, $2, $3, $4, $5, $6)`,
-              [d.id, d.title, d.docNo, d.date, d.category, d.fileUrl],
-            );
-          }
-        }
-
-        const bchCount = await client.query("SELECT COUNT(*) FROM bch_members");
-        if (parseInt(bchCount.rows[0].count) === 0) {
-          for (const m of mockBchMembers) {
-            await client.query(
-              `INSERT INTO bch_members (id, name, position, email, phone, image_url, responsibility, display_order)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-              [
-                m.id,
-                m.name,
-                m.position,
-                m.email,
-                m.phone,
-                m.imageUrl,
-                m.responsibility,
-                m.displayOrder,
-              ],
-            );
-          }
-        }
-
-        const introCount = await client.query(
-          "SELECT COUNT(*) FROM intro_settings",
-        );
-        if (parseInt(introCount.rows[0].count) === 0) {
-          await client.query(
-            `INSERT INTO intro_settings (id, history_content, stat_members, stat_branches, branches_content)
-             VALUES ($1, $2, $3, $4, $5)`,
-            [
-              mockIntroSettings.id,
-              mockIntroSettings.historyContent,
-              mockIntroSettings.statMembers,
-              mockIntroSettings.statBranches,
-              mockIntroSettings.branchesContent,
-            ],
+            'INSERT INTO "intro" ("id", "lichSu", "soLuongDoanVien", "soLuongChiDoan", "thongTinChiDoan") VALUES ($1, $2, $3, $4, $5)',
+            [1, "", "0", "0", ""]
           );
         }
 
-        const branchesCount = await client.query(
-          "SELECT COUNT(*) FROM branches",
-        );
-        if (parseInt(branchesCount.rows[0].count) === 0) {
-          for (const b of mockBranches) {
-            await client.query(
-              `INSERT INTO branches (id, name, group_name, display_order, member_count)
-               VALUES ($1, $2, $3, $4, $5)`,
-              [b.id, b.name, b.groupName, b.displayOrder, b.memberCount],
-            );
-          }
-        }
-
-        console.log("PostgreSQL schema created and seeded.");
+        console.log("PostgreSQL schema initialized successfully.");
       } finally {
         client.release();
       }
     } catch (err) {
-      console.warn("⚠️ Failed to connect to PostgreSQL:", err.message);
-      console.warn(
-        "⚠️ Falling back to built-in IN-MEMORY mock database store.",
-      );
+      console.warn("⚠️ PostgreSQL Connection/Initialization Failed:", err.message);
+      console.warn("⚠️ Falling back to built-in IN-MEMORY mock database store.");
       useMockDb = true;
       initMockDbStore();
     }
@@ -1016,7 +414,6 @@ const initializeDatabase = async () => {
     // MS SQL Server Init
     try {
       const dbName = sqlConfig.database || "tamanh_youth";
-      // 1. Try to connect to master database first to check/create the target database
       try {
         const masterConfig = { ...sqlConfig, database: "master" };
         await sql.connect(masterConfig);
@@ -1027,408 +424,185 @@ const initializeDatabase = async () => {
           END
         `);
         await sql.close();
-      } catch (masterErr) {
-        console.warn(
-          "⚠️ Cannot verify/create database via 'master' (might lack permissions):",
-          masterErr.message,
-        );
+      } catch (err) {
+        console.warn("⚠️ Failed to verify database existence via master database.");
         try {
           await sql.close();
-        } catch (_) {
-          /* ignore */
-        }
+        } catch (_) {}
       }
 
-      // 2. Connect to the target database
       await sql.connect(sqlConfig);
 
-      // Create Tables if not exist
+      // Create MS SQL Server tables
       await sql.query(`
-        IF OBJECT_ID('admins', 'U') IS NULL
-        CREATE TABLE admins (
-          username NVARCHAR(50) PRIMARY KEY,
-          password NVARCHAR(255) NOT NULL
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('posts', 'U') IS NULL
-        CREATE TABLE posts (
-          id NVARCHAR(50) PRIMARY KEY,
-          title NVARCHAR(255) NOT NULL,
-          summary NVARCHAR(MAX),
-          content NVARCHAR(MAX),
-          category NVARCHAR(50),
-          image_url NVARCHAR(MAX),
-          date NVARCHAR(20),
-          author NVARCHAR(100),
-          views INT DEFAULT 0,
-          is_hot BIT DEFAULT 0,
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('documents', 'U') IS NULL
-        CREATE TABLE documents (
-          id NVARCHAR(50) PRIMARY KEY,
-          title NVARCHAR(255) NOT NULL,
-          doc_no NVARCHAR(100),
-          date NVARCHAR(20),
-          category NVARCHAR(50),
-          file_url NVARCHAR(512),
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('feedbacks', 'U') IS NULL
-        CREATE TABLE feedbacks (
-          id NVARCHAR(50) PRIMARY KEY,
-          full_name NVARCHAR(100) NOT NULL,
-          phone NVARCHAR(20),
-          email NVARCHAR(100),
-          unit NVARCHAR(150),
-          subject NVARCHAR(255),
-          message NVARCHAR(MAX),
-          date NVARCHAR(20),
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('bch_members', 'U') IS NULL
-        CREATE TABLE bch_members (
-          id NVARCHAR(50) PRIMARY KEY,
-          name NVARCHAR(100) NOT NULL,
-          position NVARCHAR(100) NOT NULL,
-          email NVARCHAR(100),
-          phone NVARCHAR(20),
-          image_url NVARCHAR(MAX),
-          responsibility NVARCHAR(MAX),
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('intro_settings', 'U') IS NULL
-        CREATE TABLE intro_settings (
-          id INT PRIMARY KEY DEFAULT 1,
-          history_content NVARCHAR(MAX),
-          stat_members NVARCHAR(50) DEFAULT '0',
-          stat_branches NVARCHAR(50) DEFAULT '0',
-          branches_content NVARCHAR(MAX)
+        IF OBJECT_ID('taiKhoanAdmin', 'U') IS NULL
+        CREATE TABLE [taiKhoanAdmin] (
+          [tenDangNhap] NVARCHAR(50) PRIMARY KEY,
+          [matKhau] NVARCHAR(255) NOT NULL
         );
       `);
       await sql.query(`
-        IF COL_LENGTH('gallery', 'image_url') IS NOT NULL
-        BEGIN
-          DROP TABLE IF EXISTS gallery_photos;
-          DROP TABLE IF EXISTS gallery;
-        END
+        IF OBJECT_ID('baiViet', 'U') IS NULL
+        CREATE TABLE [baiViet] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [tieuDe] NVARCHAR(255) NOT NULL,
+          [tomTat] NVARCHAR(MAX),
+          [noiDung] NVARCHAR(MAX),
+          [danhMuc] NVARCHAR(50),
+          [anhDaiDien] NVARCHAR(MAX),
+          [ngayDang] NVARCHAR(20),
+          [tacGia] NVARCHAR(100),
+          [luotXem] INT DEFAULT 0,
+          [tinNoiBat] BIT DEFAULT 0,
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
       `);
-
       await sql.query(`
-        IF OBJECT_ID('gallery', 'U') IS NULL
-        CREATE TABLE gallery (
-          id NVARCHAR(50) PRIMARY KEY,
-          title NVARCHAR(255) NOT NULL,
-          date NVARCHAR(20),
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
+        IF OBJECT_ID('vanBan', 'U') IS NULL
+        CREATE TABLE [vanBan] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [tenVanBan] NVARCHAR(255) NOT NULL,
+          [soHieu] NVARCHAR(100),
+          [ngayBanHanh] NVARCHAR(20),
+          [loaiVanBan] NVARCHAR(50),
+          [duongDanFile] NVARCHAR(512),
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('gopY', 'U') IS NULL
+        CREATE TABLE [gopY] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [hoTen] NVARCHAR(100) NOT NULL,
+          [soDienThoai] NVARCHAR(20),
+          [email] NVARCHAR(100),
+          [donVi] NVARCHAR(150),
+          [tieuDe] NVARCHAR(255),
+          [noiDung] NVARCHAR(MAX),
+          [ngayGui] NVARCHAR(20),
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('thanhVienBch', 'U') IS NULL
+        CREATE TABLE [thanhVienBch] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [hoTen] NVARCHAR(100) NOT NULL,
+          [chucVu] INT NOT NULL,
+          [email] NVARCHAR(100),
+          [soDienThoai] NVARCHAR(20),
+          [anhDaiDien] NVARCHAR(MAX),
+          [nhiemVu] NVARCHAR(MAX),
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('intro', 'U') IS NULL
+        CREATE TABLE [intro] (
+          [id] INT PRIMARY KEY DEFAULT 1,
+          [lichSu] NVARCHAR(MAX),
+          [soLuongDoanVien] NVARCHAR(50) DEFAULT '0',
+          [soLuongChiDoan] NVARCHAR(50) DEFAULT '0',
+          [thongTinChiDoan] NVARCHAR(MAX)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('albumAnh', 'U') IS NULL
+        CREATE TABLE [albumAnh] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [tieuDe] NVARCHAR(255) NOT NULL,
+          [ngayTao] NVARCHAR(20),
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('anhAlbum', 'U') IS NULL
+        CREATE TABLE [anhAlbum] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [albumId] NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES [albumAnh](id) ON DELETE CASCADE,
+          [duongDanAnh] NVARCHAR(MAX) NOT NULL,
+          [tenFile] NVARCHAR(255),
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('loaiChiDoan', 'U') IS NULL
+        CREATE TABLE [loaiChiDoan] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [tenLoai] NVARCHAR(255) NOT NULL,
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('chiDoan', 'U') IS NULL
+        CREATE TABLE [chiDoan] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [tenChiDoan] NVARCHAR(255) NOT NULL,
+          [loaiChiDoanId] NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES [loaiChiDoan](id) ON DELETE CASCADE,
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
+        );
+      `);
+      await sql.query(`
+        IF OBJECT_ID('doanVien', 'U') IS NULL
+        CREATE TABLE [doanVien] (
+          [id] NVARCHAR(50) PRIMARY KEY,
+          [hoTen] NVARCHAR(100) NOT NULL,
+          [ngaySinh] NVARCHAR(20),
+          [soDienThoai] NVARCHAR(20),
+          [email] NVARCHAR(100),
+          [chiDoanId] NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES [chiDoan](id) ON DELETE CASCADE,
+          [ngayVaoDoan] NVARCHAR(20),
+          [trangThai] NVARCHAR(50) DEFAULT N'Đoàn viên',
+          [createdBy] NVARCHAR(100),
+          [createdAt] NVARCHAR(30),
+          [updatedBy] NVARCHAR(100),
+          [updatedAt] NVARCHAR(30)
         );
       `);
 
-      await sql.query(`
-        IF OBJECT_ID('gallery_photos', 'U') IS NULL
-        CREATE TABLE gallery_photos (
-          id NVARCHAR(50) PRIMARY KEY,
-          gallery_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES gallery(id) ON DELETE CASCADE,
-          image_url NVARCHAR(MAX) NOT NULL,
-          file_name NVARCHAR(255),
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('branch_types', 'U') IS NULL
-        CREATE TABLE branch_types (
-          id NVARCHAR(50) PRIMARY KEY,
-          name NVARCHAR(255) NOT NULL,
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('branches', 'U') IS NULL
-        CREATE TABLE branches (
-          id NVARCHAR(50) PRIMARY KEY,
-          name NVARCHAR(255) NOT NULL,
-          branch_type_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES branch_types(id) ON DELETE CASCADE,
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      await sql.query(`
-        IF OBJECT_ID('union_members', 'U') IS NULL
-        CREATE TABLE union_members (
-          id NVARCHAR(50) PRIMARY KEY,
-          name NVARCHAR(100) NOT NULL,
-          dob NVARCHAR(20),
-          phone NVARCHAR(20),
-          email NVARCHAR(100),
-          branch_id NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES branches(id) ON DELETE CASCADE,
-          join_date NVARCHAR(20),
-          status NVARCHAR(50) DEFAULT N'Đoàn viên',
-          created_by NVARCHAR(100),
-          created_at NVARCHAR(30),
-          updated_by NVARCHAR(100),
-          updated_at NVARCHAR(30)
-        );
-      `);
-
-      // Migration: Add audit columns to existing MS SQL Server tables
-      const addAuditColsMssql = async (tbl) => {
-        await sql.query(
-          `IF COL_LENGTH('${tbl}', 'created_by') IS NULL ALTER TABLE ${tbl} ADD created_by NVARCHAR(100);`,
-        );
-        await sql.query(
-          `IF COL_LENGTH('${tbl}', 'created_at') IS NULL ALTER TABLE ${tbl} ADD created_at NVARCHAR(30);`,
-        );
-        await sql.query(
-          `IF COL_LENGTH('${tbl}', 'updated_by') IS NULL ALTER TABLE ${tbl} ADD updated_by NVARCHAR(100);`,
-        );
-        await sql.query(
-          `IF COL_LENGTH('${tbl}', 'updated_at') IS NULL ALTER TABLE ${tbl} ADD updated_at NVARCHAR(30);`,
-        );
-      };
-      await addAuditColsMssql("posts");
-      await addAuditColsMssql("documents");
-      await addAuditColsMssql("feedbacks");
-      await addAuditColsMssql("bch_members");
-      await addAuditColsMssql("gallery");
-      await addAuditColsMssql("gallery_photos");
-
-      // Migrate old statuses to 'Đoàn viên'
-      await sql.query(`
-        UPDATE union_members 
-        SET status = N'Đoàn viên' 
-        WHERE status IN (N'Sinh hoạt', N'Tạm vắng', N'Đã chuyển sinh hoạt', N'Trưởng thành Đoàn')
-      `);
-
-      // Drop display_order from bch_members (safely handling default constraint)
-      await sql.query(`
-        IF COL_LENGTH('bch_members', 'display_order') IS NOT NULL
-        BEGIN
-          DECLARE @ConstraintNameBch NVARCHAR(200)
-          SELECT @ConstraintNameBch = name 
-          FROM sys.default_constraints 
-          WHERE parent_object_id = object_id('bch_members') 
-            AND parent_column_id = COLUMNPROPERTY(object_id('bch_members'), 'display_order', 'ColumnId')
-          IF @ConstraintNameBch IS NOT NULL
-            EXEC('ALTER TABLE bch_members DROP CONSTRAINT ' + @ConstraintNameBch)
-          ALTER TABLE bch_members DROP COLUMN display_order
-        END
-      `);
-
-      // Drop display_order from branches (safely handling default constraint)
-      await sql.query(`
-        IF COL_LENGTH('branches', 'display_order') IS NOT NULL
-        BEGIN
-          DECLARE @ConstraintNameBranches NVARCHAR(200)
-          SELECT @ConstraintNameBranches = name 
-          FROM sys.default_constraints 
-          WHERE parent_object_id = object_id('branches') 
-            AND parent_column_id = COLUMNPROPERTY(object_id('branches'), 'display_order', 'ColumnId')
-          IF @ConstraintNameBranches IS NOT NULL
-            EXEC('ALTER TABLE branches DROP CONSTRAINT ' + @ConstraintNameBranches)
-          ALTER TABLE branches DROP COLUMN display_order
-        END
-      `);
-
-      // Drop group_name from branches
-      await sql.query(
-        "IF COL_LENGTH('branches', 'group_name') IS NOT NULL ALTER TABLE branches DROP COLUMN group_name;",
-      );
-
-      // Drop member_count from branches (safely handling default constraint)
-      await sql.query(`
-        IF COL_LENGTH('branches', 'member_count') IS NOT NULL
-        BEGIN
-          DECLARE @ConstraintNameMember NVARCHAR(200)
-          SELECT @ConstraintNameMember = name 
-          FROM sys.default_constraints 
-          WHERE parent_object_id = object_id('branches') 
-            AND parent_column_id = COLUMNPROPERTY(object_id('branches'), 'member_count', 'ColumnId')
-          IF @ConstraintNameMember IS NOT NULL
-            EXEC('ALTER TABLE branches DROP CONSTRAINT ' + @ConstraintNameMember)
-          ALTER TABLE branches DROP COLUMN member_count
-        END
-      `);
-
-      await sql.query(
-        "IF COL_LENGTH('branches', 'branch_type_id') IS NULL ALTER TABLE branches ADD branch_type_id NVARCHAR(50);",
-      );
-
-      await sql.query(
-        "ALTER TABLE posts ALTER COLUMN image_url NVARCHAR(MAX);",
-      );
-      await sql.query(
-        "ALTER TABLE bch_members ALTER COLUMN image_url NVARCHAR(MAX);",
-      );
-      await sql.query(
-        "ALTER TABLE gallery_photos ALTER COLUMN image_url NVARCHAR(MAX);",
-      );
-      await sql.query(`
-        IF COL_LENGTH('gallery_photos', 'file_name') IS NULL
-        ALTER TABLE gallery_photos ADD file_name NVARCHAR(255);
-      `);
-
-      // Seed Admin
-      const adminCheck = await sql.query(
-        "SELECT COUNT(*) as count FROM admins",
-      );
+      // Seed admin default in MSSQL
+      const adminCheck = await sql.query('SELECT COUNT(*) as count FROM [taiKhoanAdmin]');
       if (adminCheck.recordset[0].count === 0) {
-        const request = new sql.Request();
-        request.input("username", mockAdmin.username);
-        request.input("password", mockAdmin.password);
-        await request.query(
-          "INSERT INTO admins (username, password) VALUES (@username, @password)",
-        );
+        const req = new sql.Request();
+        req.input("user", mockAdmin.tenDangNhap);
+        req.input("pass", mockAdmin.matKhau);
+        await req.query('INSERT INTO [taiKhoanAdmin] ([tenDangNhap], [matKhau]) VALUES (@user, @pass)');
       }
 
-      // Seed Posts
-      const postsCheck = await sql.query("SELECT COUNT(*) as count FROM posts");
-      if (postsCheck.recordset[0].count === 0) {
-        for (const p of mockPosts) {
-          const request = new sql.Request();
-          request.input("id", p.id);
-          request.input("title", p.title);
-          request.input("summary", p.summary);
-          request.input("content", p.content);
-          request.input("category", p.category);
-          request.input("imageUrl", p.imageUrl);
-          request.input("date", p.date);
-          request.input("author", p.author);
-          request.input("views", p.views);
-          request.input("isHot", p.isHot ? 1 : 0);
-          await request.query(`
-            INSERT INTO posts (id, title, summary, content, category, image_url, date, author, views, is_hot)
-            VALUES (@id, @title, @summary, @content, @category, @imageUrl, @date, @author, @views, @isHot)
-          `);
-        }
-      }
-
-      // Seed Documents
-      const docsCheck = await sql.query(
-        "SELECT COUNT(*) as count FROM documents",
-      );
-      if (docsCheck.recordset[0].count === 0) {
-        for (const d of mockDocs) {
-          const request = new sql.Request();
-          request.input("id", d.id);
-          request.input("title", d.title);
-          request.input("docNo", d.docNo);
-          request.input("date", d.date);
-          request.input("category", d.category);
-          request.input("fileUrl", d.fileUrl);
-          await request.query(`
-            INSERT INTO documents (id, title, doc_no, date, category, file_url)
-            VALUES (@id, @title, @docNo, @date, @category, @fileUrl)
-          `);
-        }
-      }
-
-      // Seed BCH Members
-      const bchCheck = await sql.query(
-        "SELECT COUNT(*) as count FROM bch_members",
-      );
-      if (bchCheck.recordset[0].count === 0) {
-        for (const m of mockBchMembers) {
-          const request = new sql.Request();
-          request.input("id", m.id);
-          request.input("name", m.name);
-          request.input("position", m.position);
-          request.input("email", m.email);
-          request.input("phone", m.phone);
-          request.input("imageUrl", m.imageUrl);
-          request.input("responsibility", m.responsibility);
-          request.input("displayOrder", m.displayOrder);
-          await request.query(`
-            INSERT INTO bch_members (id, name, position, email, phone, image_url, responsibility, display_order)
-            VALUES (@id, @name, @position, @email, @phone, @imageUrl, @responsibility, @displayOrder)
-          `);
-        }
-      }
-
-      // Seed Intro Settings
-      const introCheck = await sql.query(
-        "SELECT COUNT(*) as count FROM intro_settings",
-      );
+      // Seed intro default in MSSQL
+      const introCheck = await sql.query('SELECT COUNT(*) as count FROM [intro]');
       if (introCheck.recordset[0].count === 0) {
-        const request = new sql.Request();
-        request.input("id", mockIntroSettings.id);
-        request.input("historyContent", mockIntroSettings.historyContent);
-        request.input("statMembers", mockIntroSettings.statMembers);
-        request.input("statBranches", mockIntroSettings.statBranches);
-        request.input("branchesContent", mockIntroSettings.branchesContent);
-        await request.query(`
-          INSERT INTO intro_settings (id, history_content, stat_members, stat_branches, branches_content)
-          VALUES (@id, @historyContent, @statMembers, @statBranches, @branchesContent)
-        `);
+        await sql.query('INSERT INTO [intro] ([id], [lichSu], [soLuongDoanVien], [soLuongChiDoan], [thongTinChiDoan]) VALUES (1, \'\', \'0\', \'0\', \'\')');
       }
 
-      // Seed Branches
-      const branchesCheck = await sql.query(
-        "SELECT COUNT(*) as count FROM branches",
-      );
-      if (branchesCheck.recordset[0].count === 0) {
-        for (const b of mockBranches) {
-          const request = new sql.Request();
-          request.input("id", b.id);
-          request.input("name", b.name);
-          request.input("groupName", b.groupName);
-          request.input("displayOrder", b.displayOrder);
-          request.input("memberCount", b.memberCount);
-          await request.query(`
-            INSERT INTO branches (id, name, group_name, display_order, member_count)
-            VALUES (@id, @name, @groupName, @displayOrder, @memberCount)
-          `);
-        }
-      }
-
-      console.log("MS SQL Server schema checked and seeded.");
+      console.log("MS SQL Server schema initialized successfully.");
     } catch (err) {
-      console.warn(
-        "⚠️ Failed to connect to Microsoft SQL Server:",
-        err.message,
-      );
-      console.warn(
-        "⚠️ Falling back to built-in IN-MEMORY mock database store.",
-      );
+      console.warn("⚠️ MS SQL Server Connection/Initialization Failed:", err.message);
+      console.warn("⚠️ Falling back to built-in IN-MEMORY mock database store.");
       useMockDb = true;
       initMockDbStore();
     }

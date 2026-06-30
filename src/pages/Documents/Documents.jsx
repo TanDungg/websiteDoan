@@ -13,7 +13,7 @@ export default function Documents() {
     loading,
     execute: loadDocs,
   } = useApi(
-    useCallback(() => apiService.get("/api/documents"), [])
+    useCallback(() => apiService.get("/api/vanBan"), [])
   );
 
   const docs = data || [];
@@ -34,10 +34,10 @@ export default function Documents() {
 
   // Filtered documents
   const filteredDocs = docs.filter((doc) => {
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || doc.loaiVanBan === selectedCategory;
     const matchesSearch = 
-      doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.docNo.toLowerCase().includes(searchTerm.toLowerCase());
+      (doc.tenVanBan || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (doc.soHieu || "").toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -100,29 +100,29 @@ export default function Documents() {
             <tbody>
               {filteredDocs.map((doc) => (
                 <tr key={doc.id}>
-                  <td className="doc-number-cell">{doc.docNo}</td>
+                  <td className="doc-number-cell">{doc.soHieu}</td>
                   <td>
                     <div className="doc-title-cell">
                       <FileText size={18} className="doc-file-icon" />
-                      <span className="doc-title-text">{doc.title}</span>
+                      <span className="doc-title-text">{doc.tenVanBan}</span>
                     </div>
                   </td>
                   <td>
-                    <span className={`doc-cat-tag cat-${doc.category}`}>
-                      {doc.category}
+                    <span className={`doc-cat-tag cat-${doc.loaiVanBan}`}>
+                      {doc.loaiVanBan}
                     </span>
                   </td>
                   <td className="doc-date-cell">
                     <Calendar size={14} style={{ marginRight: '6px', color: '#888' }} />
-                    {formatDate(doc.date)}
+                    {formatDate(doc.ngayBanHanh)}
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <a 
-                      href={doc.fileUrl || '#'} 
+                      href={doc.duongDanFile || '#'} 
                       className="doc-download-btn" 
                       title="Tải văn bản"
                       onClick={(e) => {
-                        if (doc.fileUrl === '#') {
+                        if (doc.duongDanFile === '#') {
                           e.preventDefault();
                           alert('Văn bản này hiện chưa đính kèm file tải thực tế.');
                         }

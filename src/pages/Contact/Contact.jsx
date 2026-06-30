@@ -3,6 +3,16 @@ import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 import { FormItem } from "src/components";
 import "./Contact.css";
 
+const getChucVuString = (pos) => {
+  switch (Number(pos)) {
+    case 1: return "Bí thư";
+    case 2: return "Phó Bí thư";
+    case 3: return "Ủy viên BTV";
+    case 4: return "Ủy viên BCH";
+    default: return "Cán bộ BCH";
+  }
+};
+
 export default function Contact() {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -17,15 +27,19 @@ export default function Contact() {
   const [bchContacts, setBchContacts] = useState([]);
 
   useEffect(() => {
-    fetch("/api/intro")
+    fetch("/api/gioiThieu")
       .then((res) => res.json())
       .then((data) => {
         if (data.bchMembers) {
-          const contacts = data.bchMembers.filter((m) => m.phone && m.phone.trim());
+          const contacts = data.bchMembers.filter(
+            (m) => m.soDienThoai && m.soDienThoai.trim(),
+          );
           setBchContacts(contacts);
         }
       })
-      .catch((err) => console.error("Failed to load contacts for Contact page:", err));
+      .catch((err) =>
+        console.error("Failed to load contacts for Contact page:", err),
+      );
   }, []);
 
   const unitsList = [
@@ -63,12 +77,21 @@ export default function Contact() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      fetch("/api/feedbacks", {
+      const payload = {
+        hoTen: formData.fullName,
+        soDienThoai: formData.phone,
+        email: formData.email,
+        donVi: formData.unit,
+        tieuDe: formData.subject,
+        noiDung: formData.message
+      };
+
+      fetch("/api/gopY", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
         .then((res) => res.json())
         .then((data) => {
@@ -95,10 +118,10 @@ export default function Contact() {
 
   return (
     <div className="contact-page container">
-      <h1 className="section-title">Liên hệ & Ý kiến đóng góp</h1>
+      <h1 className="section-title">Liên hệ - Góp ý trực tuyến</h1>
 
       <div className="contact-grid">
-        {/* Contact info and Map */}
+        {/* Contact info column */}
         <div className="contact-info-column">
           <div className="info-cards-grid">
             <div className="contact-card-info card address-card">
@@ -123,20 +146,26 @@ export default function Contact() {
                   {bchContacts.length > 0 ? (
                     bchContacts.map((contact) => (
                       <div key={contact.id} className="contact-card-line">
-                        <span className="label">{contact.position}:</span>
+                        <span className="label">{getChucVuString(contact.chucVu)}:</span>
                         <a
-                          href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`}
+                          href={`tel:${contact.soDienThoai.replace(/[^0-9+]/g, "")}`}
                           className="val"
                         >
-                          {contact.phone}
+                          {contact.soDienThoai}
                         </a>
                         <span className="divider">•</span>
-                        <span className="val">{contact.name}</span>
+                        <span className="val">{contact.hoTen}</span>
                       </div>
                     ))
                   ) : (
                     <div className="contact-card-line">
-                      <span className="val" style={{ color: "var(--text-muted)", fontStyle: "italic" }}>
+                      <span
+                        className="val"
+                        style={{
+                          color: "var(--text-muted)",
+                          fontStyle: "italic",
+                        }}
+                      >
                         (Thông tin liên hệ đang cập nhật)
                       </span>
                     </div>

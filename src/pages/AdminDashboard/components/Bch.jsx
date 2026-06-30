@@ -2,22 +2,43 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check } from "lucide-react";
 import { Table, FormItem } from "../../../components";
 
+const getChucVuString = (pos) => {
+  switch (Number(pos)) {
+    case 1:
+      return "Bí thư Đoàn xã";
+    case 2:
+      return "Phó Bí thư Đoàn xã";
+    case 3:
+      return "Ủy viên Ban Thường vụ";
+    case 4:
+      return "Ủy viên Ban Chấp hành";
+    default:
+      return "Thành viên BCH";
+  }
+};
+
+const positionOptions = [
+  { value: 1, label: "Bí thư Đoàn xã" },
+  { value: 2, label: "Phó Bí thư Đoàn xã" },
+  { value: 3, label: "Ủy viên Ban Thường vụ" },
+  { value: 4, label: "Ủy viên Ban Chấp hành" },
+];
+
 export default function Bch() {
   const [bchMembers, setBchMembers] = useState([]);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [memberForm, setMemberForm] = useState({
-    name: "",
-    position: "",
+    hoTen: "",
+    chucVu: 4,
     email: "",
-    phone: "",
-    imageUrl: "",
-    responsibility: "",
-    displayOrder: 1,
+    soDienThoai: "",
+    anhDaiDien: "",
+    nhiemVu: "",
   });
 
   const loadBch = () => {
-    fetch("/api/intro")
+    fetch("/api/gioiThieu")
       .then((res) => res.json())
       .then((data) => {
         if (data.bchMembers) {
@@ -35,27 +56,22 @@ export default function Bch() {
     if (member) {
       setEditingMember(member);
       setMemberForm({
-        name: member.name,
-        position: member.position,
+        hoTen: member.hoTen,
+        chucVu: Number(member.chucVu) || 4,
         email: member.email,
-        phone: member.phone,
-        imageUrl:
-          member.imageUrl ||
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80",
-        responsibility: member.responsibility || "",
-        displayOrder: member.displayOrder || 1,
+        soDienThoai: member.soDienThoai,
+        anhDaiDien: member.anhDaiDien || "",
+        nhiemVu: member.nhiemVu || "",
       });
     } else {
       setEditingMember(null);
       setMemberForm({
-        name: "",
-        position: "",
+        hoTen: "",
+        chucVu: 4,
         email: "",
-        phone: "",
-        imageUrl:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80",
-        responsibility: "",
-        displayOrder: bchMembers.length + 1,
+        soDienThoai: "",
+        anhDaiDien: "",
+        nhiemVu: "",
       });
     }
     setShowMemberModal(true);
@@ -63,9 +79,16 @@ export default function Bch() {
 
   const handleMemberSubmit = (e) => {
     e.preventDefault();
+    if (!memberForm.anhDaiDien || !memberForm.anhDaiDien.trim()) {
+      alert(
+        "Bạn vui lòng tải lên hoặc dán liên kết ảnh đại diện cho thành viên BCH!",
+      );
+      return;
+    }
+
     const url = editingMember
-      ? `/api/bch-members/${editingMember.id}`
-      : "/api/bch-members";
+      ? `/api/thanhVienBch/${editingMember.id}`
+      : "/api/thanhVienBch";
     const method = editingMember ? "PUT" : "POST";
 
     fetch(url, {
@@ -77,7 +100,11 @@ export default function Bch() {
     })
       .then((res) => res.json())
       .then(() => {
-        alert(editingMember ? "Cập nhật thành viên BCH thành công!" : "Thêm thành viên BCH mới thành công!");
+        alert(
+          editingMember
+            ? "Cập nhật thành viên BCH thành công!"
+            : "Thêm thành viên BCH mới thành công!",
+        );
         setShowMemberModal(false);
         loadBch();
       })
@@ -88,10 +115,8 @@ export default function Bch() {
   };
 
   const handleDeleteMember = (id) => {
-    if (
-      window.confirm("Bạn có chắc chắn muốn xóa thành viên BCH này không?")
-    ) {
-      fetch(`/api/bch-members/${id}`, {
+    if (window.confirm("Bạn có chắc chắn muốn xóa thành viên BCH này không?")) {
+      fetch(`/api/thanhVienBch/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -125,7 +150,7 @@ export default function Bch() {
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            setMemberForm((prev) => ({ ...prev, imageUrl: data.url }));
+            setMemberForm((prev) => ({ ...prev, anhDaiDien: data.url }));
           } else {
             alert("Tải ảnh lên thất bại!");
           }
@@ -140,17 +165,17 @@ export default function Bch() {
   const columns = [
     {
       title: "Họ tên",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "hoTen",
+      key: "hoTen",
       width: "25%",
       render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
     },
     {
       title: "Chức vụ",
-      dataIndex: "position",
-      key: "position",
-      width: "20%",
-      render: (position) => (
+      dataIndex: "chucVu",
+      key: "chucVu",
+      width: "25%",
+      render: (chucVu) => (
         <span
           className="badge badge-primary"
           style={{
@@ -161,7 +186,7 @@ export default function Bch() {
             borderRadius: "4px",
           }}
         >
-          {position}
+          {getChucVuString(chucVu)}
         </span>
       ),
     },
@@ -171,24 +196,17 @@ export default function Bch() {
       width: "25%",
       render: (_, record) => (
         <div style={{ fontSize: "0.85rem" }}>
-          <div>📞 {record.phone}</div>
-          <div>✉️ {record.email}</div>
+          {record.soDienThoai && <div>📞 {record.soDienThoai}</div>}
+          {record.email && <div>✉️ {record.email}</div>}
         </div>
       ),
     },
     {
       title: "Nhiệm vụ",
-      dataIndex: "responsibility",
-      key: "responsibility",
+      dataIndex: "nhiemVu",
+      key: "nhiemVu",
       width: "18%",
       render: (text) => <span style={{ fontSize: "0.85rem" }}>{text}</span>,
-    },
-    {
-      title: "Thứ tự",
-      dataIndex: "displayOrder",
-      key: "displayOrder",
-      width: "8%",
-      align: "center",
     },
     {
       title: "Thao tác",
@@ -262,17 +280,21 @@ export default function Bch() {
                   label="Họ và tên"
                   type="text"
                   required
-                  value={memberForm.name}
-                  onChange={(val) => setMemberForm({ ...memberForm, name: val })}
+                  value={memberForm.hoTen}
+                  onChange={(val) =>
+                    setMemberForm({ ...memberForm, hoTen: val })
+                  }
                 />
 
                 <FormItem
                   label="Chức danh / Chức vụ"
-                  type="text"
+                  type="select"
                   required
-                  placeholder="Ví dụ: Bí thư Đoàn xã"
-                  value={memberForm.position}
-                  onChange={(val) => setMemberForm({ ...memberForm, position: val })}
+                  value={memberForm.chucVu}
+                  onChange={(val) =>
+                    setMemberForm({ ...memberForm, chucVu: Number(val) })
+                  }
+                  options={positionOptions}
                 />
 
                 <div className="row" style={{ display: "flex", gap: "15px" }}>
@@ -280,8 +302,10 @@ export default function Bch() {
                     label="Số điện thoại"
                     type="text"
                     required
-                    value={memberForm.phone}
-                    onChange={(val) => setMemberForm({ ...memberForm, phone: val })}
+                    value={memberForm.soDienThoai}
+                    onChange={(val) =>
+                      setMemberForm({ ...memberForm, soDienThoai: val })
+                    }
                     style={{ flex: 1 }}
                   />
                   <FormItem
@@ -289,45 +313,140 @@ export default function Bch() {
                     type="email"
                     required
                     value={memberForm.email}
-                    onChange={(val) => setMemberForm({ ...memberForm, email: val })}
+                    onChange={(val) =>
+                      setMemberForm({ ...memberForm, email: val })
+                    }
                     style={{ flex: 1 }}
                   />
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Ảnh đại diện *</label>
-                  <div className="image-upload-wrapper">
-                    <img
-                      src={memberForm.imageUrl}
-                      alt="Preview"
-                      className="image-preview-thumbnail"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80";
-                      }}
-                    />
-                    <label className="image-upload-btn-label">
-                      Tải ảnh từ máy
-                      <input
-                        type="file"
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        onChange={handleImageUpload}
+                  <div
+                    className="image-upload-wrapper"
+                    style={{
+                      display: "flex",
+                      gap: "15px",
+                      alignItems: "center",
+                    }}
+                  >
+                    {memberForm.anhDaiDien ? (
+                      <img
+                        src={memberForm.anhDaiDien}
+                        alt="Preview"
+                        className="image-preview-thumbnail"
+                        style={{
+                          width: "70px",
+                          height: "70px",
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                          border: "1px solid #cbd5e1",
+                        }}
                       />
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Hoặc nhập liên kết ảnh (URL)..."
-                      style={{ flex: 1 }}
-                      value={memberForm.imageUrl}
-                      onChange={(e) =>
-                        setMemberForm({
-                          ...memberForm,
-                          imageUrl: e.target.value,
-                        })
-                      }
-                    />
+                    ) : (
+                      <div
+                        style={{
+                          width: "70px",
+                          height: "70px",
+                          borderRadius: "8px",
+                          border: "1px dashed #cbd5e1",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#f8fafc",
+                          color: "#64748b",
+                          fontSize: "0.75rem",
+                          fontWeight: 500,
+                          textAlign: "center",
+                          padding: "4px",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        Chưa có ảnh
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <label
+                          className="image-upload-btn-label"
+                          style={{
+                            margin: 0,
+                            cursor: "pointer",
+                            padding: "6px 12px",
+                            border: "1px dashed var(--primary)",
+                            borderRadius: "4px",
+                            backgroundColor: "var(--primary-light)",
+                            color: "var(--primary)",
+                            fontWeight: 600,
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          Tải ảnh từ máy
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={handleImageUpload}
+                          />
+                        </label>
+                        {memberForm.anhDaiDien &&
+                          memberForm.anhDaiDien.startsWith("data:") && (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              style={{
+                                padding: "4px 10px",
+                                fontSize: "0.75rem",
+                                backgroundColor: "#fee2e2",
+                                color: "#dc2626",
+                                border: "1px solid #fca5a5",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                setMemberForm({ ...memberForm, anhDaiDien: "" })
+                              }
+                            >
+                              Xóa ảnh đã tải
+                            </button>
+                          )}
+                      </div>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Hoặc dán liên kết ảnh (URL) vào đây..."
+                        style={{ width: "100%" }}
+                        value={
+                          memberForm.anhDaiDien &&
+                          memberForm.anhDaiDien.startsWith("data:")
+                            ? "[Ảnh đã tải từ máy tính]"
+                            : memberForm.anhDaiDien
+                        }
+                        disabled={
+                          memberForm.anhDaiDien &&
+                          memberForm.anhDaiDien.startsWith("data:")
+                        }
+                        onChange={(e) =>
+                          setMemberForm({
+                            ...memberForm,
+                            anhDaiDien: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -336,16 +455,10 @@ export default function Bch() {
                   type="textarea"
                   rows="2"
                   placeholder="Ví dụ: Phụ trách chung, Chỉ đạo toàn diện công tác Đoàn và phong trào thanh thiếu nhi xã..."
-                  value={memberForm.responsibility}
-                  onChange={(val) => setMemberForm({ ...memberForm, responsibility: val })}
-                />
-
-                <FormItem
-                  label="Thứ tự hiển thị"
-                  type="number"
-                  required
-                  value={memberForm.displayOrder}
-                  onChange={(val) => setMemberForm({ ...memberForm, displayOrder: parseInt(val) || 0 })}
+                  value={memberForm.nhiemVu}
+                  onChange={(val) =>
+                    setMemberForm({ ...memberForm, nhiemVu: val })
+                  }
                 />
               </div>
 

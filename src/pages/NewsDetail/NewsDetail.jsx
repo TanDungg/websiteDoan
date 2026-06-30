@@ -18,11 +18,11 @@ export default function NewsDetail() {
   } = useApi(
     useCallback(async (postId) => {
       // 1. Fetch current post
-      const post = await apiService.get(`/api/posts/${postId}`);
+      const post = await apiService.get(`/api/baiViet/${postId}`);
       // 2. Fetch related posts by category
       let related = [];
       try {
-        const postsData = await apiService.get(`/api/posts?category=${post.category}`);
+        const postsData = await apiService.get(`/api/baiViet?category=${post.danhMuc}`);
         related = postsData
           .filter((item) => item.id.toString() !== postId.toString())
           .slice(0, 3);
@@ -69,7 +69,7 @@ export default function NewsDetail() {
   }
 
   // Find category display name
-  const catName = newsCategories.find(c => c.id === newsItem.category)?.name || 'Tin tức';
+  const catName = newsCategories.find(c => c.id === newsItem.danhMuc)?.name || 'Tin tức';
 
   // Format date display (DD/MM/YYYY)
   const formatDate = (dateStr) => {
@@ -86,40 +86,40 @@ export default function NewsDetail() {
         <span className="separator">/</span>
         <Link to="/tin-tuc">Tin tức</Link>
         <span className="separator">/</span>
-        <span className="current">{newsItem.title}</span>
+        <span className="current">{newsItem.tieuDe}</span>
       </nav>
 
       <div className="layout-grid">
         <main className="news-detail-main card">
           <div className="detail-header">
-            <span className={`badge badge-${newsItem.category} detail-badge`}>{catName}</span>
-            <h1 className="detail-title">{newsItem.title}</h1>
+            <span className={`badge badge-${newsItem.danhMuc} detail-badge`}>{catName}</span>
+            <h1 className="detail-title">{newsItem.tieuDe}</h1>
             
             <div className="detail-meta">
               <span className="meta-item">
                 <Calendar size={16} />
-                <span>{formatDate(newsItem.date)}</span>
+                <span>{formatDate(newsItem.ngayDang)}</span>
               </span>
               <span className="meta-item">
                 <User size={16} />
-                <span>{newsItem.author}</span>
+                <span>{newsItem.tacGia}</span>
               </span>
               <span className="meta-item">
                 <Eye size={16} />
-                <span>{newsItem.views || 0} lượt xem</span>
+                <span>{newsItem.luotXem || 0} lượt xem</span>
               </span>
             </div>
           </div>
 
           {/* Featured Image */}
           <div className="detail-image-wrapper">
-            <img src={newsItem.imageUrl} alt={newsItem.title} className="detail-image" />
+            <img src={newsItem.anhDaiDien} alt={newsItem.tieuDe} className="detail-image" />
           </div>
 
           {/* Article Content */}
           <div 
             className="detail-content"
-            dangerouslySetInnerHTML={{ __html: newsItem.content }}
+            dangerouslySetInnerHTML={{ __html: newsItem.noiDung }}
           />
 
           {/* Action / Share section */}
@@ -149,11 +149,11 @@ export default function NewsDetail() {
               <div className="related-grid">
                 {relatedPosts.map((post) => (
                   <div key={post.id} className="related-card card">
-                    <img src={post.imageUrl} alt={post.title} className="related-img" />
+                    <img src={post.anhDaiDien} alt={post.tieuDe} className="related-img" />
                     <div className="related-info">
-                      <span className="related-date">{formatDate(post.date)}</span>
+                      <span className="related-date">{formatDate(post.ngayDang)}</span>
                       <h4 className="related-title">
-                        <Link to={`/tin-tuc/${post.id}`}>{post.title}</Link>
+                        <Link to={`/tin-tuc/${post.id}`}>{post.tieuDe}</Link>
                       </h4>
                     </div>
                   </div>

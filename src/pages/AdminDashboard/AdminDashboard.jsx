@@ -44,7 +44,7 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   const loadFeedbacks = () => {
-    fetch("/api/feedbacks")
+    fetch("/api/gopY")
       .then((res) => res.json())
       .then((data) => setFeedbacks(data))
       .catch((err) => console.error("Error fetching feedbacks:", err));
@@ -57,7 +57,7 @@ export default function AdminDashboard() {
 
   const handleDeleteFeedback = (id) => {
     if (window.confirm("Xóa ý kiến phản hồi này?")) {
-      fetch(`/api/feedbacks/${id}`, {
+      fetch(`/api/gopY/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())

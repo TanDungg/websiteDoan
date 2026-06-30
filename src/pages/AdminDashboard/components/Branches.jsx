@@ -14,8 +14,8 @@ export default function Branches() {
   // Form states
   const [editingBranch, setEditingBranch] = useState(null);
   const [branchForm, setBranchForm] = useState({
-    name: "",
-    branchTypeId: "",
+    tenChiDoan: "",
+    loaiChiDoanId: "",
   });
 
   const [newTypeName, setNewTypeName] = useState("");
@@ -24,7 +24,7 @@ export default function Branches() {
 
   const loadData = () => {
     // Load branches
-    fetch("/api/intro")
+    fetch("/api/gioiThieu")
       .then((res) => res.json())
       .then((data) => {
         if (data.branches) {
@@ -34,7 +34,7 @@ export default function Branches() {
       .catch((err) => console.error("Error fetching branches:", err));
 
     // Load branch types
-    fetch("/api/branch-types")
+    fetch("/api/loaiChiDoan")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -44,7 +44,7 @@ export default function Branches() {
       .catch((err) => console.error("Error fetching branch types:", err));
 
     // Load members to count dynamically
-    fetch("/api/union-members")
+    fetch("/api/doanVien")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -63,10 +63,10 @@ export default function Branches() {
     e.preventDefault();
     if (!newTypeName.trim()) return;
 
-    fetch("/api/branch-types", {
+    fetch("/api/loaiChiDoan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newTypeName.trim() }),
+      body: JSON.stringify({ tenLoai: newTypeName.trim() }),
     })
       .then((res) => res.json())
       .then(() => {
@@ -83,10 +83,10 @@ export default function Branches() {
   const handleUpdateType = (id) => {
     if (!editTypeName.trim()) return;
 
-    fetch(`/api/branch-types/${id}`, {
+    fetch(`/api/loaiChiDoan/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editTypeName.trim() }),
+      body: JSON.stringify({ tenLoai: editTypeName.trim() }),
     })
       .then((res) => res.json())
       .then(() => {
@@ -107,7 +107,7 @@ export default function Branches() {
         "Bạn có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!"
       )
     ) {
-      fetch(`/api/branch-types/${id}`, {
+      fetch(`/api/loaiChiDoan/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -127,14 +127,14 @@ export default function Branches() {
     if (branch) {
       setEditingBranch(branch);
       setBranchForm({
-        name: branch.name,
-        branchTypeId: branch.branchTypeId || "",
+        tenChiDoan: branch.tenChiDoan,
+        loaiChiDoanId: branch.loaiChiDoanId || "",
       });
     } else {
       setEditingBranch(null);
       setBranchForm({
-        name: "",
-        branchTypeId: branchTypes[0]?.id || "",
+        tenChiDoan: "",
+        loaiChiDoanId: branchTypes[0]?.id || "",
       });
     }
     setShowBranchModal(true);
@@ -142,12 +142,12 @@ export default function Branches() {
 
   const handleBranchSubmit = (e) => {
     e.preventDefault();
-    if (!branchForm.branchTypeId) {
+    if (!branchForm.loaiChiDoanId) {
       alert("Bạn vui lòng thiết lập phân loại cho chi đoàn này trước!");
       return;
     }
 
-    const url = editingBranch ? `/api/branches/${editingBranch.id}` : "/api/branches";
+    const url = editingBranch ? `/api/chiDoan/${editingBranch.id}` : "/api/chiDoan";
     const method = editingBranch ? "PUT" : "POST";
 
     fetch(url, {
@@ -175,7 +175,7 @@ export default function Branches() {
         "Bạn có chắc chắn muốn xóa chi đoàn trực thuộc này không?"
       )
     ) {
-      fetch(`/api/branches/${id}`, {
+      fetch(`/api/chiDoan/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -194,8 +194,8 @@ export default function Branches() {
   const columns = [
     {
       title: "Tên chi đoàn",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "tenChiDoan",
+      key: "tenChiDoan",
       width: "35%",
       render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
     },
@@ -225,7 +225,7 @@ export default function Branches() {
       width: "15%",
       align: "center",
       render: (_, record) => {
-        const count = members.filter((m) => m.branch_id === record.id).length;
+        const count = members.filter((m) => m.chiDoanId === record.id).length;
         return <span style={{ fontWeight: 600, color: "var(--primary)" }}>{count}</span>;
       },
     },
@@ -332,19 +332,19 @@ export default function Branches() {
           type="text"
           required
           placeholder="Ví dụ: Chi đoàn Thôn Tam Anh 1"
-          value={branchForm.name}
-          onChange={(val) => setBranchForm({ ...branchForm, name: val })}
+          value={branchForm.tenChiDoan}
+          onChange={(val) => setBranchForm({ ...branchForm, tenChiDoan: val })}
         />
 
         <FormItem
           label="Phân loại Chi đoàn"
           type="select"
           required
-          value={branchForm.branchTypeId}
-          onChange={(val) => setBranchForm({ ...branchForm, branchTypeId: val })}
+          value={branchForm.loaiChiDoanId}
+          onChange={(val) => setBranchForm({ ...branchForm, loaiChiDoanId: val })}
           options={[
             { value: "", label: "-- Chọn phân loại chi đoàn --" },
-            ...branchTypes.map((type) => ({ value: type.id, label: type.name }))
+            ...branchTypes.map((type) => ({ value: type.id, label: type.tenLoai }))
           ]}
         />
       </Modal>
@@ -418,7 +418,7 @@ export default function Branches() {
                           </button>
                         </div>
                       ) : (
-                        <span style={{ fontWeight: 500 }}>{type.name}</span>
+                        <span style={{ fontWeight: 500 }}>{type.tenLoai}</span>
                       )}
                     </td>
                     <td style={{ padding: "10px 15px", textAlign: "center" }}>
@@ -429,7 +429,7 @@ export default function Branches() {
                             type="button"
                             onClick={() => {
                               setEditingType(type);
-                              setEditTypeName(type.name);
+                              setEditTypeName(type.tenLoai);
                             }}
                           >
                             <Edit size={14} />

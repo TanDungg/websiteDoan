@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, Trash2, Edit, Check, Upload, Image, X } from "lucide-react";
+import { Plus, Trash2, Edit, Check, Upload, X } from "lucide-react";
 import { newsCategories } from "src/data/mockData";
 import { Table, Modal, FormItem } from "src/components";
 import { generateUUID } from "src/utils/Commons";
@@ -13,17 +13,17 @@ export default function Posts() {
   const [isImageCardHovered, setIsImageCardHovered] = useState(false);
   const [postForm, setPostForm] = useState({
     id: "",
-    title: "",
-    summary: "",
-    content: "",
-    category: "hoat-dong",
-    imageUrl: "",
-    author: "BCH Đoàn xã",
-    isHot: false,
+    tieuDe: "",
+    tomTat: "",
+    noiDung: "",
+    danhMuc: "hoat-dong",
+    anhDaiDien: "",
+    tacGia: "BCH Đoàn xã",
+    tinNoiBat: false,
   });
 
   const loadPosts = () => {
-    fetch("/api/posts")
+    fetch("/api/baiViet")
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((err) => console.error("Error fetching admin posts:", err));
@@ -39,25 +39,25 @@ export default function Posts() {
       setEditingPost(post);
       setPostForm({
         id: post.id,
-        title: post.title,
-        summary: post.summary,
-        content: post.content,
-        category: post.category,
-        imageUrl: post.imageUrl || "",
-        author: post.author,
-        isHot: post.isHot || false,
+        tieuDe: post.tieuDe,
+        tomTat: post.tomTat,
+        noiDung: post.noiDung,
+        danhMuc: post.danhMuc,
+        anhDaiDien: post.anhDaiDien || "",
+        tacGia: post.tacGia,
+        tinNoiBat: post.tinNoiBat || false,
       });
     } else {
       setEditingPost(null);
       setPostForm({
         id: generateUUID(),
-        title: "",
-        summary: "",
-        content: "",
-        category: "hoat-dong",
-        imageUrl: "",
-        author: "BCH Đoàn xã",
-        isHot: false,
+        tieuDe: "",
+        tomTat: "",
+        noiDung: "",
+        danhMuc: "hoat-dong",
+        anhDaiDien: "",
+        tacGia: "BCH Đoàn xã",
+        tinNoiBat: false,
       });
     }
     setShowPostModal(true);
@@ -66,7 +66,7 @@ export default function Posts() {
   const handlePostSubmit = async (e) => {
     e.preventDefault();
 
-    let finalImageUrl = postForm.imageUrl;
+    let finalImageUrl = postForm.anhDaiDien;
 
     if (tempImage) {
       const fileId = generateUUID();
@@ -103,7 +103,7 @@ export default function Posts() {
       return;
     }
 
-    const url = editingPost ? `/api/posts/${editingPost.id}` : "/api/posts";
+    const url = editingPost ? `/api/baiViet/${editingPost.id}` : "/api/baiViet";
     const method = editingPost ? "PUT" : "POST";
 
     fetch(url, {
@@ -113,7 +113,7 @@ export default function Posts() {
       },
       body: JSON.stringify({
         ...postForm,
-        imageUrl: finalImageUrl,
+        anhDaiDien: finalImageUrl,
       }),
     })
       .then((res) => res.json())
@@ -134,7 +134,7 @@ export default function Posts() {
 
   const handleDeletePost = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
-      fetch(`/api/posts/${id}`, {
+      fetch(`/api/baiViet/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -168,15 +168,15 @@ export default function Posts() {
   const columns = [
     {
       title: "Tiêu đề bài viết",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "tieuDe",
+      key: "tieuDe",
       width: "40%",
       render: (text) => <span className="post-title-cell">{text}</span>,
     },
     {
       title: "Chuyên mục",
-      dataIndex: "category",
-      key: "category",
+      dataIndex: "danhMuc",
+      key: "danhMuc",
       width: "20%",
       render: (category) => (
         <span className={`badge badge-${category}`}>
@@ -186,14 +186,14 @@ export default function Posts() {
     },
     {
       title: "Ngày đăng",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "ngayDang",
+      key: "ngayDang",
       width: "15%",
     },
     {
       title: "Tác giả",
-      dataIndex: "author",
-      key: "author",
+      dataIndex: "tacGia",
+      key: "tacGia",
       width: "13%",
     },
     {
@@ -269,8 +269,8 @@ export default function Posts() {
           type="text"
           required
           placeholder="Nhập tiêu đề bài viết..."
-          value={postForm.title}
-          onChange={(val) => setPostForm({ ...postForm, title: val })}
+          value={postForm.tieuDe}
+          onChange={(val) => setPostForm({ ...postForm, tieuDe: val })}
         />
 
         <div style={{ display: "flex", gap: "20px" }}>
@@ -278,8 +278,8 @@ export default function Posts() {
             label="Chuyên mục"
             type="select"
             required
-            value={postForm.category}
-            onChange={(val) => setPostForm({ ...postForm, category: val })}
+            value={postForm.danhMuc}
+            onChange={(val) => setPostForm({ ...postForm, danhMuc: val })}
             options={newsCategories.map((c) => ({
               value: c.id,
               label: c.name,
@@ -308,8 +308,8 @@ export default function Posts() {
                 padding: "0 16px",
                 border: "1px solid #cbd5e1",
                 borderRadius: "6px",
-                backgroundColor: postForm.isHot ? "#f0fdf4" : "#f8fafc",
-                borderColor: postForm.isHot ? "#22c55e" : "#cbd5e1",
+                backgroundColor: postForm.tinNoiBat ? "#f0fdf4" : "#f8fafc",
+                borderColor: postForm.tinNoiBat ? "#22c55e" : "#cbd5e1",
                 width: "100%",
                 height: "42px",
                 transition: "all 0.2s ease",
@@ -318,14 +318,14 @@ export default function Posts() {
               <button
                 type="button"
                 onClick={() =>
-                  setPostForm({ ...postForm, isHot: !postForm.isHot })
+                  setPostForm({ ...postForm, tinNoiBat: !postForm.tinNoiBat })
                 }
                 style={{
                   position: "relative",
                   width: "42px",
                   height: "22px",
                   borderRadius: "11px",
-                  backgroundColor: postForm.isHot ? "#22c55e" : "#cbd5e1",
+                  backgroundColor: postForm.tinNoiBat ? "#22c55e" : "#cbd5e1",
                   border: "none",
                   cursor: "pointer",
                   padding: 0,
@@ -338,7 +338,7 @@ export default function Posts() {
                   style={{
                     position: "absolute",
                     top: "2px",
-                    left: postForm.isHot ? "22px" : "2px",
+                    left: postForm.tinNoiBat ? "22px" : "2px",
                     width: "18px",
                     height: "18px",
                     borderRadius: "50%",
@@ -353,12 +353,12 @@ export default function Posts() {
                 style={{
                   fontWeight: 600,
                   fontSize: "0.85rem",
-                  color: postForm.isHot ? "#166534" : "#475569",
+                  color: postForm.tinNoiBat ? "#166534" : "#475569",
                   cursor: "pointer",
                   userSelect: "none",
                 }}
                 onClick={() =>
-                  setPostForm({ ...postForm, isHot: !postForm.isHot })
+                  setPostForm({ ...postForm, tinNoiBat: !postForm.tinNoiBat })
                 }
               >
                 Ghim tin nổi bật ở Banner Trang chủ
@@ -399,10 +399,10 @@ export default function Posts() {
             onMouseEnter={() => setIsImageCardHovered(true)}
             onMouseLeave={() => setIsImageCardHovered(false)}
           >
-            {tempImage || postForm.imageUrl ? (
+            {tempImage || postForm.anhDaiDien ? (
               <>
                 <img
-                  src={tempImage ? tempImage.previewUrl : postForm.imageUrl}
+                  src={tempImage ? tempImage.previewUrl : postForm.anhDaiDien}
                   alt="Preview Cover"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -448,118 +448,78 @@ export default function Posts() {
                     justifyContent: "center",
                     cursor: "pointer",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
-                    transition: "transform 0.2s ease",
-                    zIndex: 10,
+                    zIndex: 2,
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setTempImage(null);
-                    setPostForm({ ...postForm, imageUrl: "" });
+                    setPostForm({ ...postForm, anhDaiDien: "" });
                   }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = "scale(1.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = "scale(1)";
-                  }}
-                  title="Gỡ bỏ ảnh bìa"
                 >
                   <X size={16} />
                 </button>
               </>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "20px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    backgroundColor: isImageCardHovered
-                      ? "var(--primary-light)"
-                      : "#e2e8f0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: isImageCardHovered ? "var(--primary)" : "#64748b",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <Image size={24} />
-                </div>
+              <>
+                <Upload
+                  size={32}
+                  style={{ color: "#94a3b8", marginBottom: "8px" }}
+                />
                 <span
                   style={{
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: "0.9rem",
-                    color: "#334155",
+                    color: "#64748b",
                   }}
                 >
-                  Kéo thả hoặc nhấp chuột để tải ảnh bìa lên
+                  Tải ảnh bìa bài viết lên
                 </span>
-                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
-                  Định dạng hỗ trợ: JPG, PNG, WEBP, GIF
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "#94a3b8",
+                    marginTop: "4px",
+                  }}
+                >
+                  Hỗ trợ JPG, PNG, WEBP tối đa 10MB
                 </span>
-              </div>
+              </>
             )}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              marginTop: "10px",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                color: "#64748b",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Hoặc nhập liên kết ảnh (URL):
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Nhập liên kết ảnh bìa từ Internet (ví dụ: https://...)"
-              style={{ flex: 1, height: "36px" }}
-              value={postForm.imageUrl}
-              onChange={(e) => {
-                setTempImage(null);
-                setPostForm({ ...postForm, imageUrl: e.target.value });
-              }}
-            />
           </div>
         </div>
 
         <FormItem
-          label="Tóm tắt"
+          label="Tóm tắt ngắn (Dành cho trang chủ/danh sách tin)"
           type="textarea"
           rows="2"
           required
-          placeholder="Nhập tóm tắt..."
-          value={postForm.summary}
-          onChange={(val) => setPostForm({ ...postForm, summary: val })}
+          placeholder="Nhập tóm tắt bài viết..."
+          value={postForm.tomTat}
+          onChange={(val) => setPostForm({ ...postForm, tomTat: val })}
         />
 
         <FormItem
-          label="Nội dung chi tiết (Trình soạn thảo trực quan)"
-          type="editor"
+          label="Nội dung bài viết chi tiết (Nhập HTML hoặc văn bản thường)"
+          type="textarea"
+          rows="8"
           required
-          placeholder="Nhập nội dung bài viết..."
-          value={postForm.content}
-          onChange={(val) => setPostForm({ ...postForm, content: val })}
+          placeholder="Nội dung bài viết..."
+          value={postForm.noiDung}
+          onChange={(val) => setPostForm({ ...postForm, noiDung: val })}
         />
+
+        <div style={{ display: "flex", gap: "20px" }}>
+          <FormItem
+            label="Tác giả bài đăng"
+            type="text"
+            required
+            value={postForm.tacGia}
+            onChange={(val) => setPostForm({ ...postForm, tacGia: val })}
+            style={{ flex: 1 }}
+          />
+
+          <div style={{ flex: 1 }} />
+        </div>
       </Modal>
     </div>
   );

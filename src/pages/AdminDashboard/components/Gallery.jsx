@@ -45,7 +45,7 @@ export default function Gallery() {
   };
 
   const loadGallery = () => {
-    fetch("/api/gallery")
+    fetch("/api/albumAnh")
       .then((res) => res.json())
       .then((data) => setGallery(data))
       .catch((err) => console.error("Error fetching admin gallery:", err));
@@ -98,19 +98,19 @@ export default function Gallery() {
         selectedFiles.map(async (fileObj) => {
           const base64Data = await fileObj.base64Promise;
           return {
-            fileData: base64Data,
-            fileName: fileObj.file.name,
+            duongDanAnh: base64Data,
+            tenFile: fileObj.file.name,
           };
         }),
       );
 
-      const response = await fetch("/api/gallery", {
+      const response = await fetch("/api/albumAnh", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: galleryTitle.trim(),
+          tieuDe: galleryTitle.trim(),
           files: filesPayload,
         }),
       });
@@ -140,7 +140,7 @@ export default function Gallery() {
         "Bạn có chắc chắn muốn xóa album này và toàn bộ ảnh bên trong khỏi thư viện?"
       )
     ) {
-      fetch(`/api/gallery/${id}`, {
+      fetch(`/api/albumAnh/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -198,10 +198,10 @@ export default function Gallery() {
                   >
                     <img
                       src={
-                        item.images[0]?.imageUrl ||
+                        item.images[0]?.duongDanAnh ||
                         "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80"
                       }
-                      alt={item.title}
+                      alt={item.tieuDe}
                       className="gallery-item-admin-img"
                       style={{
                         width: "100%",
@@ -230,11 +230,11 @@ export default function Gallery() {
                   <div className="gallery-item-admin-info">
                     <p
                       className="gallery-item-admin-title"
-                      title={item.title}
+                      title={item.tieuDe}
                       style={{ cursor: "pointer" }}
                       onClick={() => openLightbox(item, 0)}
                     >
-                      {item.title}
+                      {item.tieuDe}
                     </p>
                     <div className="gallery-item-admin-actions">
                       <span
@@ -243,7 +243,7 @@ export default function Gallery() {
                           color: "var(--text-muted)",
                         }}
                       >
-                        {item.date}
+                        {item.ngayTao}
                       </span>
                       <button
                         className="action-btn delete-btn"
@@ -497,8 +497,8 @@ export default function Gallery() {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={activeAlbum.images[lightboxIndex].imageUrl}
-                alt={activeAlbum.title}
+                src={activeAlbum.images[lightboxIndex].duongDanAnh}
+                alt={activeAlbum.tieuDe}
                 style={{
                   maxWidth: "100%",
                   maxHeight: "65vh",
@@ -521,7 +521,7 @@ export default function Gallery() {
                     color: "#fff",
                   }}
                 >
-                  {activeAlbum.title}
+                  {activeAlbum.tieuDe}
                 </h4>
                 <p style={{ fontSize: "0.75rem", color: "#94a3b8", margin: 0 }}>
                   Ảnh {lightboxIndex + 1} / {activeAlbum.images.length}

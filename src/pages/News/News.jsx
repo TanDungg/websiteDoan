@@ -19,7 +19,7 @@ export default function News() {
     execute: loadPosts,
   } = useApi(
     useCallback((cat, search) => {
-      let url = "/api/posts";
+      let url = "/api/baiViet";
       const params = [];
       if (cat && cat !== "all") {
         params.push(`category=${cat}`);

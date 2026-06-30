@@ -12,13 +12,13 @@ export default function Home() {
     data: postsData,
     loading: postsLoading,
     execute: loadPosts,
-  } = useApi(useCallback(() => apiService.get("/api/posts"), []));
+  } = useApi(useCallback(() => apiService.get("/api/baiViet"), []));
 
   const {
     data: galleryData,
     loading: galleryLoading,
     execute: loadGallery,
-  } = useApi(useCallback(() => apiService.get("/api/gallery"), []));
+  } = useApi(useCallback(() => apiService.get("/api/albumAnh"), []));
 
   const posts = postsData || [];
   const gallery = galleryData || [];
@@ -30,7 +30,7 @@ export default function Home() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const hotNews = posts.filter((n) => n.isHot);
+  const hotNews = posts.filter((n) => n.tinNoiBat);
   const recentNews = posts.slice(0, 4);
 
   // Auto transition for slide banner
@@ -55,8 +55,8 @@ export default function Home() {
   const galleryItems = gallery
     .map((album) => ({
       id: album.id,
-      imageUrl: album.images[0]?.imageUrl,
-      title: album.title,
+      imageUrl: album.images[0]?.duongDanAnh,
+      title: album.tieuDe,
     }))
     .filter((g) => g.imageUrl);
 
@@ -83,14 +83,14 @@ export default function Home() {
                 key={news.id}
                 className="slide-item"
                 style={{
-                  backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.75)), url(${news.imageUrl})`,
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.75)), url(${news.anhDaiDien})`,
                 }}
               >
                 <div className="container">
                   <div className="slide-content-card">
                     <span className="slide-tag">Tin nổi bật</span>
-                    <h2 className="slide-title">{news.title}</h2>
-                    <p className="slide-summary">{news.summary}</p>
+                    <h2 className="slide-title">{news.tieuDe}</h2>
+                    <p className="slide-summary">{news.tomTat}</p>
                     <Link
                       to={`/tin-tuc/${news.id}`}
                       className="btn btn-primary"

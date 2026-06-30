@@ -6,14 +6,14 @@ export default function Docs() {
   const [docs, setDocs] = useState([]);
   const [showDocModal, setShowDocModal] = useState(false);
   const [docForm, setDocForm] = useState({
-    title: "",
-    docNo: "",
-    category: "Kế hoạch",
-    fileUrl: "#",
+    tenVanBan: "",
+    soHieu: "",
+    loaiVanBan: "Kế hoạch",
+    duongDanFile: "#",
   });
 
   const loadDocs = () => {
-    fetch("/api/documents")
+    fetch("/api/vanBan")
       .then((res) => res.json())
       .then((data) => setDocs(data))
       .catch((err) => console.error("Error fetching admin docs:", err));
@@ -25,7 +25,7 @@ export default function Docs() {
 
   const handleDocSubmit = (e) => {
     e.preventDefault();
-    fetch("/api/documents", {
+    fetch("/api/vanBan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,10 +37,10 @@ export default function Docs() {
         alert("Đăng tải văn bản mới thành công!");
         setShowDocModal(false);
         setDocForm({
-          title: "",
-          docNo: "",
-          category: "Kế hoạch",
-          fileUrl: "#",
+          tenVanBan: "",
+          soHieu: "",
+          loaiVanBan: "Kế hoạch",
+          duongDanFile: "#",
         });
         loadDocs();
       })
@@ -52,7 +52,7 @@ export default function Docs() {
 
   const handleDeleteDoc = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa văn bản này không?")) {
-      fetch(`/api/documents/${id}`, {
+      fetch(`/api/vanBan/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -70,14 +70,14 @@ export default function Docs() {
   const columns = [
     {
       title: "Số hiệu",
-      dataIndex: "docNo",
-      key: "docNo",
+      dataIndex: "soHieu",
+      key: "soHieu",
       width: "20%",
     },
     {
       title: "Tên văn bản",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "tenVanBan",
+      key: "tenVanBan",
       width: "45%",
       render: (text) => (
         <span className="doc-title-cell">
@@ -94,17 +94,17 @@ export default function Docs() {
     },
     {
       title: "Thể loại",
-      dataIndex: "category",
-      key: "category",
+      dataIndex: "loaiVanBan",
+      key: "loaiVanBan",
       width: "15%",
-      render: (category) => (
-        <span className={`doc-cat-tag cat-${category}`}>{category}</span>
+      render: (loaiVanBan) => (
+        <span className={`doc-cat-tag cat-${loaiVanBan}`}>{loaiVanBan}</span>
       ),
     },
     {
       title: "Ngày ban hành",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "ngayBanHanh",
+      key: "ngayBanHanh",
       width: "13%",
     },
     {
@@ -166,24 +166,24 @@ export default function Docs() {
                   type="text"
                   required
                   placeholder="Ví dụ: 15-KH/ĐTN-TA"
-                  value={docForm.docNo}
-                  onChange={(val) => setDocForm({ ...docForm, docNo: val })}
+                  value={docForm.soHieu}
+                  onChange={(val) => setDocForm({ ...docForm, soHieu: val })}
                 />
 
                 <FormItem
                   label="Tên văn bản / Tài liệu"
                   type="text"
                   required
-                  value={docForm.title}
-                  onChange={(val) => setDocForm({ ...docForm, title: val })}
+                  value={docForm.tenVanBan}
+                  onChange={(val) => setDocForm({ ...docForm, tenVanBan: val })}
                 />
 
                 <FormItem
                   label="Thể loại"
                   type="select"
                   required
-                  value={docForm.category}
-                  onChange={(val) => setDocForm({ ...docForm, category: val })}
+                  value={docForm.loaiVanBan}
+                  onChange={(val) => setDocForm({ ...docForm, loaiVanBan: val })}
                   options={[
                     { value: "Kế hoạch", label: "Kế hoạch" },
                     { value: "Nghị quyết", label: "Nghị quyết" },

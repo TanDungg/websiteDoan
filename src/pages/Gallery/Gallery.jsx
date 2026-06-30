@@ -13,7 +13,7 @@ export default function Gallery() {
     loading,
     execute: loadGallery,
   } = useApi(
-    useCallback(() => apiService.get("/api/gallery"), [])
+    useCallback(() => apiService.get("/api/albumAnh"), [])
   );
 
   const gallery = data || [];
@@ -73,10 +73,10 @@ export default function Gallery() {
               <div className="gallery-img-wrapper">
                 <img
                   src={
-                    item.images[0]?.imageUrl ||
+                    item.images[0]?.duongDanAnh ||
                     "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80"
                   }
-                  alt={item.title}
+                  alt={item.tieuDe}
                   className="gallery-img"
                   loading="lazy"
                 />
@@ -90,7 +90,7 @@ export default function Gallery() {
               </div>
               <div className="gallery-title-box">
                 <Image size={16} className="gallery-title-icon" />
-                <h3 className="gallery-card-title">{item.title}</h3>
+                <h3 className="gallery-card-title">{item.tieuDe}</h3>
               </div>
             </div>
           ))}
@@ -146,12 +146,12 @@ export default function Gallery() {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={activeAlbum.images[lightboxIndex].imageUrl}
-                alt={activeAlbum.title}
+                src={activeAlbum.images[lightboxIndex].duongDanAnh}
+                alt={activeAlbum.tieuDe}
                 className="lightbox-image animate-fade-in"
               />
               <div className="lightbox-caption">
-                <h3>{activeAlbum.title}</h3>
+                <h3>{activeAlbum.tieuDe}</h3>
                 <p>
                   Ảnh {lightboxIndex + 1} / {activeAlbum.images.length}
                 </p>

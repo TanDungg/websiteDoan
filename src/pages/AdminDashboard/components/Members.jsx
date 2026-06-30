@@ -8,18 +8,18 @@ export default function Members() {
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [memberForm, setMemberForm] = useState({
-    name: "",
-    dob: "",
-    phone: "",
+    hoTen: "",
+    ngaySinh: "",
+    soDienThoai: "",
     email: "",
-    branchId: "",
-    joinDate: "",
-    status: "Đoàn viên",
+    chiDoanId: "",
+    ngayVaoDoan: "",
+    trangThai: "Đoàn viên",
   });
 
   const loadData = () => {
     // Load members
-    fetch("/api/union-members")
+    fetch("/api/doanVien")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -29,7 +29,7 @@ export default function Members() {
       .catch((err) => console.error("Error fetching union members:", err));
 
     // Load branches for dropdown
-    fetch("/api/intro")
+    fetch("/api/gioiThieu")
       .then((res) => res.json())
       .then((data) => {
         if (data.branches) {
@@ -47,24 +47,24 @@ export default function Members() {
     if (member) {
       setEditingMember(member);
       setMemberForm({
-        name: member.name || "",
-        dob: member.dob || "",
-        phone: member.phone || "",
+        hoTen: member.hoTen || "",
+        ngaySinh: member.ngaySinh || "",
+        soDienThoai: member.soDienThoai || "",
         email: member.email || "",
-        branchId: member.branch_id || "",
-        joinDate: member.join_date || "",
-        status: member.status || "Đoàn viên",
+        chiDoanId: member.chiDoanId || "",
+        ngayVaoDoan: member.ngayVaoDoan || "",
+        trangThai: member.trangThai || "Đoàn viên",
       });
     } else {
       setEditingMember(null);
       setMemberForm({
-        name: "",
-        dob: "",
-        phone: "",
+        hoTen: "",
+        ngaySinh: "",
+        soDienThoai: "",
         email: "",
-        branchId: branches[0]?.id || "",
-        joinDate: new Date().toISOString().split("T")[0],
-        status: "Đoàn viên",
+        chiDoanId: branches[0]?.id || "",
+        ngayVaoDoan: new Date().toISOString().split("T")[0],
+        trangThai: "Đoàn viên",
       });
     }
     setShowMemberModal(true);
@@ -72,12 +72,12 @@ export default function Members() {
 
   const handleMemberSubmit = (e) => {
     e.preventDefault();
-    if (!memberForm.branchId) {
+    if (!memberForm.chiDoanId) {
       alert("Bạn vui lòng chọn chi đoàn sinh hoạt!");
       return;
     }
 
-    const url = editingMember ? `/api/union-members/${editingMember.id}` : "/api/union-members";
+    const url = editingMember ? `/api/doanVien/${editingMember.id}` : "/api/doanVien";
     const method = editingMember ? "PUT" : "POST";
 
     fetch(url, {
@@ -105,7 +105,7 @@ export default function Members() {
         "Bạn có chắc chắn muốn xóa đoàn viên này ra khỏi hệ thống không?"
       )
     ) {
-      fetch(`/api/union-members/${id}`, {
+      fetch(`/api/doanVien/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -123,8 +123,8 @@ export default function Members() {
   const columns = [
     {
       title: "Họ và tên",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "hoTen",
+      key: "hoTen",
       width: "25%",
       render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
     },
@@ -134,14 +134,14 @@ export default function Members() {
       width: "25%",
       render: (_, record) => (
         <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "2px" }}>
-          {record.dob && (
+          {record.ngaySinh && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <Calendar size={12} className="text-muted" /> {record.dob}
+              <Calendar size={12} className="text-muted" /> {record.ngaySinh}
             </span>
           )}
-          {record.phone && (
+          {record.soDienThoai && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <Phone size={12} className="text-muted" /> {record.phone}
+              <Phone size={12} className="text-muted" /> {record.soDienThoai}
             </span>
           )}
           {record.email && (
@@ -154,8 +154,8 @@ export default function Members() {
     },
     {
       title: "Chi đoàn",
-      dataIndex: "branch_name",
-      key: "branch_name",
+      dataIndex: "branchName",
+      key: "branchName",
       width: "20%",
       render: (branchName) => (
         <span style={{ fontWeight: 500, color: "var(--text-main)" }}>
@@ -165,8 +165,8 @@ export default function Members() {
     },
     {
       title: "Chức vụ",
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "trangThai",
+      key: "trangThai",
       width: "15%",
       render: (status) => {
         let badgeBg = "#ebf8ff";
@@ -208,13 +208,13 @@ export default function Members() {
       key: "audit",
       width: "15%",
       render: (_, record) => {
-        const createDate = record.created_at ? new Date(record.created_at).toLocaleDateString("vi-VN") : "";
+        const createDate = record.createdAt ? new Date(record.createdAt).toLocaleDateString("vi-VN") : "";
         return (
           <div
             style={{ fontSize: "0.75rem", color: "#718096" }}
-            title={`Tạo bởi: ${record.created_by || "n/a"}\nLúc: ${record.created_at || "n/a"}\nSửa bởi: ${record.updated_by || "n/a"}\nLúc: ${record.updated_at || "n/a"}`}
+            title={`Tạo bởi: ${record.createdBy || "n/a"}\nLúc: ${record.createdAt || "n/a"}\nSửa bởi: ${record.updatedBy || "n/a"}\nLúc: ${record.updatedAt || "n/a"}`}
           >
-            <div>Tạo: {record.created_by || "admin"}</div>
+            <div>Tạo: {record.createdBy || "admin"}</div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
               <Clock size={10} /> {createDate || "Mới"}
             </div>
@@ -298,23 +298,23 @@ export default function Members() {
           type="text"
           required
           placeholder="Ví dụ: Nguyễn Văn A"
-          value={memberForm.name}
-          onChange={(val) => setMemberForm({ ...memberForm, name: val })}
+          value={memberForm.hoTen}
+          onChange={(val) => setMemberForm({ ...memberForm, hoTen: val })}
         />
 
         <div style={{ display: "flex", gap: "15px" }}>
           <FormItem
             label="Ngày sinh"
             type="date"
-            value={memberForm.dob}
-            onChange={(val) => setMemberForm({ ...memberForm, dob: val })}
+            value={memberForm.ngaySinh}
+            onChange={(val) => setMemberForm({ ...memberForm, ngaySinh: val })}
             style={{ flex: 1 }}
           />
           <FormItem
             label="Ngày vào Đoàn"
             type="date"
-            value={memberForm.joinDate}
-            onChange={(val) => setMemberForm({ ...memberForm, joinDate: val })}
+            value={memberForm.ngayVaoDoan}
+            onChange={(val) => setMemberForm({ ...memberForm, ngayVaoDoan: val })}
             style={{ flex: 1 }}
           />
         </div>
@@ -324,8 +324,8 @@ export default function Members() {
             label="Số điện thoại"
             type="text"
             placeholder="Ví dụ: 0905xxxxxx"
-            value={memberForm.phone}
-            onChange={(val) => setMemberForm({ ...memberForm, phone: val })}
+            value={memberForm.soDienThoai}
+            onChange={(val) => setMemberForm({ ...memberForm, soDienThoai: val })}
             style={{ flex: 1 }}
           />
           <FormItem
@@ -343,11 +343,11 @@ export default function Members() {
             label="Chi đoàn sinh hoạt"
             type="select"
             required
-            value={memberForm.branchId}
-            onChange={(val) => setMemberForm({ ...memberForm, branchId: val })}
+            value={memberForm.chiDoanId}
+            onChange={(val) => setMemberForm({ ...memberForm, chiDoanId: val })}
             options={[
               { value: "", label: "-- Chọn Chi đoàn --" },
-              ...branches.map((b) => ({ value: b.id, label: b.name }))
+              ...branches.map((b) => ({ value: b.id, label: b.tenChiDoan }))
             ]}
             style={{ flex: 1 }}
           />
@@ -355,8 +355,8 @@ export default function Members() {
             label="Chức vụ"
             type="select"
             required
-            value={memberForm.status}
-            onChange={(val) => setMemberForm({ ...memberForm, status: val })}
+            value={memberForm.trangThai}
+            onChange={(val) => setMemberForm({ ...memberForm, trangThai: val })}
             options={[
               { value: "Đoàn viên", label: "Đoàn viên" },
               { value: "Ủy viên", label: "Ủy viên" },

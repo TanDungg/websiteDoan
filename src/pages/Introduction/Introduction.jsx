@@ -4,6 +4,7 @@ import {
   Phone,
   ShieldCheck,
   Users,
+  User,
   CalendarDays,
   Award,
 } from "lucide-react";
@@ -11,12 +12,27 @@ import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import "./Introduction.css";
 
+const getChucVuString = (pos) => {
+  switch (Number(pos)) {
+    case 1:
+      return "Bí thư Đoàn xã";
+    case 2:
+      return "Phó Bí thư Đoàn xã";
+    case 3:
+      return "Ủy viên Ban Thường vụ";
+    case 4:
+      return "Ủy viên Ban Chấp hành";
+    default:
+      return "Thành viên BCH";
+  }
+};
+
 export default function Introduction() {
   const {
     data,
     loading,
     execute: loadIntro,
-  } = useApi(useCallback(() => apiService.get("/api/intro"), []));
+  } = useApi(useCallback(() => apiService.get("/api/gioiThieu"), []));
 
   useEffect(() => {
     loadIntro().catch((err) =>
@@ -34,10 +50,10 @@ export default function Introduction() {
   }
 
   const settings = data?.settings || {
-    historyContent: "",
-    statMembers: "0",
-    statBranches: "0",
-    branchesContent: "",
+    lichSu: "",
+    soLuongDoanVien: "0",
+    soLuongChiDoan: "0",
+    thongTinChiDoan: "",
   };
 
   const bchMembers = data?.bchMembers || [];
@@ -63,14 +79,14 @@ export default function Introduction() {
           <div className="stat-icon-wrapper">
             <Users size={28} />
           </div>
-          <span className="stat-num">{settings.statMembers}</span>
+          <span className="stat-num">{settings.soLuongDoanVien}</span>
           <span className="stat-label">Đoàn viên sinh hoạt</span>
         </div>
         <div className="stat-card">
           <div className="stat-icon-wrapper">
             <CalendarDays size={28} />
           </div>
-          <span className="stat-num">{settings.statBranches}</span>
+          <span className="stat-num">{settings.soLuongChiDoan}</span>
           <span className="stat-label">Chi đoàn trực thuộc</span>
         </div>
         <div className="stat-card">
@@ -88,7 +104,7 @@ export default function Introduction() {
           <h2>Lịch sử & Sứ mệnh</h2>
           <div
             className="intro-history-content"
-            dangerouslySetInnerHTML={{ __html: settings.historyContent }}
+            dangerouslySetInnerHTML={{ __html: settings.lichSu }}
           />
           <div className="achievements-badges">
             <div className="achievement-item">
@@ -114,33 +130,51 @@ export default function Introduction() {
             Ban Chấp hành đương nhiệm (Nhiệm kỳ 2022 - 2027)
           </h2>
           <p className="bch-intro-text">
-            Ban Chấp hành Đoàn xã Tam Anh gồm các bạn cán bộ đoàn nhiệt
-            huyết, có trình độ năng lực chuyên môn, luôn nỗ lực vì sự phát triển
-            của công tác Đoàn và phong trào thanh thiếu nhi địa bàn.
+            Ban Chấp hành Đoàn xã Tam Anh gồm các bạn cán bộ đoàn nhiệt huyết,
+            có trình độ năng lực chuyên môn, luôn nỗ lực vì sự phát triển của
+            công tác Đoàn và phong trào thanh thiếu nhi địa bàn.
           </p>
           <div className="bch-grid">
             {bchMembers.map((member) => (
               <div key={member.id} className="member-card card">
-                <div className="member-avatar-wrapper">
-                  <img
-                    src={member.imageUrl}
-                    alt={member.name}
-                    className="member-avatar"
-                  />
+                <div
+                  className="member-avatar-wrapper"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#f8fafc",
+                  }}
+                >
+                  {member.anhDaiDien ? (
+                    <img
+                      src={member.anhDaiDien}
+                      alt={member.hoTen}
+                      className="member-avatar"
+                    />
+                  ) : (
+                    <User size={48} style={{ color: "#94a3b8" }} />
+                  )}
                 </div>
                 <div className="member-info">
-                  <h3>{member.name}</h3>
-                  <span className="member-position">{member.position}</span>
-                  <p className="member-resp">{member.responsibility}</p>
+                  <h3>{member.hoTen}</h3>
+                  <span className="member-position">
+                    {getChucVuString(member.chucVu)}
+                  </span>
+                  <p className="member-resp">{member.nhiemVu}</p>
                   <div className="member-contact">
-                    <div className="contact-line">
-                      <Phone size={14} />
-                      <span>{member.phone}</span>
-                    </div>
-                    <div className="contact-line">
-                      <Mail size={14} />
-                      <span>{member.email}</span>
-                    </div>
+                    {member.soDienThoai && (
+                      <div className="contact-line">
+                        <Phone size={14} />
+                        <span>{member.soDienThoai}</span>
+                      </div>
+                    )}
+                    {member.email && (
+                      <div className="contact-line">
+                        <Mail size={14} />
+                        <span>{member.email}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -159,7 +193,7 @@ export default function Introduction() {
                 <h3>{groupName}</h3>
                 <ul>
                   {groupList.map((branch) => (
-                    <li key={branch.id}>{branch.name}</li>
+                    <li key={branch.id}>{branch.tenChiDoan}</li>
                   ))}
                 </ul>
               </div>

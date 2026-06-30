@@ -52,11 +52,11 @@ const getCleanSummary = (text) => {
 };
 
 export default function NewsCard({ news }) {
-  const { id, title, summary, imageUrl, date, author, category } = news;
+  const { id, tieuDe, tomTat, anhDaiDien, ngayDang, tacGia, danhMuc } = news;
   const navigate = useNavigate();
   
   // Find category display name
-  const catName = newsCategories.find(c => c.id === category)?.name || 'Tin tức';
+  const catName = newsCategories.find(c => c.id === danhMuc)?.name || 'Tin tức';
 
   // Format date display (DD/MM/YYYY)
   const formatDate = (dateStr) => {
@@ -68,27 +68,27 @@ export default function NewsCard({ news }) {
   return (
     <article className="card news-card" onClick={() => navigate(`/tin-tuc/${id}`)}>
       <div className="card-image-wrapper">
-        <img src={imageUrl} alt={title} className="card-image" loading="lazy" />
-        <span className={`badge badge-${category} card-badge`}>{catName}</span>
+        <img src={anhDaiDien} alt={tieuDe} className="card-image" loading="lazy" />
+        <span className={`badge badge-${danhMuc} card-badge`}>{catName}</span>
       </div>
       
       <div className="card-info">
         <div className="card-meta">
           <span className="meta-item">
             <Calendar size={14} />
-            <span>{formatDate(date)}</span>
+            <span>{formatDate(ngayDang)}</span>
           </span>
           <span className="meta-item">
             <User size={14} />
-            <span>{author}</span>
+            <span>{tacGia}</span>
           </span>
         </div>
         
         <h3 className="card-title">
-          <Link to={`/tin-tuc/${id}`}>{title}</Link>
+          <Link to={`/tin-tuc/${id}`}>{tieuDe}</Link>
         </h3>
         
-        <p className="card-summary">{getCleanSummary(summary)}</p>
+        <p className="card-summary">{getCleanSummary(tomTat)}</p>
         
         <Link to={`/tin-tuc/${id}`} className="card-link">
           <span>Xem chi tiết</span>

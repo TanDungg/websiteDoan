@@ -16,7 +16,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/posts")
+    fetch("/api/baiViet")
       .then((res) => res.json())
       .then((data) => {
         setRecentPosts(data.slice(0, 3));
@@ -25,22 +25,17 @@ export default function Sidebar() {
         console.error("Failed to load recent posts for sidebar:", err),
       );
 
-    fetch("/api/intro")
+    fetch("/api/gioiThieu")
       .then((res) => res.json())
       .then((data) => {
         if (data.bchMembers) {
           const biThu = data.bchMembers.find(
-            (m) =>
-              m.position &&
-              (m.position.toLowerCase().includes("bí thư") ||
-                m.position.toLowerCase().includes("bi thu")) &&
-              !m.position.toLowerCase().includes("phó bí thư") &&
-              !m.position.toLowerCase().includes("pho bi thu")
+            (m) => Number(m.chucVu) === 1
           );
-          if (biThu && biThu.phone) {
+          if (biThu && biThu.soDienThoai) {
             setBiThuContact({
-              name: biThu.name,
-              phone: biThu.phone,
+              name: biThu.hoTen,
+              phone: biThu.soDienThoai,
             });
           }
         }
@@ -98,16 +93,16 @@ export default function Sidebar() {
                 onClick={() => navigate(`/tin-tuc/${post.id}`)}
               >
                 <img
-                  src={post.imageUrl}
-                  alt={post.title}
+                  src={post.anhDaiDien}
+                  alt={post.tieuDe}
                   className="recent-post-thumb"
                 />
                 <div className="recent-post-info">
                   <span className="recent-post-date">
-                    {formatDate(post.date)}
+                    {formatDate(post.ngayDang)}
                   </span>
                   <h5 className="recent-post-title">
-                    <Link to={`/tin-tuc/${post.id}`}>{post.title}</Link>
+                    <Link to={`/tin-tuc/${post.id}`}>{post.tieuDe}</Link>
                   </h5>
                 </div>
               </div>

@@ -7,8 +7,8 @@ router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
     const result = await runQuery(
-      "SELECT * FROM admins WHERE username = @username AND password = @password",
-      { username, password },
+      'SELECT * FROM "taiKhoanAdmin" WHERE "tenDangNhap" = @tenDangNhap AND "matKhau" = @matKhau',
+      { tenDangNhap: username, matKhau: password },
     );
     if (result.rows.length > 0) {
       res.json({ success: true, session: "active" });

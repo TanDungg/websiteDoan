@@ -4,18 +4,19 @@ import { FormItem } from "src/components";
 
 export default function Intro() {
   const [introSettings, setIntroSettings] = useState({
-    historyContent: "",
-    statMembers: "",
-    statBranches: "",
-    branchesContent: "",
+    lichSu: "",
+    thongTinChiDoan: "",
   });
 
   const loadIntro = () => {
-    fetch("/api/intro")
+    fetch("/api/gioiThieu")
       .then((res) => res.json())
       .then((data) => {
         if (data.settings) {
-          setIntroSettings(data.settings);
+          setIntroSettings({
+            lichSu: data.settings.lichSu || "",
+            thongTinChiDoan: data.settings.thongTinChiDoan || "",
+          });
         }
       })
       .catch((err) =>
@@ -29,7 +30,7 @@ export default function Intro() {
 
   const handleIntroSettingsSubmit = (e) => {
     e.preventDefault();
-    fetch("/api/intro", {
+    fetch("/api/gioiThieu", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -59,11 +60,11 @@ export default function Intro() {
             label=""
             type="editor"
             required
-            value={introSettings.historyContent}
+            value={introSettings.lichSu}
             onChange={(val) =>
               setIntroSettings({
                 ...introSettings,
-                historyContent: val,
+                lichSu: val,
               })
             }
             placeholder="Nhập giới thiệu..."
