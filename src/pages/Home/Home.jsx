@@ -3,23 +3,30 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Image } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
-import { galleryList } from "../../data/mockData";
 import NewsCard from "../../components/NewsCard/NewsCard";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import "./Home.css";
 
 export default function Home() {
   const {
-    data,
-    loading,
+    data: postsData,
+    loading: postsLoading,
     execute: loadPosts,
   } = useApi(useCallback(() => apiService.get("/api/posts"), []));
 
-  const posts = data || [];
+  const {
+    data: galleryData,
+    loading: galleryLoading,
+    execute: loadGallery,
+  } = useApi(useCallback(() => apiService.get("/api/gallery"), []));
+
+  const posts = postsData || [];
+  const gallery = galleryData || [];
 
   useEffect(() => {
     loadPosts().catch((err) => console.error("Failed to load posts:", err));
-  }, [loadPosts]);
+    loadGallery().catch((err) => console.error("Failed to load gallery:", err));
+  }, [loadPosts, loadGallery]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -42,6 +49,16 @@ export default function Home() {
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % hotNews.length);
   };
+
+  const loading = postsLoading || galleryLoading;
+
+  const galleryItems = gallery
+    .map((album) => ({
+      id: album.id,
+      imageUrl: album.images[0]?.imageUrl,
+      title: album.title,
+    }))
+    .filter((g) => g.imageUrl);
 
   if (loading) {
     return (
@@ -134,29 +151,31 @@ export default function Home() {
             </div>
 
             {/* Sub-section: Quick Gallery display */}
-            <section className="home-gallery-sec">
-              <h2 className="section-title">Thư viện hình ảnh</h2>
-              <div className="home-gallery-grid">
-                {galleryList.slice(0, 4).map((g) => (
-                  <div key={g.id} className="home-gallery-item card">
-                    <img
-                      src={g.imageUrl}
-                      alt={g.title}
-                      className="home-gallery-img"
-                    />
-                    <div className="home-gallery-overlay">
-                      <Image size={24} className="gallery-overlay-icon" />
-                      <p className="home-gallery-title">{g.title}</p>
+            {galleryItems.length > 0 && (
+              <section className="home-gallery-sec">
+                <h2 className="section-title">Thư viện hình ảnh</h2>
+                <div className="home-gallery-grid">
+                  {galleryItems.slice(0, 4).map((g) => (
+                    <div key={g.id} className="home-gallery-item card">
+                      <img
+                        src={g.imageUrl}
+                        alt={g.title}
+                        className="home-gallery-img"
+                      />
+                      <div className="home-gallery-overlay">
+                        <Image size={24} className="gallery-overlay-icon" />
+                        <p className="home-gallery-title">{g.title}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div className="see-all-wrapper">
-                <Link to="/thu-vien" className="btn btn-outline">
-                  Xem thư viện ảnh
-                </Link>
-              </div>
-            </section>
+                  ))}
+                </div>
+                <div className="see-all-wrapper">
+                  <Link to="/thu-vien" className="btn btn-outline">
+                    Xem thư viện ảnh
+                  </Link>
+                </div>
+              </section>
+            )}
           </main>
 
           {/* Sidebar column */}
