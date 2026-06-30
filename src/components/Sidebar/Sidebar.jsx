@@ -12,6 +12,7 @@ import "./Sidebar.css";
 export default function Sidebar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [recentPosts, setRecentPosts] = useState([]);
+  const [biThuContact, setBiThuContact] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +23,30 @@ export default function Sidebar() {
       })
       .catch((err) =>
         console.error("Failed to load recent posts for sidebar:", err),
+      );
+
+    fetch("/api/intro")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.bchMembers) {
+          const biThu = data.bchMembers.find(
+            (m) =>
+              m.position &&
+              (m.position.toLowerCase().includes("bí thư") ||
+                m.position.toLowerCase().includes("bi thu")) &&
+              !m.position.toLowerCase().includes("phó bí thư") &&
+              !m.position.toLowerCase().includes("pho bi thu")
+          );
+          if (biThu && biThu.phone) {
+            setBiThuContact({
+              name: biThu.name,
+              phone: biThu.phone,
+            });
+          }
+        }
+      })
+      .catch((err) =>
+        console.error("Failed to load intro for sidebar:", err),
       );
   }, []);
 
@@ -144,10 +169,12 @@ export default function Sidebar() {
           Mọi phản ánh, đề xuất hoạt động của đoàn viên thanh niên và nhân dân
           vui lòng liên hệ trực tiếp:
         </p>
-        <a href="tel:0905123xxx" className="hotline-number">
-          <Phone size={20} />
-          <span>0905.123.xxx (Bí thư)</span>
-        </a>
+        {biThuContact?.phone ? (
+          <a href={`tel:${biThuContact.phone.replace(/[^0-9+]/g, "")}`} className="hotline-number">
+            <Phone size={20} />
+            <span>{biThuContact.phone} (Bí thư)</span>
+          </a>
+        ) : null}
         <div className="support-action">
           <Link to="/lien-he" className="btn btn-primary btn-sm support-btn">
             <MessageSquare size={16} />

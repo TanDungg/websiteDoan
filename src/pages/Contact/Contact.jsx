@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 import { FormItem } from "src/components";
 import "./Contact.css";
@@ -14,6 +14,19 @@ export default function Contact() {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [bchContacts, setBchContacts] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/intro")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.bchMembers) {
+          const contacts = data.bchMembers.filter((m) => m.phone && m.phone.trim());
+          setBchContacts(contacts);
+        }
+      })
+      .catch((err) => console.error("Failed to load contacts for Contact page:", err));
+  }, []);
 
   const unitsList = [
     "Chi đoàn Thôn Tam Anh 1",
@@ -107,17 +120,27 @@ export default function Contact() {
               <div className="card-info-content">
                 <h3>Điện thoại liên hệ</h3>
                 <div className="contact-card-lines">
-                  <div className="contact-card-line">
-                    <span className="label">Văn phòng:</span>
-                    <a href="tel:02363845" className="val">
-                      0236.3845.xxx
-                    </a>
-                    <span className="divider">•</span>
-                    <span className="label">Bí thư:</span>
-                    <a href="tel:0905123" className="val">
-                      0905.123.xxx
-                    </a>
-                  </div>
+                  {bchContacts.length > 0 ? (
+                    bchContacts.map((contact) => (
+                      <div key={contact.id} className="contact-card-line">
+                        <span className="label">{contact.position}:</span>
+                        <a
+                          href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`}
+                          className="val"
+                        >
+                          {contact.phone}
+                        </a>
+                        <span className="divider">•</span>
+                        <span className="val">{contact.name}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="contact-card-line">
+                      <span className="val" style={{ color: "var(--text-muted)", fontStyle: "italic" }}>
+                        (Thông tin liên hệ đang cập nhật)
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
