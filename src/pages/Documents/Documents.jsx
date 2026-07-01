@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Search, FileText, Download, Calendar } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import "./Documents.css";
 
 export default function Documents() {
@@ -17,6 +18,10 @@ export default function Documents() {
   );
 
   const docs = data || [];
+
+  useRealtimeRefresh("vanBan", () => {
+    loadDocs({ silent: true }).catch((err) => console.error("Error loading documents:", err));
+  });
 
   useEffect(() => {
     loadDocs().catch((err) => console.error("Error loading documents:", err));

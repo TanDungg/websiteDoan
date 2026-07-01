@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // GET /api/loaiChiDoan
 router.get("/", async (req, res) => {
@@ -27,6 +28,7 @@ router.post("/", async (req, res) => {
        VALUES (@id, @nameVal, @createdBy, @createdAt, @createdBy, @createdAt)`,
       { id, nameVal, createdBy, createdAt }
     );
+    sendRealtimeUpdate("chiDoan");
     res.status(201).json({ success: true, message: "Thêm phân loại chi đoàn thành công!", id });
   } catch (err) {
     console.error("POST /api/loaiChiDoan error:", err);
@@ -49,6 +51,7 @@ router.put("/:id", async (req, res) => {
        WHERE "id" = @id`,
       { id, nameVal, updatedBy, updatedAt }
     );
+    sendRealtimeUpdate("chiDoan");
     res.json({ success: true, message: "Cập nhật phân loại chi đoàn thành công!" });
   } catch (err) {
     console.error("PUT /api/loaiChiDoan error:", err);
@@ -61,6 +64,7 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await runQuery('DELETE FROM "loaiChiDoan" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("chiDoan");
     res.json({ success: true, message: "Xóa phân loại chi đoàn thành công!" });
   } catch (err) {
     console.error("DELETE /api/loaiChiDoan error:", err);

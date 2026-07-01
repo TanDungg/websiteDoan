@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import { newsCategories } from "../../data/mockData";
 import NewsCard from "../../components/NewsCard/NewsCard";
 import Sidebar from "../../components/Sidebar/Sidebar";
@@ -38,6 +39,10 @@ export default function News() {
 
   // Sync state with URL search param
   const urlSearch = searchParams.get("search") || "";
+
+  useRealtimeRefresh("baiViet", () => {
+    loadPosts(selectedCategory, urlSearch, { silent: true }).catch((err) => console.error("Error loading posts:", err));
+  });
 
   useEffect(() => {
     setSearchText(urlSearch);

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // POST /api/thanhVienBch -> mounted on /api/thanhVienBch, so POST /
 router.post("/", async (req, res) => {
@@ -31,6 +32,7 @@ router.post("/", async (req, res) => {
         createdAt,
       },
     );
+    sendRealtimeUpdate("thanhVienBch");
     res
       .status(201)
       .json({ success: true, message: "Thêm thành viên BCH thành công!", id });
@@ -70,6 +72,7 @@ router.put("/:id", async (req, res) => {
         updatedAt,
       },
     );
+    sendRealtimeUpdate("thanhVienBch");
     res.json({ success: true, message: "Cập nhật thành viên BCH thành công!" });
   } catch (err) {
     console.error("PUT /api/thanhVienBch error:", err);
@@ -82,6 +85,7 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await runQuery('DELETE FROM "thanhVienBch" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("thanhVienBch");
     res.json({ success: true, message: "Xóa thành viên BCH thành công!" });
   } catch (err) {
     console.error("DELETE /api/thanhVienBch error:", err);

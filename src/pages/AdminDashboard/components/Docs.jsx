@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, FileText, Check } from "lucide-react";
 import { Table, FormItem } from "../../../components";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
@@ -13,11 +15,14 @@ export default function Docs() {
   });
 
   const loadDocs = () => {
-    fetch("/api/vanBan")
-      .then((res) => res.json())
+    apiService.get("/api/vanBan")
       .then((data) => setDocs(data))
       .catch((err) => console.error("Error fetching admin docs:", err));
   };
+
+  useRealtimeRefresh("vanBan", () => {
+    loadDocs();
+  });
 
   useEffect(() => {
     loadDocs();
@@ -25,16 +30,13 @@ export default function Docs() {
 
   const handleDocSubmit = (e) => {
     e.preventDefault();
-    fetch("/api/vanBan", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(docForm),
-    })
-      .then((res) => res.json())
+    apiService.post(
+      "/api/vanBan",
+      docForm,
+      true,
+      "Đăng tải văn bản mới thành công!"
+    )
       .then(() => {
-        alert("Đăng tải văn bản mới thành công!");
         setShowDocModal(false);
         setDocForm({
           tenVanBan: "",
@@ -44,26 +46,16 @@ export default function Docs() {
         });
         loadDocs();
       })
-      .catch((err) => {
-        console.error("Doc save error:", err);
-        alert("Có lỗi xảy ra khi thêm văn bản!");
-      });
+      .catch((err) => console.error("Doc save error:", err));
   };
 
   const handleDeleteDoc = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa văn bản này không?")) {
-      fetch(`/api/vanBan/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService.delete(`/api/vanBan/${id}`, "Đã xóa văn bản thành công!")
         .then(() => {
-          alert("Đã xóa văn bản thành công!");
           loadDocs();
         })
-        .catch((err) => {
-          console.error("Delete doc error:", err);
-          alert("Có lỗi xảy ra khi xóa văn bản!");
-        });
+        .catch((err) => console.error("Delete doc error:", err));
     }
   };
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check, Calendar, Phone, Mail, Clock } from "lucide-react";
 import { Table, Modal, FormItem } from "../../../components";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 export default function Members() {
   const [members, setMembers] = useState([]);
@@ -19,8 +21,7 @@ export default function Members() {
 
   const loadData = () => {
     // Load members
-    fetch("/api/doanVien")
-      .then((res) => res.json())
+    apiService.get("/api/doanVien")
       .then((data) => {
         if (Array.isArray(data)) {
           setMembers(data);
@@ -29,8 +30,7 @@ export default function Members() {
       .catch((err) => console.error("Error fetching union members:", err));
 
     // Load branches for dropdown
-    fetch("/api/gioiThieu")
-      .then((res) => res.json())
+    apiService.get("/api/gioiThieu")
       .then((data) => {
         if (data.branches) {
           setBranches(data.branches);
@@ -38,6 +38,14 @@ export default function Members() {
       })
       .catch((err) => console.error("Error fetching branches:", err));
   };
+
+  useRealtimeRefresh("doanVien", () => {
+    loadData();
+  });
+
+  useRealtimeRefresh("chiDoan", () => {
+    loadData();
+  });
 
   useEffect(() => {
     loadData();
@@ -77,26 +85,30 @@ export default function Members() {
       return;
     }
 
-    const url = editingMember ? `/api/doanVien/${editingMember.id}` : "/api/doanVien";
-    const method = editingMember ? "PUT" : "POST";
-
-    fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(memberForm),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        alert(editingMember ? "Cập nhật thông tin đoàn viên thành công!" : "Tiếp nhận đoàn viên thành công!");
-        setShowMemberModal(false);
-        loadData();
-      })
-      .catch((err) => {
-        console.error("Member save error:", err);
-        alert("Có lỗi xảy ra khi lưu thông tin đoàn viên!");
-      });
+    if (editingMember) {
+      apiService.put(
+        `/api/doanVien/${editingMember.id}`,
+        memberForm,
+        "Cập nhật thông tin đoàn viên thành công!"
+      )
+        .then(() => {
+          setShowMemberModal(false);
+          loadData();
+        })
+        .catch((err) => console.error("Member save error:", err));
+    } else {
+      apiService.post(
+        "/api/doanVien",
+        memberForm,
+        true,
+        "Tiếp nhận đoàn viên thành công!"
+      )
+        .then(() => {
+          setShowMemberModal(false);
+          loadData();
+        })
+        .catch((err) => console.error("Member save error:", err));
+    }
   };
 
   const handleDeleteMember = (id) => {
@@ -105,18 +117,11 @@ export default function Members() {
         "Bạn có chắc chắn muốn xóa đoàn viên này ra khỏi hệ thống không?"
       )
     ) {
-      fetch(`/api/doanVien/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService.delete(`/api/doanVien/${id}`, "Đã xóa đoàn viên thành công!")
         .then(() => {
-          alert("Đã xóa đoàn viên thành công!");
           loadData();
         })
-        .catch((err) => {
-          console.error("Delete member error:", err);
-          alert("Có lỗi xảy ra khi xóa đoàn viên!");
-        });
+        .catch((err) => console.error("Delete member error:", err));
     }
   };
 

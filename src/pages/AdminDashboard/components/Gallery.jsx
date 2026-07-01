@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Trash2,
@@ -8,6 +8,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { FormItem } from "../../../components";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 export default function Gallery() {
   const [gallery, setGallery] = useState([]);
@@ -45,21 +47,65 @@ export default function Gallery() {
   };
 
   const loadGallery = () => {
-    fetch("/api/albumAnh")
-      .then((res) => res.json())
+    apiService
+      .get("/api/albumAnh")
       .then((data) => setGallery(data))
       .catch((err) => console.error("Error fetching admin gallery:", err));
   };
+
+  useRealtimeRefresh("albumAnh", () => {
+    loadGallery();
+  });
+
+  const selectedFilesRef = useRef(selectedFiles);
+
+  useEffect(() => {
+    selectedFilesRef.current = selectedFiles;
+  }, [selectedFiles]);
 
   useEffect(() => {
     loadGallery();
     return () => {
       // Clean up object URLs to prevent leaks
-      selectedFiles.forEach((fileObj) =>
+      selectedFilesRef.current.forEach((fileObj) =>
         URL.revokeObjectURL(fileObj.previewUrl),
       );
     };
   }, []);
+
+  const compressImage = (file, maxWidth, maxHeight, quality, callback) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+        callback(compressedBase64);
+      };
+    };
+  };
 
   const handleGalleryFilesSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -70,9 +116,9 @@ export default function Gallery() {
         file,
         previewUrl: URL.createObjectURL(file),
         base64Promise: new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result);
+          compressImage(file, 1000, 1000, 0.7, (compressedBase64) => {
+            resolve(compressedBase64);
+          });
         }),
       };
     });
@@ -104,31 +150,22 @@ export default function Gallery() {
         }),
       );
 
-      const response = await fetch("/api/albumAnh", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      await apiService.post(
+        "/api/albumAnh",
+        {
           tieuDe: galleryTitle.trim(),
           files: filesPayload,
-        }),
-      });
+        },
+        true,
+        "Đã đăng tải thành công tất cả hình ảnh lên thư viện!",
+      );
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Lỗi lưu hình ảnh thư viện");
-      }
-
-      alert("Đã đăng tải thành công tất cả hình ảnh lên thư viện!");
       setSelectedFiles([]);
       setGalleryTitle("");
       setShowGalleryModal(false);
       loadGallery();
     } catch (err) {
       console.error("Gallery upload error:", err);
-      alert("Có lỗi xảy ra khi tải lên thư viện!");
     } finally {
       setUploadingGallery(false);
     }
@@ -137,20 +174,16 @@ export default function Gallery() {
   const handleDeleteGalleryItem = (id) => {
     if (
       window.confirm(
-        "Bạn có chắc chắn muốn xóa album này và toàn bộ ảnh bên trong khỏi thư viện?"
+        "Bạn có chắc chắn muốn xóa album này và toàn bộ ảnh bên trong khỏi thư viện?",
       )
     ) {
-      fetch(`/api/albumAnh/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService
+        .delete(`/api/albumAnh/${id}`, "Xóa album thành công!")
         .then(() => {
-          alert("Xóa album thành công!");
           loadGallery();
         })
         .catch((err) => {
           console.error("Delete gallery album error:", err);
-          alert("Có lỗi xảy ra khi xóa album!");
         });
     }
   };

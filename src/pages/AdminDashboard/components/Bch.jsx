@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check } from "lucide-react";
 import { Table, FormItem } from "../../../components";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 const getChucVuString = (pos) => {
   switch (Number(pos)) {
@@ -38,8 +40,7 @@ export default function Bch() {
   });
 
   const loadBch = () => {
-    fetch("/api/gioiThieu")
-      .then((res) => res.json())
+    apiService.get("/api/gioiThieu")
       .then((data) => {
         if (data.bchMembers) {
           setBchMembers(data.bchMembers);
@@ -47,6 +48,10 @@ export default function Bch() {
       })
       .catch((err) => console.error("Error fetching bch members:", err));
   };
+
+  useRealtimeRefresh("thanhVienBch", () => {
+    loadBch();
+  });
 
   useEffect(() => {
     loadBch();
@@ -86,80 +91,100 @@ export default function Bch() {
       return;
     }
 
-    const url = editingMember
-      ? `/api/thanhVienBch/${editingMember.id}`
-      : "/api/thanhVienBch";
-    const method = editingMember ? "PUT" : "POST";
-
-    fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(memberForm),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        alert(
-          editingMember
-            ? "Cập nhật thành viên BCH thành công!"
-            : "Thêm thành viên BCH mới thành công!",
-        );
-        setShowMemberModal(false);
-        loadBch();
-      })
-      .catch((err) => {
-        console.error("Member save error:", err);
-        alert("Có lỗi xảy ra khi lưu thông tin thành viên!");
-      });
+    if (editingMember) {
+      apiService.put(
+        `/api/thanhVienBch/${editingMember.id}`,
+        memberForm,
+        "Cập nhật thành viên BCH thành công!"
+      )
+        .then(() => {
+          setShowMemberModal(false);
+          loadBch();
+        })
+        .catch((err) => console.error("Member save error:", err));
+    } else {
+      apiService.post(
+        "/api/thanhVienBch",
+        memberForm,
+        true,
+        "Thêm thành viên BCH mới thành công!"
+      )
+        .then(() => {
+          setShowMemberModal(false);
+          loadBch();
+        })
+        .catch((err) => console.error("Member save error:", err));
+    }
   };
 
   const handleDeleteMember = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa thành viên BCH này không?")) {
-      fetch(`/api/thanhVienBch/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService.delete(`/api/thanhVienBch/${id}`, "Đã xóa thành viên BCH thành công!")
         .then(() => {
-          alert("Đã xóa thành viên BCH thành công!");
           loadBch();
         })
         .catch((err) => {
           console.error("Delete member error:", err);
-          alert("Có lỗi xảy ra khi xóa thành viên BCH!");
         });
     }
+  };
+
+  const compressImage = (file, maxWidth, maxHeight, quality, callback) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+        callback(compressedBase64);
+      };
+    };
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const base64Data = reader.result;
-
-      fetch("/api/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    compressImage(file, 500, 500, 0.7, (compressedBase64) => {
+      apiService.post(
+        "/api/upload",
+        {
+          fileData: compressedBase64,
+          fileName: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
         },
-        body: JSON.stringify({ fileData: base64Data, fileName: file.name }),
-      })
-        .then((res) => res.json())
+        false
+      )
         .then((data) => {
           if (data.success) {
             setMemberForm((prev) => ({ ...prev, anhDaiDien: data.url }));
-          } else {
-            alert("Tải ảnh lên thất bại!");
           }
         })
         .catch((err) => {
           console.error("Upload error:", err);
-          alert("Có lỗi xảy ra khi tải ảnh lên!");
         });
-    };
+    });
   };
 
   const columns = [

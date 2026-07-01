@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require("path");
 const fs = require("fs");
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // GET /api/albumAnh
 router.get("/", async (req, res) => {
@@ -75,12 +76,45 @@ router.post("/", async (req, res) => {
         ? crypto.randomUUID()
         : Date.now().toString() + Math.random().toString(36).substring(2, 5);
 
+      // Decode base64 and save to uploads folder
+      let savedUrl = fileDataVal;
+      if (fileDataVal.startsWith("data:") || fileDataVal.length > 500) {
+        try {
+          const matches = fileDataVal.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          let base64Buffer;
+          let extension = ".jpg";
+
+          if (matches && matches.length === 3) {
+            const mimeType = matches[1];
+            base64Buffer = Buffer.from(matches[2], "base64");
+            if (mimeType === "image/png") extension = ".png";
+            else if (mimeType === "image/webp") extension = ".webp";
+            else if (mimeType === "image/gif") extension = ".gif";
+          } else {
+            base64Buffer = Buffer.from(fileDataVal, "base64");
+          }
+
+          const uploadsPath = path.join(__dirname, "../uploads");
+          if (!fs.existsSync(uploadsPath)) {
+            fs.mkdirSync(uploadsPath, { recursive: true });
+          }
+
+          const savedFileName = `gallery-${photoId}${extension}`;
+          const diskPath = path.join(uploadsPath, savedFileName);
+          fs.writeFileSync(diskPath, base64Buffer);
+          savedUrl = `/uploads/${savedFileName}`;
+        } catch (err) {
+          console.error("Gallery file save error:", err);
+        }
+      }
+
       await runQuery(
         `INSERT INTO "anhAlbum" ("id", "albumId", "duongDanAnh", "tenFile", "createdBy", "createdAt", "updatedBy", "updatedAt")
-         VALUES (@id, @galleryId, @fileDataVal, @fileNameVal, @createdBy, @createdAt, @createdBy, @createdAt)`,
-        { id: photoId, galleryId, fileDataVal, fileNameVal, createdBy, createdAt }
+         VALUES (@id, @galleryId, @savedUrl, @fileNameVal, @createdBy, @createdAt, @createdBy, @createdAt)`,
+        { id: photoId, galleryId, savedUrl, fileNameVal, createdBy, createdAt }
       );
     }
+    sendRealtimeUpdate("albumAnh");
     res.status(201).json({
       success: true,
       message: "Đăng tải thành công tất cả hình ảnh lên thư viện!",
@@ -117,6 +151,7 @@ router.delete("/:id", async (req, res) => {
     });
 
     await runQuery('DELETE FROM "albumAnh" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("albumAnh");
     res.json({ success: true, message: "Xóa album thư viện thành công!" });
   } catch (err) {
     console.error("DELETE /api/albumAnh error:", err);

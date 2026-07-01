@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // POST /api/chiDoan
 router.post("/", async (req, res) => {
@@ -22,6 +23,7 @@ router.post("/", async (req, res) => {
         createdAt,
       },
     );
+    sendRealtimeUpdate("chiDoan");
     res
       .status(201)
       .json({ success: true, message: "Thêm chi đoàn thành công!", id });
@@ -52,6 +54,7 @@ router.put("/:id", async (req, res) => {
         updatedAt,
       },
     );
+    sendRealtimeUpdate("chiDoan");
     res.json({ success: true, message: "Cập nhật chi đoàn thành công!" });
   } catch (err) {
     console.error("PUT /api/chiDoan error:", err);
@@ -64,6 +67,7 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await runQuery('DELETE FROM "chiDoan" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("chiDoan");
     res.json({ success: true, message: "Xóa chi đoàn thành công!" });
   } catch (err) {
     console.error("DELETE /api/chiDoan error:", err);

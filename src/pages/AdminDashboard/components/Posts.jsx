@@ -3,6 +3,8 @@ import { Plus, Trash2, Edit, Check, Upload, X } from "lucide-react";
 import { newsCategories } from "src/data/mockData";
 import { Table, Modal, FormItem } from "src/components";
 import { generateUUID } from "src/utils/Commons";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 export default function Posts() {
   const fileInputRef = useRef(null);
@@ -23,11 +25,15 @@ export default function Posts() {
   });
 
   const loadPosts = () => {
-    fetch("/api/baiViet")
-      .then((res) => res.json())
+    apiService
+      .get("/api/baiViet")
       .then((data) => setPosts(data))
       .catch((err) => console.error("Error fetching admin posts:", err));
   };
+
+  useRealtimeRefresh("baiViet", () => {
+    loadPosts();
+  });
 
   useEffect(() => {
     loadPosts();
@@ -41,12 +47,27 @@ export default function Posts() {
         id: post.id,
         tieuDe: post.tieuDe,
         tomTat: post.tomTat,
-        noiDung: post.noiDung,
+        noiDung: "", // Load in background
         danhMuc: post.danhMuc,
         anhDaiDien: post.anhDaiDien || "",
         tacGia: post.tacGia,
         tinNoiBat: post.tinNoiBat || false,
       });
+
+      // Fetch the full post details in background
+      apiService
+        .get(`/api/baiViet/${post.id}`)
+        .then((detail) => {
+          setPostForm((prev) => {
+            if (prev.id === post.id) {
+              return { ...prev, noiDung: detail.noiDung };
+            }
+            return prev;
+          });
+        })
+        .catch((err) =>
+          console.error("Error loading post content details:", err),
+        );
     } else {
       setEditingPost(null);
       setPostForm({
@@ -71,29 +92,24 @@ export default function Posts() {
     if (tempImage) {
       const fileId = generateUUID();
       try {
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        const uploadData = await apiService.post(
+          "/api/upload",
+          {
             fileData: tempImage.fileData,
             fileName: tempImage.fileName,
             fileId,
             postId: postForm.id,
             fileType: "cover",
-          }),
-        });
-        const uploadData = await uploadRes.json();
+          },
+          false,
+        );
         if (uploadData.success) {
           finalImageUrl = uploadData.filePath;
         } else {
-          alert("Tải ảnh lên máy chủ thất bại!");
           return;
         }
       } catch (err) {
         console.error("Upload during post submit error:", err);
-        alert("Có lỗi xảy ra khi tải ảnh bìa lên máy chủ!");
         return;
       }
     }
@@ -103,66 +119,92 @@ export default function Posts() {
       return;
     }
 
-    const url = editingPost ? `/api/baiViet/${editingPost.id}` : "/api/baiViet";
-    const method = editingPost ? "PUT" : "POST";
-
-    fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...postForm,
-        anhDaiDien: finalImageUrl,
-      }),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        alert(
-          editingPost
-            ? "Cập nhật bài viết thành công!"
-            : "Đăng bài viết thành công!",
+    try {
+      if (editingPost) {
+        await apiService.put(
+          `/api/baiViet/${editingPost.id}`,
+          {
+            ...postForm,
+            anhDaiDien: finalImageUrl,
+          },
+          "Cập nhật bài viết thành công!",
         );
-        setShowPostModal(false);
-        loadPosts();
-      })
-      .catch((err) => {
-        console.error("Post save error:", err);
-        alert("Có lỗi xảy ra khi lưu bài viết!");
-      });
+      } else {
+        await apiService.post(
+          "/api/baiViet",
+          {
+            ...postForm,
+            anhDaiDien: finalImageUrl,
+          },
+          true,
+          "Đăng bài viết thành công!",
+        );
+      }
+      setShowPostModal(false);
+      loadPosts();
+    } catch (err) {
+      console.error("Post save error:", err);
+    }
   };
 
   const handleDeletePost = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
-      fetch(`/api/baiViet/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService
+        .delete(`/api/baiViet/${id}`, "Đã xóa bài viết thành công!")
         .then(() => {
-          alert("Đã xóa bài viết thành công!");
           loadPosts();
         })
         .catch((err) => {
           console.error("Delete post error:", err);
-          alert("Có lỗi xảy ra khi xóa bài viết!");
         });
     }
+  };
+
+  const compressImage = (file, maxWidth, maxHeight, quality, callback) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+        callback(compressedBase64);
+      };
+    };
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const base64Data = reader.result;
+    compressImage(file, 1200, 1200, 0.7, (compressedBase64) => {
       setTempImage({
-        fileData: base64Data,
-        fileName: file.name,
+        fileData: compressedBase64,
+        fileName: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
         previewUrl: URL.createObjectURL(file),
       });
-    };
+    });
   };
 
   const columns = [

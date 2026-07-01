@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { FormItem } from "src/components";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 export default function Intro() {
   const [introSettings, setIntroSettings] = useState({
@@ -9,8 +11,7 @@ export default function Intro() {
   });
 
   const loadIntro = () => {
-    fetch("/api/gioiThieu")
-      .then((res) => res.json())
+    apiService.get("/api/gioiThieu")
       .then((data) => {
         if (data.settings) {
           setIntroSettings({
@@ -24,27 +25,26 @@ export default function Intro() {
       );
   };
 
+  useRealtimeRefresh("gioiThieu", () => {
+    loadIntro();
+  });
+
   useEffect(() => {
     loadIntro();
   }, []);
 
   const handleIntroSettingsSubmit = (e) => {
     e.preventDefault();
-    fetch("/api/gioiThieu", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(introSettings),
-    })
-      .then((res) => res.json())
+    apiService.put(
+      "/api/gioiThieu",
+      introSettings,
+      "Cập nhật thông tin giới thiệu thành công!"
+    )
       .then(() => {
-        alert("Cập nhật thông tin giới thiệu thành công!");
         loadIntro();
       })
       .catch((err) => {
         console.error("Intro settings save error:", err);
-        alert("Có lỗi xảy ra khi lưu thông tin giới thiệu!");
       });
   };
 

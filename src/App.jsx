@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
@@ -24,6 +24,32 @@ function ClientLayout({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    const eventSource = new EventSource("/api/realtime");
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data && data.target) {
+          const refreshEvent = new CustomEvent("realtime-refresh", {
+            detail: { target: data.target },
+          });
+          window.dispatchEvent(refreshEvent);
+        }
+      } catch (err) {
+        // Silently ignore ping comments or malformed data
+      }
+    };
+
+    eventSource.onerror = () => {
+      console.warn("[Realtime] EventSource disconnected. Reconnecting automatically...");
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
   return (
     <Routes>
       {/* Admin Panel Routes - No client wrapper */}

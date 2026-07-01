@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Calendar, User, Eye, ArrowLeft, Share2, Link2 } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import { newsCategories } from "../../data/mockData";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import "./NewsDetail.css";
@@ -32,6 +33,10 @@ export default function NewsDetail() {
       return { post, related };
     }, [])
   );
+
+  useRealtimeRefresh("baiViet", () => {
+    loadPostDetail(id, { silent: true }).catch((err) => console.error("Error loading post:", err));
+  });
 
   useEffect(() => {
     loadPostDetail(id).catch((err) => console.error("Error loading post:", err));

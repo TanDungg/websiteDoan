@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import "./Introduction.css";
 
 const getChucVuString = (pos) => {
@@ -33,6 +34,18 @@ export default function Introduction() {
     loading,
     execute: loadIntro,
   } = useApi(useCallback(() => apiService.get("/api/gioiThieu"), []));
+
+  useRealtimeRefresh("gioiThieu", () => {
+    loadIntro({ silent: true }).catch((err) => console.error("Failed to load introduction:", err));
+  });
+
+  useRealtimeRefresh("thanhVienBch", () => {
+    loadIntro({ silent: true }).catch((err) => console.error("Failed to load introduction:", err));
+  });
+
+  useRealtimeRefresh("chiDoan", () => {
+    loadIntro({ silent: true }).catch((err) => console.error("Failed to load introduction:", err));
+  });
 
   useEffect(() => {
     loadIntro().catch((err) =>

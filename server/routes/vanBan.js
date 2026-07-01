@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // GET /api/vanBan -> mounted on /api/vanBan, so GET /
 router.get("/", async (req, res) => {
@@ -34,6 +35,7 @@ router.post("/", async (req, res) => {
        VALUES (@id, @tenVanBan, @soHieu, @date, @loaiVanBan, @duongDanFile, @createdBy, @createdAt, @createdBy, @createdAt)`,
       { id, tenVanBan, soHieu, date, loaiVanBan, duongDanFile, createdBy, createdAt },
     );
+    sendRealtimeUpdate("vanBan");
     res
       .status(201)
       .json({ success: true, message: "Thêm văn bản thành công!", id });
@@ -48,6 +50,7 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await runQuery('DELETE FROM "vanBan" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("vanBan");
     res.json({ success: true, message: "Xóa văn bản thành công!" });
   } catch (err) {
     console.error("Delete doc API error:", err);

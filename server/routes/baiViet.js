@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const path = require("path");
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // GET /api/baiViet -> mounted on /api/baiViet, so GET /
 router.get("/", async (req, res) => {
   const { category, search } = req.query;
   try {
-    let query = 'SELECT * FROM "baiViet"';
+    let query = 'SELECT "id", "tieuDe", "tomTat", "danhMuc", "anhDaiDien", "ngayDang", "tacGia", "luotXem", "tinNoiBat" FROM "baiViet"';
     const params = {};
     const conditions = [];
 
@@ -33,7 +34,6 @@ router.get("/", async (req, res) => {
       id: row.id,
       tieuDe: row.tieuDe,
       tomTat: row.tomTat,
-      noiDung: row.noiDung,
       danhMuc: row.danhMuc,
       anhDaiDien: row.anhDaiDien,
       ngayDang: row.ngayDang,
@@ -107,6 +107,7 @@ router.post("/", async (req, res) => {
         createdAt,
       },
     );
+    sendRealtimeUpdate("baiViet");
     res.status(201).json({
       success: true,
       message: "Đăng bài viết thành công!",
@@ -143,6 +144,7 @@ router.put("/:id", async (req, res) => {
         updatedAt,
       },
     );
+    sendRealtimeUpdate("baiViet");
     res.json({ success: true, message: "Cập nhật bài viết thành công!" });
   } catch (err) {
     console.error("Update post API error:", err);
@@ -193,6 +195,7 @@ router.delete("/:id", async (req, res) => {
     }
 
     await runQuery('DELETE FROM "baiViet" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("baiViet");
     res.json({
       success: true,
       message: "Xóa bài viết và các tệp đính kèm thành công!",

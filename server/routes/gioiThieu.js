@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // GET /api/gioiThieu -> mounted on /api/gioiThieu, so GET /
 router.get("/", async (req, res) => {
@@ -98,6 +99,7 @@ router.put("/", async (req, res) => {
         { lichSu, thongTinChiDoan },
       );
     }
+    sendRealtimeUpdate("gioiThieu");
     res.json({ success: true, message: "Cập nhật giới thiệu thành công!" });
   } catch (err) {
     console.error("PUT /api/gioiThieu error:", err);

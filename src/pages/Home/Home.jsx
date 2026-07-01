@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Image } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import NewsCard from "../../components/NewsCard/NewsCard";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import "./Home.css";
@@ -22,6 +23,14 @@ export default function Home() {
 
   const posts = postsData || [];
   const gallery = galleryData || [];
+
+  useRealtimeRefresh("baiViet", () => {
+    loadPosts({ silent: true }).catch((err) => console.error("Failed to load posts:", err));
+  });
+
+  useRealtimeRefresh("albumAnh", () => {
+    loadGallery({ silent: true }).catch((err) => console.error("Failed to load gallery:", err));
+  });
 
   useEffect(() => {
     loadPosts().catch((err) => console.error("Failed to load posts:", err));

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check, Settings } from "lucide-react";
 import { Table, Modal, FormItem } from "../../../components";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -24,8 +26,7 @@ export default function Branches() {
 
   const loadData = () => {
     // Load branches
-    fetch("/api/gioiThieu")
-      .then((res) => res.json())
+    apiService.get("/api/gioiThieu")
       .then((data) => {
         if (data.branches) {
           setBranches(data.branches);
@@ -34,8 +35,7 @@ export default function Branches() {
       .catch((err) => console.error("Error fetching branches:", err));
 
     // Load branch types
-    fetch("/api/loaiChiDoan")
-      .then((res) => res.json())
+    apiService.get("/api/loaiChiDoan")
       .then((data) => {
         if (Array.isArray(data)) {
           setBranchTypes(data);
@@ -44,8 +44,7 @@ export default function Branches() {
       .catch((err) => console.error("Error fetching branch types:", err));
 
     // Load members to count dynamically
-    fetch("/api/doanVien")
-      .then((res) => res.json())
+    apiService.get("/api/doanVien")
       .then((data) => {
         if (Array.isArray(data)) {
           setMembers(data);
@@ -53,6 +52,14 @@ export default function Branches() {
       })
       .catch((err) => console.error("Error fetching union members:", err));
   };
+
+  useRealtimeRefresh("chiDoan", () => {
+    loadData();
+  });
+
+  useRealtimeRefresh("doanVien", () => {
+    loadData();
+  });
 
   useEffect(() => {
     loadData();
@@ -63,42 +70,33 @@ export default function Branches() {
     e.preventDefault();
     if (!newTypeName.trim()) return;
 
-    fetch("/api/loaiChiDoan", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tenLoai: newTypeName.trim() }),
-    })
-      .then((res) => res.json())
+    apiService.post(
+      "/api/loaiChiDoan",
+      { tenLoai: newTypeName.trim() },
+      true,
+      "Thêm phân loại chi đoàn thành công!"
+    )
       .then(() => {
-        alert("Thêm phân loại chi đoàn thành công!");
         setNewTypeName("");
         loadData();
       })
-      .catch((err) => {
-        console.error("Error adding branch type:", err);
-        alert("Có lỗi xảy ra khi thêm phân loại!");
-      });
+      .catch((err) => console.error("Error adding branch type:", err));
   };
 
   const handleUpdateType = (id) => {
     if (!editTypeName.trim()) return;
 
-    fetch(`/api/loaiChiDoan/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tenLoai: editTypeName.trim() }),
-    })
-      .then((res) => res.json())
+    apiService.put(
+      `/api/loaiChiDoan/${id}`,
+      { tenLoai: editTypeName.trim() },
+      "Cập nhật phân loại chi đoàn thành công!"
+    )
       .then(() => {
-        alert("Cập nhật phân loại chi đoàn thành công!");
         setEditingType(null);
         setEditTypeName("");
         loadData();
       })
-      .catch((err) => {
-        console.error("Error updating branch type:", err);
-        alert("Có lỗi xảy ra khi cập nhật phân loại!");
-      });
+      .catch((err) => console.error("Error updating branch type:", err));
   };
 
   const handleDeleteType = (id) => {
@@ -107,18 +105,11 @@ export default function Branches() {
         "Bạn có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!"
       )
     ) {
-      fetch(`/api/loaiChiDoan/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService.delete(`/api/loaiChiDoan/${id}`, "Xóa phân loại chi đoàn thành công!")
         .then(() => {
-          alert("Xóa phân loại chi đoàn thành công!");
           loadData();
         })
-        .catch((err) => {
-          console.error("Error deleting branch type:", err);
-          alert("Có lỗi xảy ra khi xóa phân loại!");
-        });
+        .catch((err) => console.error("Error deleting branch type:", err));
     }
   };
 
@@ -147,26 +138,30 @@ export default function Branches() {
       return;
     }
 
-    const url = editingBranch ? `/api/chiDoan/${editingBranch.id}` : "/api/chiDoan";
-    const method = editingBranch ? "PUT" : "POST";
-
-    fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(branchForm),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        alert(editingBranch ? "Cập nhật chi đoàn thành công!" : "Thêm chi đoàn mới thành công!");
-        setShowBranchModal(false);
-        loadData();
-      })
-      .catch((err) => {
-        console.error("Branch save error:", err);
-        alert("Có lỗi xảy ra khi lưu thông tin chi đoàn!");
-      });
+    if (editingBranch) {
+      apiService.put(
+        `/api/chiDoan/${editingBranch.id}`,
+        branchForm,
+        "Cập nhật chi đoàn thành công!"
+      )
+        .then(() => {
+          setShowBranchModal(false);
+          loadData();
+        })
+        .catch((err) => console.error("Branch save error:", err));
+    } else {
+      apiService.post(
+        "/api/chiDoan",
+        branchForm,
+        true,
+        "Thêm chi đoàn mới thành công!"
+      )
+        .then(() => {
+          setShowBranchModal(false);
+          loadData();
+        })
+        .catch((err) => console.error("Branch save error:", err));
+    }
   };
 
   const handleDeleteBranch = (id) => {
@@ -175,18 +170,11 @@ export default function Branches() {
         "Bạn có chắc chắn muốn xóa chi đoàn trực thuộc này không?"
       )
     ) {
-      fetch(`/api/chiDoan/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService.delete(`/api/chiDoan/${id}`, "Đã xóa chi đoàn thành công!")
         .then(() => {
-          alert("Đã xóa chi đoàn thành công!");
           loadData();
         })
-        .catch((err) => {
-          console.error("Delete branch error:", err);
-          alert("Có lỗi xảy ra khi xóa chi đoàn!");
-        });
+        .catch((err) => console.error("Delete branch error:", err));
     }
   };
 

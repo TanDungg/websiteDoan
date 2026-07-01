@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { X, ZoomIn, ChevronLeft, ChevronRight, Image } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import "./Gallery.css";
 
 export default function Gallery() {
@@ -17,6 +18,10 @@ export default function Gallery() {
   );
 
   const gallery = data || [];
+
+  useRealtimeRefresh("albumAnh", () => {
+    loadGallery({ silent: true }).catch((err) => console.error("Error loading gallery:", err));
+  });
 
   useEffect(() => {
     loadGallery().catch((err) => console.error("Error loading gallery:", err));

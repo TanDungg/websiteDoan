@@ -17,16 +17,23 @@ import Branches from "./components/Branches";
 import Bch from "./components/Bch";
 import Gallery from "./components/Gallery";
 import Members from "./components/Members";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
+import apiService from "src/services/apiService";
 import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(
-    () => localStorage.getItem("tamanh_admin_active_tab") || "posts",
+    () => localStorage.getItem("tamanh_admin_active_tab") || "feedbacks",
   );
 
   // Parent state for feedbacks to sync badge count on sidebar
   const [feedbacks, setFeedbacks] = useState([]);
+
+  // Setup realtime sync for feedbacks
+  useRealtimeRefresh("gopY", () => {
+    loadFeedbacks();
+  });
 
   // Authenticate session
   useEffect(() => {
@@ -44,8 +51,7 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   const loadFeedbacks = () => {
-    fetch("/api/gopY")
-      .then((res) => res.json())
+    apiService.get("/api/gopY")
       .then((data) => setFeedbacks(data))
       .catch((err) => console.error("Error fetching feedbacks:", err));
   };
@@ -57,16 +63,12 @@ export default function AdminDashboard() {
 
   const handleDeleteFeedback = (id) => {
     if (window.confirm("Xóa ý kiến phản hồi này?")) {
-      fetch(`/api/gopY/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      apiService.delete(`/api/gopY/${id}`, "Xóa ý kiến phản hồi thành công!")
         .then(() => {
           loadFeedbacks();
         })
         .catch((err) => {
           console.error("Delete feedback error:", err);
-          alert("Có lỗi xảy ra khi xóa ý kiến phản hồi!");
         });
     }
   };

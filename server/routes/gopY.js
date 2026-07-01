@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
+const { sendRealtimeUpdate } = require("../realtime");
 
 // GET /api/gopY -> mounted on /api/gopY, so GET /
 router.get("/", async (req, res) => {
@@ -34,6 +35,7 @@ router.post("/", async (req, res) => {
        VALUES (@id, @hoTen, @soDienThoai, @email, @donVi, @tieuDe, @noiDung, @date)`,
       { id, hoTen, soDienThoai, email, donVi, tieuDe, noiDung, date },
     );
+    sendRealtimeUpdate("gopY");
     res.status(201).json({
       success: true,
       message: "Gửi góp ý thành công! Xin cảm ơn bạn!",
@@ -49,6 +51,7 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await runQuery('DELETE FROM "gopY" WHERE "id" = @id', { id });
+    sendRealtimeUpdate("gopY");
     res.json({ success: true, message: "Xóa ý kiến thành công!" });
   } catch (err) {
     console.error("Delete feedback API error:", err);
