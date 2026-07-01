@@ -13,6 +13,7 @@ export default function Sidebar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [popularPosts, setPopularPosts] = useState([]);
   const [biThuContact, setBiThuContact] = useState(null);
+  const [stats, setStats] = useState({ online: 12, homNay: 0, tongCong: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +27,11 @@ export default function Sidebar() {
       .catch((err) =>
         console.error("Failed to load popular posts for sidebar:", err),
       );
+
+    fetch("/api/thongKe")
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch((err) => console.error("Failed to load statistics:", err));
 
     fetch("/api/gioiThieu")
       .then((res) => res.json())
@@ -154,6 +160,47 @@ export default function Sidebar() {
             </Link>
           </li>
         </ul>
+      </div>
+
+      {/* Banner Links Widget */}
+      <div className="sidebar-widget banner-links-widget">
+        <a 
+          href="https://hochiminh.vn" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="banner-link-card hoc-tap-bac"
+        >
+          <span className="banner-link-title">HỌC TẬP & LÀM THEO</span>
+          <span className="banner-link-subtitle">Tấm gương đạo đức Hồ Chí Minh</span>
+        </a>
+        <a 
+          href="https://dichvucong.gov.vn" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="banner-link-card dich-vu-cong"
+        >
+          <span className="banner-link-title">CỔNG DỊCH VỤ CÔNG</span>
+          <span className="banner-link-subtitle">Hệ thống thông tin Quốc gia</span>
+        </a>
+      </div>
+
+      {/* Access Statistics Widget */}
+      <div className="sidebar-widget statistics-widget card">
+        <h4>Thống kê truy cập</h4>
+        <div className="stats-list">
+          <div className="stat-row">
+            <span className="stat-title">Đang trực tuyến:</span>
+            <span className="stat-value">{stats.online}</span>
+          </div>
+          <div className="stat-row">
+            <span className="stat-title">Hôm nay:</span>
+            <span className="stat-value">{stats.homNay}</span>
+          </div>
+          <div className="stat-row">
+            <span className="stat-title">Tổng lượt truy cập:</span>
+            <span className="stat-value">{stats.tongCong}</span>
+          </div>
+        </div>
       </div>
 
       {/* Contact Hotline box */}

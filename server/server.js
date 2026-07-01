@@ -13,6 +13,27 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+// Middleware to track visitor traffic
+const { runQuery } = require("./database");
+const trackVisitsMiddleware = async (req, res, next) => {
+  // Only track GET requests to the home page or root resources
+  if (req.method === "GET" && (req.path === "/" || req.path === "/index.html")) {
+    const today = new Date().toISOString().split("T")[0];
+    try {
+      const check = await runQuery('SELECT "ngay", "soLuotTruyCap" FROM "thongKeTruyCap" WHERE "ngay" = @ngay', { ngay: today });
+      if (check.rows.length > 0) {
+        await runQuery('UPDATE "thongKeTruyCap" SET "soLuotTruyCap" = "soLuotTruyCap" + 1 WHERE "ngay" = @ngay', { ngay: today });
+      } else {
+        await runQuery('INSERT INTO "thongKeTruyCap" ("ngay", "soLuotTruyCap") VALUES (@ngay, 1)', { ngay: today });
+      }
+    } catch (err) {
+      console.error("Failed to increment visit counter:", err);
+    }
+  }
+  next();
+};
+app.use(trackVisitsMiddleware);
+
 // Initialize SSE Realtime
 initRealtime(app);
 
@@ -36,6 +57,7 @@ app.use("/api/loaiChiDoan", require("./routes/loaiChiDoan"));
 app.use("/api/doanVien", require("./routes/doanVien"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/albumAnh", require("./routes/albumAnh"));
+app.use("/api/thongKe", require("./routes/thongKe"));
 
 // Serve static React build in production
 const distPath = path.join(__dirname, "../dist");

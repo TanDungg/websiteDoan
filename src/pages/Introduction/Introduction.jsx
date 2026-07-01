@@ -112,7 +112,7 @@ export default function Introduction() {
       </div>
 
       {/* Overview Intro */}
-      <section className="intro-overview card">
+      <section className="intro-overview card" id="lichsu">
         <div className="intro-text-content">
           <h2>Lịch sử & Sứ mệnh</h2>
           <div
@@ -138,7 +138,7 @@ export default function Introduction() {
 
       {/* Organizational Structure */}
       {bchMembers.length > 0 && (
-        <section className="bch-section">
+        <section className="bch-section" id="bch">
           <h2 className="section-title">
             Ban Chấp hành đương nhiệm (Nhiệm kỳ 2022 - 2027)
           </h2>
@@ -198,7 +198,7 @@ export default function Introduction() {
 
       {/* Chi doan list */}
       {branches.length > 0 && (
-        <section className="sub-units-section card">
+        <section className="sub-units-section card" id="chidoan">
           <h2>Hệ thống các Chi đoàn trực thuộc</h2>
           <div className="sub-units-grid">
             {Object.entries(groupedBranches).map(([groupName, groupList]) => (

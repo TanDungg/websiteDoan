@@ -39,17 +39,10 @@ export default function Home() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const parts = dateStr.split("-");
-    if (parts.length < 3) return dateStr;
-    const [year, month, day] = parts;
-    return `${day}/${month}/${year}`;
-  };
-
   const hotNews = posts.filter((n) => n.tinNoiBat);
-  const announcements = posts.filter((n) => n.danhMuc === "thong-bao").slice(0, 3);
-  const recentNews = posts.filter((n) => n.danhMuc !== "thong-bao").slice(0, 4);
+  const activityNews = posts.filter((n) => n.danhMuc === "hoat-dong").slice(0, 4);
+  const charityNews = posts.filter((n) => n.danhMuc === "tu-thien").slice(0, 4);
+  const fallbackNews = posts.slice(0, 4);
 
   // Auto transition for slide banner
   useEffect(() => {
@@ -151,43 +144,56 @@ export default function Home() {
         </section>
       )}
 
-      {/* Announcement Section */}
-      {announcements.length > 0 && (
-        <div className="container" style={{ marginTop: "30px", marginBottom: "-10px" }}>
-          <div className="announcement-card card">
-            <div className="announcement-header">
-              <span className="announcement-icon-badge">📢 THÔNG BÁO MỚI</span>
-            </div>
-            <div className="announcement-body">
-              {announcements.map((item) => (
-                <div key={item.id} className="announcement-row">
-                  <span className="announcement-row-date">{formatDate(item.ngayDang)}</span>
-                  <Link to={`/tin-tuc/${item.id}`} className="announcement-row-title">
-                    {item.tieuDe}
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="announcement-footer">
-              <Link to="/tin-tuc?category=thong-bao" className="announcement-view-all">
-                Xem tất cả &rarr;
-              </Link>
-            </div>
+      {/* Announcement Board Ticker */}
+      <div className="announcement-ticker-container">
+        <div className="container ticker-inner">
+          <div className="ticker-label">
+            <span className="ticker-badge">Thông báo khẩn</span>
+          </div>
+          <div className="ticker-content-wrapper">
+            <marquee className="ticker-marquee" scrollamount="4" onMouseOver={(e) => e.currentTarget.stop()} onMouseOut={(e) => e.currentTarget.start()}>
+              {posts.filter(p => p.danhMuc === 'thong-bao').length > 0 ? (
+                posts.filter(p => p.danhMuc === 'thong-bao').map((notice, idx) => (
+                  <span key={notice.id} className="ticker-notice-item">
+                    <Link to={`/tin-tuc/${notice.id}`}>
+                      🔔 {notice.tieuDe} ({notice.ngayDang ? notice.ngayDang.split("-").reverse().join("/") : ""})
+                    </Link>
+                    {idx < posts.filter(p => p.danhMuc === 'thong-bao').length - 1 && <span className="ticker-separator">|</span>}
+                  </span>
+                ))
+              ) : (
+                <span className="ticker-notice-item">Chưa có thông báo mới trong tuần này. Kính chúc các đồng chí đoàn viên sức khỏe và công tác tốt!</span>
+              )}
+            </marquee>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Main Layout Grid */}
       <div className="container main-layout">
         <div className="layout-grid">
           {/* Main news column */}
           <main className="news-main-section">
-            <h2 className="section-title">Tin tức mới nhất</h2>
+            <h2 className="section-title">
+              {activityNews.length > 0 ? "Hoạt động Đoàn - Hội - Đội" : "Tin tức mới nhất"}
+            </h2>
             <div className="news-grid">
-              {recentNews.map((news) => (
+              {(activityNews.length > 0 ? activityNews : fallbackNews).map((news) => (
                 <NewsCard key={news.id} news={news} />
               ))}
             </div>
+
+            {charityNews.length > 0 && (
+              <div className="charity-news-sec" style={{ marginTop: "40px" }}>
+                <h2 className="section-title">Hoạt động Từ thiện - Tình nguyện</h2>
+                <div className="news-grid">
+                  {charityNews.map((news) => (
+                    <NewsCard key={news.id} news={news} />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="see-all-wrapper">
               <Link to="/tin-tuc" className="btn btn-outline">
                 Xem tất cả tin tức

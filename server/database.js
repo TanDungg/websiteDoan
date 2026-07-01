@@ -59,6 +59,7 @@ function initMockDbStore() {
     loaiChiDoan: [],
     chiDoan: [],
     doanVien: [],
+    thongKeTruyCap: [],
   };
 }
 
@@ -101,6 +102,11 @@ function runMockQuery(queryText, params = {}) {
     // Filter by ID
     if (params.id !== undefined) {
       list = list.filter((item) => String(item.id) === String(params.id));
+    }
+
+    // Filter by ngay
+    if (params.ngay !== undefined) {
+      list = list.filter((item) => String(item.ngay) === String(params.ngay));
     }
 
     // Custom filtering for specific tables
@@ -173,9 +179,18 @@ function runMockQuery(queryText, params = {}) {
       mockDbStore.intro = { ...mockDbStore.intro, ...params };
       return { rows: [], rowCount: 1 };
     }
-    const index = table.findIndex((item) => String(item.id) === String(params.id));
+    let index = -1;
+    if (params.id !== undefined) {
+      index = table.findIndex((item) => String(item.id) === String(params.id));
+    } else if (params.ngay !== undefined) {
+      index = table.findIndex((item) => String(item.ngay) === String(params.ngay));
+    }
     if (index !== -1) {
-      table[index] = { ...table[index], ...params };
+      if (normalized.includes('"soLuotTruyCap" = "soLuotTruyCap" + 1') || normalized.includes('[soLuotTruyCap] = [soLuotTruyCap] + 1')) {
+        table[index].soLuotTruyCap = (table[index].soLuotTruyCap || 0) + 1;
+      } else {
+        table[index] = { ...table[index], ...params };
+      }
       return { rows: [], rowCount: 1 };
     }
     return { rows: [], rowCount: 0 };
@@ -382,6 +397,13 @@ const initializeDatabase = async () => {
           );
         `);
 
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS "thongKeTruyCap" (
+            "ngay" VARCHAR(10) PRIMARY KEY,
+            "soLuotTruyCap" INTEGER DEFAULT 0
+          );
+        `);
+
         // Seed admin if empty
         const adminCheck = await client.query('SELECT COUNT(*) FROM "taiKhoanAdmin"');
         if (parseInt(adminCheck.rows[0].count) === 0) {
@@ -581,6 +603,14 @@ const initializeDatabase = async () => {
           [createdAt] NVARCHAR(30),
           [updatedBy] NVARCHAR(100),
           [updatedAt] NVARCHAR(30)
+        );
+      `);
+
+      await sql.query(`
+        IF OBJECT_ID('thongKeTruyCap', 'U') IS NULL
+        CREATE TABLE [thongKeTruyCap] (
+          [ngay] NVARCHAR(10) PRIMARY KEY,
+          [soLuotTruyCap] INT DEFAULT 0
         );
       `);
 

@@ -11,8 +11,8 @@ import "./News.css";
 
 export default function News() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchText, setSearchText] = useState("");
+  const selectedCategory = searchParams.get("category") || "all";
 
   const {
     data,
@@ -53,7 +53,12 @@ export default function News() {
   }, [loadPosts, selectedCategory, urlSearch]);
 
   const handleCategorySelect = (catId) => {
-    setSelectedCategory(catId);
+    if (catId === "all") {
+      searchParams.delete("category");
+    } else {
+      searchParams.set("category", catId);
+    }
+    setSearchParams(searchParams);
   };
 
   const handleSearchChange = (e) => {
