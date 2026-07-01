@@ -164,6 +164,23 @@
   .hero-slider {
     height: 400px;
   }
+  .slide-item::after {
+    /* Use a more uniform overlay on mobile to keep text readable while showing the image */
+    background: linear-gradient(
+      180deg,
+      rgba(9, 13, 22, 0.45) 0%,
+      rgba(9, 13, 22, 0.75) 100%
+    );
+  }
+  .slide-content-card {
+    background: transparent;
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    padding: 10px 0;
+    max-width: 100%;
+  }
   .slide-title {
     font-size: 1.7rem;
   }

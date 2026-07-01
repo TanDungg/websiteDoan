@@ -11,7 +11,7 @@ import "./Sidebar.css";
 
 export default function Sidebar() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [popularPosts, setPopularPosts] = useState([]);
   const [biThuContact, setBiThuContact] = useState(null);
   const navigate = useNavigate();
 
@@ -19,10 +19,12 @@ export default function Sidebar() {
     fetch("/api/baiViet")
       .then((res) => res.json())
       .then((data) => {
-        setRecentPosts(data.slice(0, 3));
+        // Sort by views descending to get the most viewed posts
+        const sorted = [...data].sort((a, b) => (b.luotXem || 0) - (a.luotXem || 0));
+        setPopularPosts(sorted.slice(0, 3));
       })
       .catch((err) =>
-        console.error("Failed to load recent posts for sidebar:", err),
+        console.error("Failed to load popular posts for sidebar:", err),
       );
 
     fetch("/api/gioiThieu")
@@ -81,12 +83,12 @@ export default function Sidebar() {
         </form>
       </div>
 
-      {/* Hot news list */}
+      {/* Popular news list */}
       <div className="sidebar-widget recent-widget card">
-        <h4>Tin mới cập nhật</h4>
+        <h4>Tin xem nhiều nhất</h4>
         <div className="recent-posts-list">
-          {recentPosts.length > 0 ? (
-            recentPosts.map((post) => (
+          {popularPosts.length > 0 ? (
+            popularPosts.map((post) => (
               <div
                 key={post.id}
                 className="recent-post-item"
@@ -117,7 +119,7 @@ export default function Sidebar() {
                 margin: "20px 0",
               }}
             >
-              Chưa có bài viết mới.
+              Chưa có bài viết phổ biến.
             </p>
           )}
         </div>
