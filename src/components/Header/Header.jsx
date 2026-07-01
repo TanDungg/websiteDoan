@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { Menu, X, ShieldAlert, ChevronDown } from "lucide-react";
+import { Menu, X, ShieldAlert } from "lucide-react";
 import "./Header.css";
 
 export default function Header() {
@@ -55,40 +55,22 @@ export default function Header() {
             >
               Trang chủ
             </NavLink>
-            <div className="nav-item-dropdown">
-              <NavLink
-                to="/gioi-thieu"
-                className={({ isActive }) =>
-                  isActive ? "nav-link active" : "nav-link"
-                }
-              >
-                <span>Giới thiệu</span>
-                <ChevronDown size={14} className="dropdown-arrow-icon" />
-              </NavLink>
-              <div className="dropdown-menu-list">
-                <Link to="/gioi-thieu#lichsu">Lịch sử truyền thống</Link>
-                <Link to="/gioi-thieu#bch">Ban Chấp hành</Link>
-                <Link to="/gioi-thieu#chidoan">Chi đoàn trực thuộc</Link>
-              </div>
-            </div>
-            <div className="nav-item-dropdown">
-              <NavLink
-                to="/tin-tuc"
-                className={({ isActive }) =>
-                  isActive ? "nav-link active" : "nav-link"
-                }
-              >
-                <span>Tin tức</span>
-                <ChevronDown size={14} className="dropdown-arrow-icon" />
-              </NavLink>
-              <div className="dropdown-menu-list">
-                <Link to="/tin-tuc?category=thong-bao">Thông báo - Kế hoạch</Link>
-                <Link to="/tin-tuc?category=hoat-dong">Hoạt động Đoàn</Link>
-                <Link to="/tin-tuc?category=tu-thien">Từ thiện - Tình nguyện</Link>
-                <Link to="/tin-tuc?category=guong-sang">Gương sáng trẻ</Link>
-                <Link to="/tin-tuc?category=tin-dia-phuong">Tin địa phương</Link>
-              </div>
-            </div>
+            <NavLink
+              to="/gioi-thieu"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              Giới thiệu
+            </NavLink>
+            <NavLink
+              to="/tin-tuc"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              Tin tức
+            </NavLink>
             <NavLink
               to="/van-ban"
               className={({ isActive }) =>

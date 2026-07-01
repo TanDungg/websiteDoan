@@ -448,6 +448,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 4px 10px !important;
 }
 
 .ticker-label {
@@ -461,7 +462,7 @@
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.8rem;
-  padding: 4px 10px;
+  padding: 4px 10px !important;
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;

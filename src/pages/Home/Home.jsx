@@ -25,11 +25,15 @@ export default function Home() {
   const gallery = galleryData || [];
 
   useRealtimeRefresh("baiViet", () => {
-    loadPosts({ silent: true }).catch((err) => console.error("Failed to load posts:", err));
+    loadPosts({ silent: true }).catch((err) =>
+      console.error("Failed to load posts:", err),
+    );
   });
 
   useRealtimeRefresh("albumAnh", () => {
-    loadGallery({ silent: true }).catch((err) => console.error("Failed to load gallery:", err));
+    loadGallery({ silent: true }).catch((err) =>
+      console.error("Failed to load gallery:", err),
+    );
   });
 
   useEffect(() => {
@@ -40,7 +44,9 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const hotNews = posts.filter((n) => n.tinNoiBat);
-  const activityNews = posts.filter((n) => n.danhMuc === "hoat-dong").slice(0, 4);
+  const activityNews = posts
+    .filter((n) => n.danhMuc === "hoat-dong")
+    .slice(0, 4);
   const charityNews = posts.filter((n) => n.danhMuc === "tu-thien").slice(0, 4);
   const fallbackNews = posts.slice(0, 4);
 
@@ -151,20 +157,38 @@ export default function Home() {
             <span className="ticker-badge">Thông báo khẩn</span>
           </div>
           <div className="ticker-content-wrapper">
-            <marquee className="ticker-marquee" scrollamount="4" onMouseOver={(e) => e.currentTarget.stop()} onMouseOut={(e) => e.currentTarget.start()}>
-              {posts.filter(p => p.danhMuc === 'thong-bao').length > 0 ? (
-                posts.filter(p => p.danhMuc === 'thong-bao').map((notice, idx) => (
-                  <span key={notice.id} className="ticker-notice-item">
-                    <Link to={`/tin-tuc/${notice.id}`}>
-                      🔔 {notice.tieuDe} ({notice.ngayDang ? notice.ngayDang.split("-").reverse().join("/") : ""})
-                    </Link>
-                    {idx < posts.filter(p => p.danhMuc === 'thong-bao').length - 1 && <span className="ticker-separator">|</span>}
-                  </span>
-                ))
+            {/* eslint-disable react/no-unknown-property */}
+            <marquee
+              className="ticker-marquee"
+              scrollamount="4"
+              onMouseOver={(e) => e.currentTarget.stop()}
+              onMouseOut={(e) => e.currentTarget.start()}
+            >
+              {posts.filter((p) => p.danhMuc === "thong-bao").length > 0 ? (
+                posts
+                  .filter((p) => p.danhMuc === "thong-bao")
+                  .map((notice, idx) => (
+                    <span key={notice.id} className="ticker-notice-item">
+                      <Link to={`/tin-tuc/${notice.id}`}>
+                        🔔 {notice.tieuDe} (
+                        {notice.ngayDang
+                          ? notice.ngayDang.split("-").reverse().join("/")
+                          : ""}
+                        )
+                      </Link>
+                      {idx <
+                        posts.filter((p) => p.danhMuc === "thong-bao").length -
+                          1 && <span className="ticker-separator">|</span>}
+                    </span>
+                  ))
               ) : (
-                <span className="ticker-notice-item">Chưa có thông báo mới trong tuần này. Kính chúc các đồng chí đoàn viên sức khỏe và công tác tốt!</span>
+                <span className="ticker-notice-item">
+                  Chưa có thông báo mới trong tuần này. Kính chúc các đồng chí
+                  đoàn viên sức khỏe và công tác tốt!
+                </span>
               )}
             </marquee>
+            {/* eslint-enable react/no-unknown-property */}
           </div>
         </div>
       </div>
@@ -175,17 +199,23 @@ export default function Home() {
           {/* Main news column */}
           <main className="news-main-section">
             <h2 className="section-title">
-              {activityNews.length > 0 ? "Hoạt động Đoàn - Hội - Đội" : "Tin tức mới nhất"}
+              {activityNews.length > 0
+                ? "Hoạt động Đoàn - Hội - Đội"
+                : "Tin tức mới nhất"}
             </h2>
             <div className="news-grid">
-              {(activityNews.length > 0 ? activityNews : fallbackNews).map((news) => (
-                <NewsCard key={news.id} news={news} />
-              ))}
+              {(activityNews.length > 0 ? activityNews : fallbackNews).map(
+                (news) => (
+                  <NewsCard key={news.id} news={news} />
+                ),
+              )}
             </div>
 
             {charityNews.length > 0 && (
               <div className="charity-news-sec" style={{ marginTop: "40px" }}>
-                <h2 className="section-title">Hoạt động Từ thiện - Tình nguyện</h2>
+                <h2 className="section-title">
+                  Hoạt động Từ thiện - Tình nguyện
+                </h2>
                 <div className="news-grid">
                   {charityNews.map((news) => (
                     <NewsCard key={news.id} news={news} />
