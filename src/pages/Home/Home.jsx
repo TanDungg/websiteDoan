@@ -39,8 +39,17 @@ export default function Home() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length < 3) return dateStr;
+    const [year, month, day] = parts;
+    return `${day}/${month}/${year}`;
+  };
+
   const hotNews = posts.filter((n) => n.tinNoiBat);
-  const recentNews = posts.slice(0, 4);
+  const announcements = posts.filter((n) => n.danhMuc === "thong-bao").slice(0, 3);
+  const recentNews = posts.filter((n) => n.danhMuc !== "thong-bao").slice(0, 4);
 
   // Auto transition for slide banner
   useEffect(() => {
@@ -140,6 +149,32 @@ export default function Home() {
             </>
           )}
         </section>
+      )}
+
+      {/* Announcement Section */}
+      {announcements.length > 0 && (
+        <div className="container" style={{ marginTop: "30px", marginBottom: "-10px" }}>
+          <div className="announcement-card card">
+            <div className="announcement-header">
+              <span className="announcement-icon-badge">📢 THÔNG BÁO MỚI</span>
+            </div>
+            <div className="announcement-body">
+              {announcements.map((item) => (
+                <div key={item.id} className="announcement-row">
+                  <span className="announcement-row-date">{formatDate(item.ngayDang)}</span>
+                  <Link to={`/tin-tuc/${item.id}`} className="announcement-row-title">
+                    {item.tieuDe}
+                  </Link>
+                </div>
+              ))}
+            </div>
+            <div className="announcement-footer">
+              <Link to="/tin-tuc?category=thong-bao" className="announcement-view-all">
+                Xem tất cả &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Main Layout Grid */}

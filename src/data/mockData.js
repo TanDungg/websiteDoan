@@ -1,8 +1,8 @@
 export const newsCategories = [
-  { id: "hoat-dong", name: "Hoạt động Đoàn" },
-  { id: "guong-sang", name: "Gương sáng trẻ" },
-  { id: "thong-bao", name: "Thông báo - Kế hoạch" },
-  { id: "tin-dia-phuong", name: "Tin tức địa phương" },
+  { id: "thong-bao", name: "Thông tin - Thông báo" },
+  { id: "hoat-dong-doan", name: "Hoạt động Đoàn - Hội - Đội" },
+  { id: "tu-thien", name: "Từ thiện & Tình nguyện" },
+  { id: "hoc-tap-theo-bac", name: "Học tập & Làm theo Bác" },
 ];
 
 export const newsList = [];
