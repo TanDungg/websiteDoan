@@ -63,6 +63,8 @@ const getCleanText = (text, maxLength = 120) => {
   return cleaned;
 };
 
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80";
+
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const parts = dateStr.split("-");
@@ -266,7 +268,7 @@ export default function Home() {
                       key={news.id}
                       className="slider-item"
                       style={{
-                        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%), url(${news.anhDaiDien})`,
+                        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%), url(${news.anhDaiDien || DEFAULT_IMAGE})`,
                       }}
                       onClick={() => navigate(`/tin-tuc/${news.id}`)}
                     >
@@ -346,7 +348,7 @@ export default function Home() {
                     >
                       <div className="entry-index-badge">{idx + 1}</div>
                       <img
-                        src={post.anhDaiDien}
+                        src={post.anhDaiDien || DEFAULT_IMAGE}
                         alt={post.tieuDe}
                         className="entry-thumbnail"
                       />
@@ -398,7 +400,7 @@ export default function Home() {
                     >
                       <div className="featured-card-img-holder">
                         <img
-                          src={cat1Featured.anhDaiDien}
+                          src={cat1Featured.anhDaiDien || DEFAULT_IMAGE}
                           alt={cat1Featured.tieuDe}
                         />
                       </div>
@@ -427,7 +429,7 @@ export default function Home() {
                           onClick={() => navigate(`/tin-tuc/${subNews.id}`)}
                         >
                           <img
-                            src={subNews.anhDaiDien}
+                            src={subNews.anhDaiDien || DEFAULT_IMAGE}
                             alt={subNews.tieuDe}
                             className="sublist-item-thumb"
                           />
@@ -491,7 +493,7 @@ export default function Home() {
                     >
                       <div className="featured-card-img-holder">
                         <img
-                          src={cat2Featured.anhDaiDien}
+                          src={cat2Featured.anhDaiDien || DEFAULT_IMAGE}
                           alt={cat2Featured.tieuDe}
                         />
                       </div>
@@ -520,7 +522,7 @@ export default function Home() {
                           onClick={() => navigate(`/tin-tuc/${subNews.id}`)}
                         >
                           <img
-                            src={subNews.anhDaiDien}
+                            src={subNews.anhDaiDien || DEFAULT_IMAGE}
                             alt={subNews.tieuDe}
                             className="sublist-item-thumb"
                           />
@@ -569,7 +571,7 @@ export default function Home() {
                       >
                         <div className="example-avatar-holder">
                           <img
-                            src={item.anhDaiDien}
+                            src={item.anhDaiDien || DEFAULT_IMAGE}
                             alt={item.tieuDe}
                             className="example-avatar-img"
                           />

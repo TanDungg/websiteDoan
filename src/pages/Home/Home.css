@@ -451,6 +451,21 @@
   margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 1.5px solid #f1f5f9;
+  position: relative;
+}
+
+.showcase-section-header::after {
+  content: "";
+  position: absolute;
+  bottom: -1.5px;
+  left: 0;
+  width: 80px;
+  height: 2.5px;
+  background-color: #0284c7;
+}
+
+.showcase-section-header:has(.header-icon-orange)::after {
+  background-color: #ea580c;
 }
 
 .showcase-section-title {
@@ -585,8 +600,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  justify-content: space-between;
+  gap: 16px;
+  justify-content: flex-start;
 }
 
 .showcase-sublist-item {
