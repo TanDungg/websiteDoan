@@ -25,7 +25,13 @@ function ClientLayout({ children }) {
 
 export default function App() {
   useEffect(() => {
-    const eventSource = new EventSource("/api/realtime");
+    let tabId = sessionStorage.getItem("realtimeTabId");
+    if (!tabId) {
+      tabId = Math.random().toString(36).substring(2, 15);
+      sessionStorage.setItem("realtimeTabId", tabId);
+    }
+
+    const eventSource = new EventSource(`/api/realtime?tabId=${tabId}`);
 
     eventSource.onmessage = (event) => {
       try {
