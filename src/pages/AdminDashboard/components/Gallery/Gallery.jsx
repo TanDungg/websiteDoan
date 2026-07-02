@@ -1,21 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Trash2,
-  Image,
   X,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { FormItem } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
+import GalleryModal from "./GalleryModal";
 
 export default function Gallery() {
   const [gallery, setGallery] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [uploadingGallery, setUploadingGallery] = useState(false);
-  const [galleryTitle, setGalleryTitle] = useState("");
   const [showGalleryModal, setShowGalleryModal] = useState(false);
 
   const [activeAlbum, setActiveAlbum] = useState(null);
@@ -57,119 +53,9 @@ export default function Gallery() {
     loadGallery();
   });
 
-  const selectedFilesRef = useRef(selectedFiles);
-
-  useEffect(() => {
-    selectedFilesRef.current = selectedFiles;
-  }, [selectedFiles]);
-
   useEffect(() => {
     loadGallery();
-    return () => {
-      // Clean up object URLs to prevent leaks
-      selectedFilesRef.current.forEach((fileObj) =>
-        URL.revokeObjectURL(fileObj.previewUrl),
-      );
-    };
   }, []);
-
-  const compressImage = (file, maxWidth, maxHeight, quality, callback) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
-        callback(compressedBase64);
-      };
-    };
-  };
-
-  const handleGalleryFilesSelect = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    const newFiles = files.map((file) => {
-      return {
-        file,
-        previewUrl: URL.createObjectURL(file),
-        base64Promise: new Promise((resolve) => {
-          compressImage(file, 1000, 1000, 0.7, (compressedBase64) => {
-            resolve(compressedBase64);
-          });
-        }),
-      };
-    });
-
-    setSelectedFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const handleRemoveSelectedFile = (idx) => {
-    setSelectedFiles((prev) => {
-      const updated = [...prev];
-      URL.revokeObjectURL(updated[idx].previewUrl);
-      updated.splice(idx, 1);
-      return updated;
-    });
-  };
-
-  const handleGalleryUploadSubmit = async () => {
-    if (selectedFiles.length === 0) return;
-    setUploadingGallery(true);
-
-    try {
-      const filesPayload = await Promise.all(
-        selectedFiles.map(async (fileObj) => {
-          const base64Data = await fileObj.base64Promise;
-          return {
-            duongDanAnh: base64Data,
-            tenFile: fileObj.file.name,
-          };
-        }),
-      );
-
-      await apiService.post(
-        "/api/albumAnh",
-        {
-          tieuDe: galleryTitle.trim(),
-          files: filesPayload,
-        },
-        true,
-        "Đã đăng tải thành công tất cả hình ảnh lên thư viện!",
-      );
-
-      setSelectedFiles([]);
-      setGalleryTitle("");
-      setShowGalleryModal(false);
-      loadGallery();
-    } catch (err) {
-      console.error("Gallery upload error:", err);
-    } finally {
-      setUploadingGallery(false);
-    }
-  };
 
   const handleDeleteGalleryItem = (id) => {
     if (
@@ -195,11 +81,7 @@ export default function Gallery() {
         <button
           className="btn btn-primary"
           type="button"
-          onClick={() => {
-            setGalleryTitle("");
-            setSelectedFiles([]);
-            setShowGalleryModal(true);
-          }}
+          onClick={() => setShowGalleryModal(true)}
         >
           <Plus size={18} />
           <span>Đăng album mới</span>
@@ -306,125 +188,14 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* MODAL: ADD NEW PHOTOS */}
-      {showGalleryModal && (
-        <div className="modal-overlay">
-          <div
-            className="modal-container card animate-fade-in"
-            style={{ maxWidth: "600px" }}
-          >
-            <div className="modal-header">
-              <h3>Đăng tải hình ảnh mới</h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowGalleryModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-muted)",
-                  marginBottom: "15px",
-                }}
-              >
-                Chọn một hoặc nhiều hình ảnh từ thiết bị để tải lên thư viện ảnh
-                hoạt động.
-              </p>
-
-              <FormItem
-                label="Tiêu đề chung cho bộ ảnh (Tùy chọn)"
-                type="text"
-                className="gallery-title-input"
-                placeholder="Ví dụ: Lễ ra quân chiến dịch Hè tình nguyện 2026"
-                value={galleryTitle}
-                onChange={(val) => setGalleryTitle(val)}
-              />
-
-              <div
-                className="upload-zone-card"
-                onClick={() =>
-                  document.getElementById("gallery-multi-upload").click()
-                }
-              >
-                <div className="upload-icon-wrapper">
-                  <Image size={28} />
-                </div>
-                <p className="upload-zone-title">
-                  Click vào đây để chọn nhiều hình ảnh từ thiết bị
-                </p>
-                <p className="upload-zone-desc">
-                  Hỗ trợ các định dạng: JPG, PNG, WEBP
-                </p>
-                <input
-                  id="gallery-multi-upload"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="file-input-hidden"
-                  onChange={handleGalleryFilesSelect}
-                />
-              </div>
-
-              {selectedFiles.length > 0 && (
-                <div style={{ marginTop: "20px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <h5>Ảnh đã chọn ({selectedFiles.length})</h5>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      type="button"
-                      onClick={() => setSelectedFiles([])}
-                    >
-                      Xóa tất cả
-                    </button>
-                  </div>
-
-                  <div className="upload-previews-grid">
-                    {selectedFiles.map((fileObj, idx) => (
-                      <div key={idx} className="upload-preview-item">
-                        <img src={fileObj.previewUrl} alt="Preview" />
-                        <button
-                          type="button"
-                          className="remove-preview-btn"
-                          onClick={() => handleRemoveSelectedFile(idx)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setShowGalleryModal(false)}
-              >
-                Hủy bỏ
-              </button>
-              <button
-                className="btn btn-primary"
-                type="button"
-                disabled={uploadingGallery || selectedFiles.length === 0}
-                onClick={handleGalleryUploadSubmit}
-              >
-                {uploadingGallery ? "Đang tải lên..." : "Bắt đầu đăng tải"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GalleryModal
+        isOpen={showGalleryModal}
+        onClose={() => setShowGalleryModal(false)}
+        onSuccess={() => {
+          setShowGalleryModal(false);
+          loadGallery();
+        }}
+      />
 
       {/* Lightbox Modal */}
       {activeAlbum !== null &&

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Check, Calendar, Phone, Mail, Clock, Download } from "lucide-react";
-import { Table, Modal, FormItem } from "../../../../components";
+import { Plus, Edit, Trash2, Calendar, Phone, Mail, Clock, Download } from "lucide-react";
+import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import ExcelImportModal from "../ExcelImportModal/ExcelImportModal";
+import MemberModal from "./MemberModal";
 
 export default function Members() {
   const [members, setMembers] = useState([]);
@@ -11,15 +12,6 @@ export default function Members() {
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
-  const [memberForm, setMemberForm] = useState({
-    hoTen: "",
-    ngaySinh: "",
-    soDienThoai: "",
-    email: "",
-    chiDoanId: "",
-    ngayVaoDoan: "",
-    trangThai: "Đoàn viên",
-  });
 
   const loadData = () => {
     // Load members
@@ -54,35 +46,12 @@ export default function Members() {
   }, []);
 
   const handleOpenMemberModal = (member = null) => {
-    if (member) {
-      setEditingMember(member);
-      setMemberForm({
-        hoTen: member.hoTen || "",
-        ngaySinh: member.ngaySinh || "",
-        soDienThoai: member.soDienThoai || "",
-        email: member.email || "",
-        chiDoanId: member.chiDoanId || "",
-        ngayVaoDoan: member.ngayVaoDoan || "",
-        trangThai: member.trangThai || "Đoàn viên",
-      });
-    } else {
-      setEditingMember(null);
-      setMemberForm({
-        hoTen: "",
-        ngaySinh: "",
-        soDienThoai: "",
-        email: "",
-        chiDoanId: branches[0]?.id || "",
-        ngayVaoDoan: new Date().toISOString().split("T")[0],
-        trangThai: "Đoàn viên",
-      });
-    }
+    setEditingMember(member);
     setShowMemberModal(true);
   };
 
-  const handleMemberSubmit = (e) => {
-    e.preventDefault();
-    if (!memberForm.chiDoanId) {
+  const handleSaveMember = (formData) => {
+    if (!formData.chiDoanId) {
       alert("Bạn vui lòng chọn chi đoàn sinh hoạt!");
       return;
     }
@@ -90,7 +59,7 @@ export default function Members() {
     if (editingMember) {
       apiService.put(
         `/api/doanVien/${editingMember.id}`,
-        memberForm,
+        formData,
         "Cập nhật thông tin đoàn viên thành công!"
       )
         .then(() => {
@@ -101,7 +70,7 @@ export default function Members() {
     } else {
       apiService.post(
         "/api/doanVien",
-        memberForm,
+        formData,
         true,
         "Tiếp nhận đoàn viên thành công!"
       )
@@ -288,103 +257,13 @@ export default function Members() {
         emptyMessage="Chưa có đoàn viên nào được thêm vào hệ thống."
       />
 
-      {/* MODAL: ADD/EDIT MEMBER */}
-      <Modal
+      <MemberModal
         isOpen={showMemberModal}
         onClose={() => setShowMemberModal(false)}
-        title={editingMember ? "Cập nhật Hồ sơ Đoàn viên" : "Tiếp nhận Đoàn viên Mới"}
-        maxWidth="600px"
-        onSubmit={handleMemberSubmit}
-        footer={
-          <>
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={() => setShowMemberModal(false)}
-            >
-              Hủy bỏ
-            </button>
-            <button type="submit" className="btn btn-primary">
-              <Check size={16} />
-              <span>{editingMember ? "Cập nhật" : "Tiếp nhận"}</span>
-            </button>
-          </>
-        }
-      >
-        <FormItem
-          label="Họ và tên đoàn viên"
-          type="text"
-          required
-          placeholder="Ví dụ: Nguyễn Văn A"
-          value={memberForm.hoTen}
-          onChange={(val) => setMemberForm({ ...memberForm, hoTen: val })}
-        />
-
-        <div style={{ display: "flex", gap: "15px" }}>
-          <FormItem
-            label="Ngày sinh"
-            type="date"
-            value={memberForm.ngaySinh}
-            onChange={(val) => setMemberForm({ ...memberForm, ngaySinh: val })}
-            style={{ flex: 1 }}
-          />
-          <FormItem
-            label="Ngày vào Đoàn"
-            type="date"
-            value={memberForm.ngayVaoDoan}
-            onChange={(val) => setMemberForm({ ...memberForm, ngayVaoDoan: val })}
-            style={{ flex: 1 }}
-          />
-        </div>
-
-        <div style={{ display: "flex", gap: "15px" }}>
-          <FormItem
-            label="Số điện thoại"
-            type="text"
-            placeholder="Ví dụ: 0905xxxxxx"
-            value={memberForm.soDienThoai}
-            onChange={(val) => setMemberForm({ ...memberForm, soDienThoai: val })}
-            style={{ flex: 1 }}
-          />
-          <FormItem
-            label="Email"
-            type="email"
-            placeholder="Vi dụ: nguyenvana@gmail.com"
-            value={memberForm.email}
-            onChange={(val) => setMemberForm({ ...memberForm, email: val })}
-            style={{ flex: 1 }}
-          />
-        </div>
-
-        <div style={{ display: "flex", gap: "15px" }}>
-          <FormItem
-            label="Chi đoàn sinh hoạt"
-            type="select"
-            required
-            value={memberForm.chiDoanId}
-            onChange={(val) => setMemberForm({ ...memberForm, chiDoanId: val })}
-            options={[
-              { value: "", label: "-- Chọn Chi đoàn --" },
-              ...branches.map((b) => ({ value: b.id, label: b.tenChiDoan }))
-            ]}
-            style={{ flex: 1 }}
-          />
-          <FormItem
-            label="Chức vụ"
-            type="select"
-            required
-            value={memberForm.trangThai}
-            onChange={(val) => setMemberForm({ ...memberForm, trangThai: val })}
-            options={[
-              { value: "Đoàn viên", label: "Đoàn viên" },
-              { value: "Ủy viên", label: "Ủy viên" },
-              { value: "Phó Bí thư", label: "Phó Bí thư" },
-              { value: "Bí thư", label: "Bí thư" }
-            ]}
-            style={{ flex: 1 }}
-          />
-        </div>
-      </Modal>
+        member={editingMember}
+        branches={branches}
+        onSave={handleSaveMember}
+      />
 
       <ExcelImportModal
         isOpen={showImportModal}

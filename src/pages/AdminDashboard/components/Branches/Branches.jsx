@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Check, Settings, Download } from "lucide-react";
-import { Table, Modal, FormItem } from "../../../../components";
+import { Plus, Edit, Trash2, Settings, Download } from "lucide-react";
+import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import ExcelImportModal from "../ExcelImportModal/ExcelImportModal";
+import BranchModal from "./BranchModal";
+import BranchTypeModal from "./BranchTypeModal";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -17,14 +19,6 @@ export default function Branches() {
 
   // Form states
   const [editingBranch, setEditingBranch] = useState(null);
-  const [branchForm, setBranchForm] = useState({
-    tenChiDoan: "",
-    loaiChiDoanId: "",
-  });
-
-  const [newTypeName, setNewTypeName] = useState("");
-  const [editingType, setEditingType] = useState(null);
-  const [editTypeName, setEditTypeName] = useState("");
 
   const loadData = () => {
     // Load branches
@@ -71,36 +65,28 @@ export default function Branches() {
   }, []);
 
   // Handlers for Branch Types CRUD
-  const handleAddType = (e) => {
-    e.preventDefault();
-    if (!newTypeName.trim()) return;
-
+  const handleAddType = (tenLoai) => {
     apiService
       .post(
         "/api/loaiChiDoan",
-        { tenLoai: newTypeName.trim() },
+        { tenLoai },
         true,
         "Thêm phân loại chi đoàn thành công!",
       )
       .then(() => {
-        setNewTypeName("");
         loadData();
       })
       .catch((err) => console.error("Error adding branch type:", err));
   };
 
-  const handleUpdateType = (id) => {
-    if (!editTypeName.trim()) return;
-
+  const handleUpdateType = (id, tenLoai) => {
     apiService
       .put(
         `/api/loaiChiDoan/${id}`,
-        { tenLoai: editTypeName.trim() },
+        { tenLoai },
         "Cập nhật phân loại chi đoàn thành công!",
       )
       .then(() => {
-        setEditingType(null);
-        setEditTypeName("");
         loadData();
       })
       .catch((err) => console.error("Error updating branch type:", err));
@@ -123,25 +109,12 @@ export default function Branches() {
 
   // Handlers for Branch CRUD
   const handleOpenBranchModal = (branch = null) => {
-    if (branch) {
-      setEditingBranch(branch);
-      setBranchForm({
-        tenChiDoan: branch.tenChiDoan,
-        loaiChiDoanId: branch.loaiChiDoanId || "",
-      });
-    } else {
-      setEditingBranch(null);
-      setBranchForm({
-        tenChiDoan: "",
-        loaiChiDoanId: branchTypes[0]?.id || "",
-      });
-    }
+    setEditingBranch(branch);
     setShowBranchModal(true);
   };
 
-  const handleBranchSubmit = (e) => {
-    e.preventDefault();
-    if (!branchForm.loaiChiDoanId) {
+  const handleBranchSubmit = (formData) => {
+    if (!formData.loaiChiDoanId) {
       alert("Bạn vui lòng thiết lập phân loại cho chi đoàn này trước!");
       return;
     }
@@ -150,7 +123,7 @@ export default function Branches() {
       apiService
         .put(
           `/api/chiDoan/${editingBranch.id}`,
-          branchForm,
+          formData,
           "Cập nhật chi đoàn thành công!",
         )
         .then(() => {
@@ -160,7 +133,7 @@ export default function Branches() {
         .catch((err) => console.error("Branch save error:", err));
     } else {
       apiService
-        .post("/api/chiDoan", branchForm, true, "Thêm chi đoàn mới thành công!")
+        .post("/api/chiDoan", formData, true, "Thêm chi đoàn mới thành công!")
         .then(() => {
           setShowBranchModal(false);
           loadData();
@@ -312,206 +285,22 @@ export default function Branches() {
         emptyMessage="Chưa có chi đoàn trực thuộc nào được thiết lập."
       />
 
-      {/* MODAL: ADD/EDIT BRANCH */}
-      <Modal
+      <BranchModal
         isOpen={showBranchModal}
         onClose={() => setShowBranchModal(false)}
-        title={
-          editingBranch ? "Sửa thông tin Chi đoàn" : "Thêm Chi đoàn trực thuộc"
-        }
-        maxWidth="500px"
-        onSubmit={handleBranchSubmit}
-        footer={
-          <>
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={() => setShowBranchModal(false)}
-            >
-              Hủy bỏ
-            </button>
-            <button type="submit" className="btn btn-primary">
-              <Check size={16} />
-              <span>{editingBranch ? "Cập nhật" : "Thêm mới"}</span>
-            </button>
-          </>
-        }
-      >
-        <FormItem
-          label="Tên chi đoàn"
-          type="text"
-          required
-          placeholder="Ví dụ: Chi đoàn Thôn Tam Anh 1"
-          value={branchForm.tenChiDoan}
-          onChange={(val) => setBranchForm({ ...branchForm, tenChiDoan: val })}
-        />
+        branch={editingBranch}
+        branchTypes={branchTypes}
+        onSave={handleBranchSubmit}
+      />
 
-        <FormItem
-          label="Phân loại Chi đoàn"
-          type="select"
-          required
-          value={branchForm.loaiChiDoanId}
-          onChange={(val) =>
-            setBranchForm({ ...branchForm, loaiChiDoanId: val })
-          }
-          options={[
-            { value: "", label: "-- Chọn phân loại chi đoàn --" },
-            ...branchTypes.map((type) => ({
-              value: type.id,
-              label: type.tenLoai,
-            })),
-          ]}
-        />
-      </Modal>
-
-      {/* MODAL: MANAGE BRANCH TYPES */}
-      <Modal
+      <BranchTypeModal
         isOpen={showTypeModal}
         onClose={() => setShowTypeModal(false)}
-        title="Quản lý Phân loại Chi đoàn"
-        maxWidth="600px"
-        footer={
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => setShowTypeModal(false)}
-          >
-            Đóng hộp thoại
-          </button>
-        }
-      >
-        {/* Form to add a new type */}
-        <form
-          onSubmit={handleAddType}
-          style={{ display: "flex", gap: "10px", marginBottom: "20px" }}
-        >
-          <input
-            type="text"
-            className="form-control"
-            style={{ flex: 1 }}
-            required
-            placeholder="Tên phân loại mới (Ví dụ: Chi đoàn Khối Hành chính)"
-            value={newTypeName}
-            onChange={(e) => setNewTypeName(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ whiteSpace: "nowrap" }}
-          >
-            <Plus size={16} /> Thêm mới
-          </button>
-        </form>
-
-        {/* List of current types */}
-        <div
-          style={{
-            maxHeight: "300px",
-            overflowY: "auto",
-            border: "1px solid #e2e8f0",
-            borderRadius: "6px",
-          }}
-        >
-          {branchTypes.length === 0 ? (
-            <div
-              style={{ padding: "20px", textAlign: "center", color: "#a0aec0" }}
-            >
-              Chưa có phân loại nào. Hãy tạo phân loại đầu tiên ở trên!
-            </div>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{
-                    backgroundColor: "#f7fafc",
-                    borderBottom: "1px solid #e2e8f0",
-                  }}
-                >
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "10px 15px",
-                      fontSize: "0.85rem",
-                      color: "#4a5568",
-                    }}
-                  >
-                    Tên Phân loại
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "center",
-                      padding: "10px 15px",
-                      fontSize: "0.85rem",
-                      color: "#4a5568",
-                      width: "120px",
-                    }}
-                  >
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {branchTypes.map((type) => (
-                  <tr
-                    key={type.id}
-                    style={{ borderBottom: "1px solid #e2e8f0" }}
-                  >
-                    <td style={{ padding: "10px 15px" }}>
-                      {editingType?.id === type.id ? (
-                        <div style={{ display: "flex", gap: "8px" }}>
-                          <input
-                            type="text"
-                            className="form-control"
-                            style={{ height: "30px", fontSize: "0.9rem" }}
-                            value={editTypeName}
-                            onChange={(e) => setEditTypeName(e.target.value)}
-                          />
-                          <button
-                            type="button"
-                            className="action-btn edit-btn"
-                            style={{ padding: "4px" }}
-                            onClick={() => handleUpdateType(type.id)}
-                          >
-                            <Check size={14} />
-                          </button>
-                        </div>
-                      ) : (
-                        <span style={{ fontWeight: 500 }}>{type.tenLoai}</span>
-                      )}
-                    </td>
-                    <td style={{ padding: "10px 15px", textAlign: "center" }}>
-                      <div
-                        className="action-buttons-group"
-                        style={{ justifyContent: "center" }}
-                      >
-                        {editingType?.id !== type.id && (
-                          <button
-                            className="action-btn edit-btn"
-                            type="button"
-                            onClick={() => {
-                              setEditingType(type);
-                              setEditTypeName(type.tenLoai);
-                            }}
-                          >
-                            <Edit size={14} />
-                          </button>
-                        )}
-                        <button
-                          className="action-btn delete-btn"
-                          type="button"
-                          onClick={() => handleDeleteType(type.id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </Modal>
+        branchTypes={branchTypes}
+        onAddType={handleAddType}
+        onUpdateType={handleUpdateType}
+        onDeleteType={handleDeleteType}
+      />
 
       <ExcelImportModal
         isOpen={showImportModal}

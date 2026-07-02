@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, FileText, Check } from "lucide-react";
-import { Table, FormItem } from "../../../../components";
+import { Plus, Trash2, FileText } from "lucide-react";
+import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
+import DocModal from "./DocModal";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
   const [showDocModal, setShowDocModal] = useState(false);
-  const [docForm, setDocForm] = useState({
-    tenVanBan: "",
-    soHieu: "",
-    loaiVanBan: "Kế hoạch",
-    duongDanFile: "#",
-  });
 
   const loadDocs = () => {
     apiService.get("/api/vanBan")
@@ -28,22 +23,18 @@ export default function Docs() {
     loadDocs();
   }, []);
 
-  const handleDocSubmit = (e) => {
-    e.preventDefault();
+  const handleSaveDoc = (formData) => {
     apiService.post(
       "/api/vanBan",
-      docForm,
+      {
+        ...formData,
+        duongDanFile: "#",
+      },
       true,
       "Đăng tải văn bản mới thành công!"
     )
       .then(() => {
         setShowDocModal(false);
-        setDocForm({
-          tenVanBan: "",
-          soHieu: "",
-          loaiVanBan: "Kế hoạch",
-          duongDanFile: "#",
-        });
         loadDocs();
       })
       .catch((err) => console.error("Doc save error:", err));
@@ -135,73 +126,11 @@ export default function Docs() {
         emptyMessage="Chưa có văn bản nào được cập nhật."
       />
 
-      {/* MODAL: ADD DOCUMENT */}
-      {showDocModal && (
-        <div className="modal-overlay">
-          <div
-            className="modal-container card animate-fade-in"
-            style={{ maxWidth: "500px" }}
-          >
-            <div className="modal-header">
-              <h3>Thêm văn bản - Tài liệu</h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowDocModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleDocSubmit} className="modal-form">
-              <div className="modal-body">
-                <FormItem
-                  label="Số hiệu văn bản"
-                  type="text"
-                  required
-                  placeholder="Ví dụ: 15-KH/ĐTN-TA"
-                  value={docForm.soHieu}
-                  onChange={(val) => setDocForm({ ...docForm, soHieu: val })}
-                />
-
-                <FormItem
-                  label="Tên văn bản / Tài liệu"
-                  type="text"
-                  required
-                  value={docForm.tenVanBan}
-                  onChange={(val) => setDocForm({ ...docForm, tenVanBan: val })}
-                />
-
-                <FormItem
-                  label="Thể loại"
-                  type="select"
-                  required
-                  value={docForm.loaiVanBan}
-                  onChange={(val) => setDocForm({ ...docForm, loaiVanBan: val })}
-                  options={[
-                    { value: "Kế hoạch", label: "Kế hoạch" },
-                    { value: "Nghị quyết", label: "Nghị quyết" },
-                    { value: "Quyết định", label: "Quyết định" },
-                    { value: "Hướng dẫn", label: "Hướng dẫn" },
-                  ]}
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowDocModal(false)}
-                >
-                  Hủy bỏ
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  <Check size={16} />
-                  <span>Thêm văn bản</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <DocModal
+        isOpen={showDocModal}
+        onClose={() => setShowDocModal(false)}
+        onSave={handleSaveDoc}
+      />
     </div>
   );
 }
