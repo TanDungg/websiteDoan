@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { Modal, FormItem } from "../../../../components";
 
-export default function DocModal({ isOpen, onClose, onSave }) {
+export default function VanBanModal({ isOpen, onClose, onSave }) {
   const [docForm, setDocForm] = useState({
     soHieu: "",
     tenVanBan: "",

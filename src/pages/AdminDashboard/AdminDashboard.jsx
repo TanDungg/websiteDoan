@@ -9,14 +9,14 @@ import {
   Building,
   Shield,
 } from "lucide-react";
-import Posts from "./components/Posts/Posts";
-import Docs from "./components/Docs/Docs";
-import Feedbacks from "./components/Feedbacks/Feedbacks";
-import Intro from "./components/Intro/Intro";
-import Branches from "./components/Branches/Branches";
-import Bch from "./components/Bch/Bch";
-import Gallery from "./components/Gallery/Gallery";
-import Members from "./components/Members/Members";
+import BaiViet from "./components/BaiViet/BaiViet";
+import VanBan from "./components/VanBan/VanBan";
+import GopY from "./components/GopY/GopY";
+import GioiThieu from "./components/GioiThieu/GioiThieu";
+import ChiDoan from "./components/ChiDoan/ChiDoan";
+import ThanhVienBch from "./components/ThanhVienBch/ThanhVienBch";
+import AlbumAnh from "./components/AlbumAnh/AlbumAnh";
+import DoanVien from "./components/DoanVien/DoanVien";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import "./AdminDashboard.css";
@@ -161,19 +161,19 @@ export default function AdminDashboard() {
 
         {/* Dynamic Panels */}
         <main className="admin-panel-content">
-          {activeTab === "posts" && <Posts />}
-          {activeTab === "docs" && <Docs />}
+          {activeTab === "posts" && <BaiViet />}
+          {activeTab === "docs" && <VanBan />}
           {activeTab === "feedbacks" && (
-            <Feedbacks
+            <GopY
               feedbacks={feedbacks}
               onDeleteFeedback={handleDeleteFeedback}
             />
           )}
-          {activeTab === "intro" && <Intro />}
-          {activeTab === "branches" && <Branches />}
-          {activeTab === "members" && <Members />}
-          {activeTab === "bch" && <Bch />}
-          {activeTab === "gallery" && <Gallery />}
+          {activeTab === "intro" && <GioiThieu />}
+          {activeTab === "branches" && <ChiDoan />}
+          {activeTab === "members" && <DoanVien />}
+          {activeTab === "bch" && <ThanhVienBch />}
+          {activeTab === "gallery" && <AlbumAnh />}
         </main>
       </div>
     </div>

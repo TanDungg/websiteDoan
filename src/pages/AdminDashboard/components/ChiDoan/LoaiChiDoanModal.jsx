@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Plus, Check, Edit, Trash2 } from "lucide-react";
 import { Modal } from "../../../../components";
 
-export default function BranchTypeModal({
+export default function LoaiChiDoanModal({
   isOpen,
   onClose,
   branchTypes,

@@ -4,7 +4,7 @@ import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import ExcelImportModal from "../ExcelImportModal/ExcelImportModal";
-import BchMemberModal from "./BchMemberModal";
+import ThanhVienBchModal from "./ThanhVienBchModal";
 
 const getChucVuString = (pos) => {
   switch (Number(pos)) {
@@ -28,7 +28,7 @@ const positionOptions = [
   { value: 4, label: "Ủy viên Ban Chấp hành" },
 ];
 
-export default function Bch() {
+export default function ThanhVienBch() {
   const [bchMembers, setBchMembers] = useState([]);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -208,7 +208,7 @@ export default function Bch() {
         emptyMessage="Chưa có thành viên BCH nào được thiết lập."
       />
 
-      <BchMemberModal
+      <ThanhVienBchModal
         isOpen={showMemberModal}
         onClose={() => setShowMemberModal(false)}
         member={editingMember}

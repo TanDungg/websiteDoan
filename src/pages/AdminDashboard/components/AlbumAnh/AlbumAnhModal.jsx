@@ -3,7 +3,7 @@ import { Image } from "lucide-react";
 import { Modal, FormItem } from "../../../../components";
 import apiService from "src/services/apiService";
 
-export default function GalleryModal({ isOpen, onClose, onSuccess }) {
+export default function AlbumAnhModal({ isOpen, onClose, onSuccess }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [galleryTitle, setGalleryTitle] = useState("");

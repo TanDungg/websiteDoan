@@ -5,11 +5,11 @@ import { Table } from "src/components";
 import { generateUUID } from "src/utils/Commons";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
-import PostModal from "./PostModal";
+import BaiVietModal from "./BaiVietModal";
 
-export default function Posts() {
+export default function BaiViet() {
   const [posts, setPosts] = useState([]);
-  const [showPostModal, setShowPostModal] = useState(false);
+  const [showBaiVietModal, setShowBaiVietModal] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
   const loadPosts = () => {
@@ -27,9 +27,9 @@ export default function Posts() {
     loadPosts();
   }, []);
 
-  const handleOpenPostModal = (post = null) => {
+  const handleOpenBaiVietModal = (post = null) => {
     setEditingPost(post);
-    setShowPostModal(true);
+    setShowBaiVietModal(true);
   };
 
   const handleSavePost = async (postForm, tempImage) => {
@@ -86,7 +86,7 @@ export default function Posts() {
           "Đăng bài viết thành công!",
         );
       }
-      setShowPostModal(false);
+      setShowBaiVietModal(false);
       loadPosts();
     } catch (err) {
       console.error("Post save error:", err);
@@ -147,7 +147,7 @@ export default function Posts() {
           <button
             className="action-btn edit-btn"
             title="Sửa bài"
-            onClick={() => handleOpenPostModal(record)}
+            onClick={() => handleOpenBaiVietModal(record)}
           >
             <Edit size={16} />
           </button>
@@ -169,7 +169,7 @@ export default function Posts() {
         <h3>Danh sách Bài viết</h3>
         <button
           className="btn btn-primary"
-          onClick={() => handleOpenPostModal()}
+          onClick={() => handleOpenBaiVietModal()}
         >
           <Plus size={18} />
           <span>Viết bài mới</span>
@@ -182,9 +182,9 @@ export default function Posts() {
         emptyMessage="Chưa có bài viết nào được đăng tải."
       />
 
-      <PostModal
-        isOpen={showPostModal}
-        onClose={() => setShowPostModal(false)}
+      <BaiVietModal
+        isOpen={showBaiVietModal}
+        onClose={() => setShowBaiVietModal(false)}
         post={editingPost}
         onSave={handleSavePost}
       />

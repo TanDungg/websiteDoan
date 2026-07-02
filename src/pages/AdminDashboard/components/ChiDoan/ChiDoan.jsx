@@ -4,17 +4,17 @@ import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import ExcelImportModal from "../ExcelImportModal/ExcelImportModal";
-import BranchModal from "./BranchModal";
-import BranchTypeModal from "./BranchTypeModal";
+import ChiDoanModal from "./ChiDoanModal";
+import LoaiChiDoanModal from "./LoaiChiDoanModal";
 
-export default function Branches() {
+export default function ChiDoan() {
   const [branches, setBranches] = useState([]);
   const [branchTypes, setBranchTypes] = useState([]);
   const [members, setMembers] = useState([]);
 
   // Modals visibility
-  const [showBranchModal, setShowBranchModal] = useState(false);
-  const [showTypeModal, setShowTypeModal] = useState(false);
+  const [showChiDoanModal, setShowChiDoanModal] = useState(false);
+  const [showLoaiChiDoanModal, setShowLoaiChiDoanModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
   // Form states
@@ -108,12 +108,12 @@ export default function Branches() {
   };
 
   // Handlers for Branch CRUD
-  const handleOpenBranchModal = (branch = null) => {
+  const handleOpenChiDoanModal = (branch = null) => {
     setEditingBranch(branch);
-    setShowBranchModal(true);
+    setShowChiDoanModal(true);
   };
 
-  const handleBranchSubmit = (formData) => {
+  const handleChiDoanSubmit = (formData) => {
     if (!formData.loaiChiDoanId) {
       alert("Bạn vui lòng thiết lập phân loại cho chi đoàn này trước!");
       return;
@@ -127,7 +127,7 @@ export default function Branches() {
           "Cập nhật chi đoàn thành công!",
         )
         .then(() => {
-          setShowBranchModal(false);
+          setShowChiDoanModal(false);
           loadData();
         })
         .catch((err) => console.error("Branch save error:", err));
@@ -135,7 +135,7 @@ export default function Branches() {
       apiService
         .post("/api/chiDoan", formData, true, "Thêm chi đoàn mới thành công!")
         .then(() => {
-          setShowBranchModal(false);
+          setShowChiDoanModal(false);
           loadData();
         })
         .catch((err) => console.error("Branch save error:", err));
@@ -227,7 +227,7 @@ export default function Branches() {
             className="action-btn edit-btn"
             type="button"
             title="Sửa chi đoàn"
-            onClick={() => handleOpenBranchModal(record)}
+            onClick={() => handleOpenChiDoanModal(record)}
           >
             <Edit size={16} />
           </button>
@@ -261,16 +261,16 @@ export default function Branches() {
           <button
             className="btn btn-outline"
             type="button"
-            onClick={() => setShowTypeModal(true)}
+            onClick={() => setShowLoaiChiDoanModal(true)}
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
             <Settings size={16} />
-            <span>Quản lý Phân loại</span>
+            <span>Phân loại chi đoàn</span>
           </button>
           <button
             className="btn btn-primary"
             type="button"
-            onClick={() => handleOpenBranchModal()}
+            onClick={() => handleOpenChiDoanModal()}
           >
             <Plus size={18} />
             <span>Thêm chi đoàn</span>
@@ -285,17 +285,17 @@ export default function Branches() {
         emptyMessage="Chưa có chi đoàn trực thuộc nào được thiết lập."
       />
 
-      <BranchModal
-        isOpen={showBranchModal}
-        onClose={() => setShowBranchModal(false)}
+      <ChiDoanModal
+        isOpen={showChiDoanModal}
+        onClose={() => setShowChiDoanModal(false)}
         branch={editingBranch}
         branchTypes={branchTypes}
-        onSave={handleBranchSubmit}
+        onSave={handleChiDoanSubmit}
       />
 
-      <BranchTypeModal
-        isOpen={showTypeModal}
-        onClose={() => setShowTypeModal(false)}
+      <LoaiChiDoanModal
+        isOpen={showLoaiChiDoanModal}
+        onClose={() => setShowLoaiChiDoanModal(false)}
         branchTypes={branchTypes}
         onAddType={handleAddType}
         onUpdateType={handleUpdateType}

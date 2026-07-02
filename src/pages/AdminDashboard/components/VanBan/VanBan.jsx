@@ -3,11 +3,11 @@ import { Plus, Trash2, FileText } from "lucide-react";
 import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
-import DocModal from "./DocModal";
+import VanBanModal from "./VanBanModal";
 
-export default function Docs() {
+export default function VanBan() {
   const [docs, setDocs] = useState([]);
-  const [showDocModal, setShowDocModal] = useState(false);
+  const [showVanBanModal, setShowVanBanModal] = useState(false);
 
   const loadDocs = () => {
     apiService.get("/api/vanBan")
@@ -34,7 +34,7 @@ export default function Docs() {
       "Đăng tải văn bản mới thành công!"
     )
       .then(() => {
-        setShowDocModal(false);
+        setShowVanBanModal(false);
         loadDocs();
       })
       .catch((err) => console.error("Doc save error:", err));
@@ -113,7 +113,7 @@ export default function Docs() {
         <h3>Danh sách Văn bản - Tài liệu</h3>
         <button
           className="btn btn-primary"
-          onClick={() => setShowDocModal(true)}
+          onClick={() => setShowVanBanModal(true)}
         >
           <Plus size={18} />
           <span>Thêm văn bản</span>
@@ -126,9 +126,9 @@ export default function Docs() {
         emptyMessage="Chưa có văn bản nào được cập nhật."
       />
 
-      <DocModal
-        isOpen={showDocModal}
-        onClose={() => setShowDocModal(false)}
+      <VanBanModal
+        isOpen={showVanBanModal}
+        onClose={() => setShowVanBanModal(false)}
         onSave={handleSaveDoc}
       />
     </div>

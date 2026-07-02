@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { Modal, FormItem } from "../../../../components";
 
-export default function BchMemberModal({ isOpen, onClose, member, positionOptions, onSave }) {
+export default function ThanhVienBchModal({ isOpen, onClose, member, positionOptions, onSave }) {
   const [memberForm, setMemberForm] = useState({
     id: "",
     hoTen: "",

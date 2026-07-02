@@ -4,9 +4,9 @@ import { Table } from "../../../../components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import ExcelImportModal from "../ExcelImportModal/ExcelImportModal";
-import MemberModal from "./MemberModal";
+import DoanVienModal from "./DoanVienModal";
 
-export default function Members() {
+export default function DoanVien() {
   const [members, setMembers] = useState([]);
   const [branches, setBranches] = useState([]);
   const [showMemberModal, setShowMemberModal] = useState(false);
@@ -257,7 +257,7 @@ export default function Members() {
         emptyMessage="Chưa có đoàn viên nào được thêm vào hệ thống."
       />
 
-      <MemberModal
+      <DoanVienModal
         isOpen={showMemberModal}
         onClose={() => setShowMemberModal(false)}
         member={editingMember}

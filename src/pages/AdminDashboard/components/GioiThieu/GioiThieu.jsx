@@ -4,7 +4,7 @@ import { FormItem } from "src/components";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 
-export default function Intro() {
+export default function GioiThieu() {
   const [introSettings, setIntroSettings] = useState({
     lichSu: "",
     thongTinChiDoan: "",

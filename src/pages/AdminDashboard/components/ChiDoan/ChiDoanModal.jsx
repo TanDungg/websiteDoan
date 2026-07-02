@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { Modal, FormItem } from "../../../../components";
 
-export default function BranchModal({ isOpen, onClose, branch, branchTypes, onSave }) {
+export default function ChiDoanModal({ isOpen, onClose, branch, branchTypes, onSave }) {
   const [branchForm, setBranchForm] = useState({
     tenChiDoan: "",
     loaiChiDoanId: "",

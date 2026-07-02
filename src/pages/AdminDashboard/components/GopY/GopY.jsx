@@ -1,7 +1,7 @@
 import React from "react";
 import { Trash2 } from "lucide-react";
 
-export default function Feedbacks({ feedbacks, onDeleteFeedback }) {
+export default function GopY({ feedbacks, onDeleteFeedback }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     try {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { Modal, FormItem } from "../../../../components";
 
-export default function MemberModal({ isOpen, onClose, member, branches, onSave }) {
+export default function DoanVienModal({ isOpen, onClose, member, branches, onSave }) {
   const [memberForm, setMemberForm] = useState({
     id: "",
     hoTen: "",

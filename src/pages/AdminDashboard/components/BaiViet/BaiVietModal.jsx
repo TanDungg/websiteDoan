@@ -5,7 +5,7 @@ import { newsCategories } from "src/data/mockData";
 import { generateUUID } from "src/utils/Commons";
 import apiService from "src/services/apiService";
 
-export default function PostModal({ isOpen, onClose, post, onSave }) {
+export default function BaiVietModal({ isOpen, onClose, post, onSave }) {
   const fileInputRef = useRef(null);
   const [isImageCardHovered, setIsImageCardHovered] = useState(false);
   const [tempImage, setTempImage] = useState(null);

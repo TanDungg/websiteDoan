@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
-import GalleryModal from "./GalleryModal";
+import AlbumAnhModal from "./AlbumAnhModal";
 
-export default function Gallery() {
+export default function AlbumAnh() {
   const [gallery, setGallery] = useState([]);
   const [showGalleryModal, setShowGalleryModal] = useState(false);
 
@@ -188,7 +188,7 @@ export default function Gallery() {
         </div>
       </div>
 
-      <GalleryModal
+      <AlbumAnhModal
         isOpen={showGalleryModal}
         onClose={() => setShowGalleryModal(false)}
         onSuccess={() => {
