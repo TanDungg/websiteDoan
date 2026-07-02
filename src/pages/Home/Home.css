@@ -259,26 +259,49 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 6px;
+  padding: 10px 8px;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tab-list-entry:last-child {
+  border-bottom: none;
 }
 
 .tab-list-entry:hover {
-  background-color: #f1f5f9;
+  background-color: #f0f9ff;
+  transform: translateX(4px);
 }
 
 .entry-index-badge {
-  font-size: 0.9rem;
-  font-weight: 750;
-  color: #94a3b8;
-  width: 20px;
-  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #64748b;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.tab-list-entry:hover .entry-index-badge {
-  color: #0284c7;
+.tab-list-entry:nth-child(1) .entry-index-badge {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.tab-list-entry:nth-child(2) .entry-index-badge {
+  background-color: #f97316;
+  color: #ffffff;
+}
+
+.tab-list-entry:nth-child(3) .entry-index-badge {
+  background-color: #f59e0b;
+  color: #ffffff;
 }
 
 .entry-thumbnail {
@@ -609,13 +632,19 @@
   display: flex;
   gap: 14px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 10px;
-  transition: all 0.2s ease;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1.5px solid #f1f5f9;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
 .showcase-sublist-item:hover {
-  background-color: #f1f5f9;
+  background-color: #f0f9ff;
+  border-color: #bae6fd;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.04);
 }
 
 .sublist-item-thumb {
@@ -1047,4 +1076,41 @@
 
 .bright-example-card:hover .example-readmore {
   gap: 6px;
+}
+
+/* Card badge overlay on homepage featured cards */
+.featured-card-img-holder {
+  position: relative;
+}
+
+.home-card-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  font-size: 0.72rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff !important;
+}
+
+.home-card-badge.badge-hoat-dong {
+  background-color: rgba(2, 132, 199, 0.9) !important;
+}
+
+.home-card-badge.badge-tin-dia-phuong {
+  background-color: rgba(5, 150, 105, 0.9) !important;
+}
+
+.home-card-badge.badge-tu-thien {
+  background-color: rgba(219, 39, 119, 0.9) !important;
+}
+
+.home-card-badge.badge-guong-sang {
+  background-color: rgba(217, 119, 6, 0.9) !important;
 }

@@ -22,6 +22,7 @@ import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import { newsCategories } from "../../data/mockData";
 import "./Home.css";
 
 const getCleanText = (text, maxLength = 120) => {
@@ -404,6 +405,9 @@ export default function Home() {
                           src={cat1Featured.anhDaiDien || DEFAULT_IMAGE}
                           alt={cat1Featured.tieuDe}
                         />
+                        <span className={`home-card-badge badge-${cat1Featured.danhMuc}`}>
+                          {newsCategories.find((c) => c.id === cat1Featured.danhMuc)?.name || "Tin tức"}
+                        </span>
                       </div>
                       <div className="featured-card-info">
                         <div className="featured-card-meta">
@@ -497,6 +501,9 @@ export default function Home() {
                           src={cat2Featured.anhDaiDien || DEFAULT_IMAGE}
                           alt={cat2Featured.tieuDe}
                         />
+                        <span className={`home-card-badge badge-${cat2Featured.danhMuc}`}>
+                          {newsCategories.find((c) => c.id === cat2Featured.danhMuc)?.name || "Tin tức"}
+                        </span>
                       </div>
                       <div className="featured-card-info">
                         <div className="featured-card-meta">

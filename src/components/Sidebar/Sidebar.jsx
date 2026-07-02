@@ -6,6 +6,9 @@ import {
   Phone,
   MessageSquare,
   Award,
+  FileText,
+  Users,
+  Image,
 } from "lucide-react";
 import "./Sidebar.css";
 
@@ -81,27 +84,31 @@ export default function Sidebar() {
         <h4>Liên kết nội bộ</h4>
         <ul className="quick-links-list">
           <li>
-            <Link to="/van-ban">
-              <ChevronRight size={16} />
+            <Link to="/van-ban" className="quick-link-item">
+              <FileText size={18} className="link-icon" />
               <span>Thư viện văn bản Đoàn</span>
+              <ChevronRight size={14} className="arrow-icon" />
             </Link>
           </li>
           <li>
-            <Link to="/gioi-thieu">
-              <ChevronRight size={16} />
+            <Link to="/gioi-thieu" className="quick-link-item">
+              <Users size={18} className="link-icon" />
               <span>Sơ đồ tổ chức BCH</span>
+              <ChevronRight size={14} className="arrow-icon" />
             </Link>
           </li>
           <li>
-            <Link to="/thu-vien">
-              <ChevronRight size={16} />
+            <Link to="/thu-vien" className="quick-link-item">
+              <Image size={18} className="link-icon" />
               <span>Thư viện đa phương tiện</span>
+              <ChevronRight size={14} className="arrow-icon" />
             </Link>
           </li>
           <li>
-            <Link to="/lien-he">
-              <ChevronRight size={16} />
+            <Link to="/lien-he" className="quick-link-item">
+              <MessageSquare size={18} className="link-icon" />
               <span>Gửi ý kiến đóng góp</span>
+              <ChevronRight size={14} className="arrow-icon" />
             </Link>
           </li>
         </ul>
