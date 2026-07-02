@@ -5,7 +5,7 @@ import { useApi } from "src/hooks/useApi";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import { newsCategories } from "../../data/mockData";
-import "./Home.css";
+import "./TrangChu.css";
 
 // Subcomponents
 import AnnouncementTicker from "./components/AnnouncementTicker";
@@ -64,7 +64,7 @@ const formatDate = (dateStr) => {
   return dateStr;
 };
 
-export default function Home() {
+export default function TrangChu() {
   const {
     data: postsData,
     loading: postsLoading,

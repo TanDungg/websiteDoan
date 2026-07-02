@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
-import Home from "./pages/Home/Home";
+import TrangChu from "./pages/TrangChu/TrangChu";
 import GioiThieu from "./pages/GioiThieu/GioiThieu";
 import BaiViet from "./pages/BaiViet/BaiViet";
 import ChiTietBaiViet from "./pages/ChiTietBaiViet/ChiTietBaiViet";
@@ -67,7 +67,7 @@ export default function App() {
         path="/"
         element={
           <ClientLayout>
-            <Home />
+            <TrangChu />
           </ClientLayout>
         }
       />
