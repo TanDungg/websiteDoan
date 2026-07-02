@@ -110,4 +110,49 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// POST /api/doanVien/bulk
+router.post("/bulk", async (req, res) => {
+  const { list } = req.body;
+  if (!Array.isArray(list)) {
+    return res.status(400).json({ error: "Dữ liệu không hợp lệ" });
+  }
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
+  try {
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const hoTenVal = item.hoTen || item.name;
+      const ngaySinhVal = item.ngaySinh || item.dob || "";
+      const soDienThoaiVal = item.soDienThoai || item.phone || "";
+      const email = item.email || "";
+      const chiDoanIdVal = item.chiDoanId || item.branchId;
+      const ngayVaoDoanVal = item.ngayVaoDoan || item.joinDate || "";
+      const trangThaiVal = item.trangThai || item.status || "Đoàn viên";
+      
+      const id = (Date.now() + i).toString() + Math.random().toString(36).substring(2, 6);
+      await runQuery(
+        `INSERT INTO "doanVien" ("id", "hoTen", "ngaySinh", "soDienThoai", "email", "chiDoanId", "ngayVaoDoan", "trangThai", "createdBy", "createdAt", "updatedBy", "updatedAt")
+         VALUES (@id, @hoTenVal, @ngaySinhVal, @soDienThoaiVal, @email, @chiDoanIdVal, @ngayVaoDoanVal, @trangThaiVal, @createdBy, @createdAt, @createdBy, @createdAt)`,
+        {
+          id,
+          hoTenVal,
+          ngaySinhVal,
+          soDienThoaiVal,
+          email,
+          chiDoanIdVal,
+          ngayVaoDoanVal,
+          trangThaiVal,
+          createdBy,
+          createdAt,
+        }
+      );
+    }
+    sendRealtimeUpdate("doanVien");
+    res.json({ success: true, message: `Import thành công ${list.length} đoàn viên!` });
+  } catch (err) {
+    console.error("POST /api/doanVien/bulk error:", err);
+    res.status(500).json({ error: "Lỗi import danh sách đoàn viên", details: err.message });
+  }
+});
+
 module.exports = router;

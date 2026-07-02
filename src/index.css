@@ -114,7 +114,7 @@ ol {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-main);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
@@ -217,6 +217,12 @@ h6 {
   background-color: #d1fae5;
   color: #047857;
   border-color: rgba(4, 120, 87, 0.15);
+}
+
+.badge-tu-thien {
+  background-color: #fdf2f8;
+  color: #db2777;
+  border-color: rgba(219, 39, 119, 0.15);
 }
 
 /* Global Loading Spinner */

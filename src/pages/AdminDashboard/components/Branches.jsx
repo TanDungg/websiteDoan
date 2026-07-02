@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Check, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, Check, Settings, Download } from "lucide-react";
 import { Table, Modal, FormItem } from "../../../components";
 import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
+import ExcelImportModal from "./ExcelImportModal";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -12,6 +13,7 @@ export default function Branches() {
   // Modals visibility
   const [showBranchModal, setShowBranchModal] = useState(false);
   const [showTypeModal, setShowTypeModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Form states
   const [editingBranch, setEditingBranch] = useState(null);
@@ -26,7 +28,8 @@ export default function Branches() {
 
   const loadData = () => {
     // Load branches
-    apiService.get("/api/gioiThieu")
+    apiService
+      .get("/api/gioiThieu")
       .then((data) => {
         if (data.branches) {
           setBranches(data.branches);
@@ -35,7 +38,8 @@ export default function Branches() {
       .catch((err) => console.error("Error fetching branches:", err));
 
     // Load branch types
-    apiService.get("/api/loaiChiDoan")
+    apiService
+      .get("/api/loaiChiDoan")
       .then((data) => {
         if (Array.isArray(data)) {
           setBranchTypes(data);
@@ -44,7 +48,8 @@ export default function Branches() {
       .catch((err) => console.error("Error fetching branch types:", err));
 
     // Load members to count dynamically
-    apiService.get("/api/doanVien")
+    apiService
+      .get("/api/doanVien")
       .then((data) => {
         if (Array.isArray(data)) {
           setMembers(data);
@@ -70,12 +75,13 @@ export default function Branches() {
     e.preventDefault();
     if (!newTypeName.trim()) return;
 
-    apiService.post(
-      "/api/loaiChiDoan",
-      { tenLoai: newTypeName.trim() },
-      true,
-      "Thêm phân loại chi đoàn thành công!"
-    )
+    apiService
+      .post(
+        "/api/loaiChiDoan",
+        { tenLoai: newTypeName.trim() },
+        true,
+        "Thêm phân loại chi đoàn thành công!",
+      )
       .then(() => {
         setNewTypeName("");
         loadData();
@@ -86,11 +92,12 @@ export default function Branches() {
   const handleUpdateType = (id) => {
     if (!editTypeName.trim()) return;
 
-    apiService.put(
-      `/api/loaiChiDoan/${id}`,
-      { tenLoai: editTypeName.trim() },
-      "Cập nhật phân loại chi đoàn thành công!"
-    )
+    apiService
+      .put(
+        `/api/loaiChiDoan/${id}`,
+        { tenLoai: editTypeName.trim() },
+        "Cập nhật phân loại chi đoàn thành công!",
+      )
       .then(() => {
         setEditingType(null);
         setEditTypeName("");
@@ -102,10 +109,11 @@ export default function Branches() {
   const handleDeleteType = (id) => {
     if (
       window.confirm(
-        "Bạn có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!"
+        "Bạn có chắc chắn muốn xóa phân loại này? Tất cả các chi đoàn thuộc phân loại này cũng sẽ bị ảnh hưởng!",
       )
     ) {
-      apiService.delete(`/api/loaiChiDoan/${id}`, "Xóa phân loại chi đoàn thành công!")
+      apiService
+        .delete(`/api/loaiChiDoan/${id}`, "Xóa phân loại chi đoàn thành công!")
         .then(() => {
           loadData();
         })
@@ -139,23 +147,20 @@ export default function Branches() {
     }
 
     if (editingBranch) {
-      apiService.put(
-        `/api/chiDoan/${editingBranch.id}`,
-        branchForm,
-        "Cập nhật chi đoàn thành công!"
-      )
+      apiService
+        .put(
+          `/api/chiDoan/${editingBranch.id}`,
+          branchForm,
+          "Cập nhật chi đoàn thành công!",
+        )
         .then(() => {
           setShowBranchModal(false);
           loadData();
         })
         .catch((err) => console.error("Branch save error:", err));
     } else {
-      apiService.post(
-        "/api/chiDoan",
-        branchForm,
-        true,
-        "Thêm chi đoàn mới thành công!"
-      )
+      apiService
+        .post("/api/chiDoan", branchForm, true, "Thêm chi đoàn mới thành công!")
         .then(() => {
           setShowBranchModal(false);
           loadData();
@@ -166,11 +171,10 @@ export default function Branches() {
 
   const handleDeleteBranch = (id) => {
     if (
-      window.confirm(
-        "Bạn có chắc chắn muốn xóa chi đoàn trực thuộc này không?"
-      )
+      window.confirm("Bạn có chắc chắn muốn xóa chi đoàn trực thuộc này không?")
     ) {
-      apiService.delete(`/api/chiDoan/${id}`, "Đã xóa chi đoàn thành công!")
+      apiService
+        .delete(`/api/chiDoan/${id}`, "Đã xóa chi đoàn thành công!")
         .then(() => {
           loadData();
         })
@@ -214,7 +218,11 @@ export default function Branches() {
       align: "center",
       render: (_, record) => {
         const count = members.filter((m) => m.chiDoanId === record.id).length;
-        return <span style={{ fontWeight: 600, color: "var(--primary)" }}>{count}</span>;
+        return (
+          <span style={{ fontWeight: 600, color: "var(--primary)" }}>
+            {count}
+          </span>
+        );
       },
     },
     {
@@ -222,7 +230,9 @@ export default function Branches() {
       key: "audit",
       width: "10%",
       render: (_, record) => {
-        const createDate = record.createdAt ? new Date(record.createdAt).toLocaleDateString("vi-VN") : "";
+        const createDate = record.createdAt
+          ? new Date(record.createdAt).toLocaleDateString("vi-VN")
+          : "";
         return (
           <span
             style={{ fontSize: "0.75rem", color: "#718096" }}
@@ -269,6 +279,15 @@ export default function Branches() {
           <button
             className="btn btn-outline"
             type="button"
+            onClick={() => setShowImportModal(true)}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <Download size={16} />
+            <span>Import Excel</span>
+          </button>
+          <button
+            className="btn btn-outline"
+            type="button"
             onClick={() => setShowTypeModal(true)}
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
@@ -289,6 +308,7 @@ export default function Branches() {
       <Table
         columns={columns}
         data={branches}
+        height={"500px"}
         emptyMessage="Chưa có chi đoàn trực thuộc nào được thiết lập."
       />
 
@@ -296,7 +316,9 @@ export default function Branches() {
       <Modal
         isOpen={showBranchModal}
         onClose={() => setShowBranchModal(false)}
-        title={editingBranch ? "Sửa thông tin Chi đoàn" : "Thêm Chi đoàn trực thuộc"}
+        title={
+          editingBranch ? "Sửa thông tin Chi đoàn" : "Thêm Chi đoàn trực thuộc"
+        }
         maxWidth="500px"
         onSubmit={handleBranchSubmit}
         footer={
@@ -329,10 +351,15 @@ export default function Branches() {
           type="select"
           required
           value={branchForm.loaiChiDoanId}
-          onChange={(val) => setBranchForm({ ...branchForm, loaiChiDoanId: val })}
+          onChange={(val) =>
+            setBranchForm({ ...branchForm, loaiChiDoanId: val })
+          }
           options={[
             { value: "", label: "-- Chọn phân loại chi đoàn --" },
-            ...branchTypes.map((type) => ({ value: type.id, label: type.tenLoai }))
+            ...branchTypes.map((type) => ({
+              value: type.id,
+              label: type.tenLoai,
+            })),
           ]}
         />
       </Modal>
@@ -354,7 +381,10 @@ export default function Branches() {
         }
       >
         {/* Form to add a new type */}
-        <form onSubmit={handleAddType} style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <form
+          onSubmit={handleAddType}
+          style={{ display: "flex", gap: "10px", marginBottom: "20px" }}
+        >
           <input
             type="text"
             className="form-control"
@@ -364,28 +394,68 @@ export default function Branches() {
             value={newTypeName}
             onChange={(e) => setNewTypeName(e.target.value)}
           />
-          <button type="submit" className="btn btn-primary" style={{ whiteSpace: "nowrap" }}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ whiteSpace: "nowrap" }}
+          >
             <Plus size={16} /> Thêm mới
           </button>
         </form>
 
         {/* List of current types */}
-        <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: "6px" }}>
+        <div
+          style={{
+            maxHeight: "300px",
+            overflowY: "auto",
+            border: "1px solid #e2e8f0",
+            borderRadius: "6px",
+          }}
+        >
           {branchTypes.length === 0 ? (
-            <div style={{ padding: "20px", textAlign: "center", color: "#a0aec0" }}>
+            <div
+              style={{ padding: "20px", textAlign: "center", color: "#a0aec0" }}
+            >
               Chưa có phân loại nào. Hãy tạo phân loại đầu tiên ở trên!
             </div>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ backgroundColor: "#f7fafc", borderBottom: "1px solid #e2e8f0" }}>
-                  <th style={{ textAlign: "left", padding: "10px 15px", fontSize: "0.85rem", color: "#4a5568" }}>Tên Phân loại</th>
-                  <th style={{ textAlign: "center", padding: "10px 15px", fontSize: "0.85rem", color: "#4a5568", width: "120px" }}>Thao tác</th>
+                <tr
+                  style={{
+                    backgroundColor: "#f7fafc",
+                    borderBottom: "1px solid #e2e8f0",
+                  }}
+                >
+                  <th
+                    style={{
+                      textAlign: "left",
+                      padding: "10px 15px",
+                      fontSize: "0.85rem",
+                      color: "#4a5568",
+                    }}
+                  >
+                    Tên Phân loại
+                  </th>
+                  <th
+                    style={{
+                      textAlign: "center",
+                      padding: "10px 15px",
+                      fontSize: "0.85rem",
+                      color: "#4a5568",
+                      width: "120px",
+                    }}
+                  >
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {branchTypes.map((type) => (
-                  <tr key={type.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                  <tr
+                    key={type.id}
+                    style={{ borderBottom: "1px solid #e2e8f0" }}
+                  >
                     <td style={{ padding: "10px 15px" }}>
                       {editingType?.id === type.id ? (
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -410,7 +480,10 @@ export default function Branches() {
                       )}
                     </td>
                     <td style={{ padding: "10px 15px", textAlign: "center" }}>
-                      <div className="action-buttons-group" style={{ justifyContent: "center" }}>
+                      <div
+                        className="action-buttons-group"
+                        style={{ justifyContent: "center" }}
+                      >
                         {editingType?.id !== type.id && (
                           <button
                             className="action-btn edit-btn"
@@ -439,6 +512,14 @@ export default function Branches() {
           )}
         </div>
       </Modal>
+
+      <ExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        type="branches"
+        branchTypes={branchTypes}
+        onSuccess={loadData}
+      />
     </div>
   );
 }

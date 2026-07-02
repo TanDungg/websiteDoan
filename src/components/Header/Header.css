@@ -5,15 +5,21 @@
 
 /* Banner Section */
 .header-banner {
-  background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 45%, #bae6fd 100%);
-  border-bottom: 1px solid rgba(2, 132, 199, 0.1);
-  padding: 15px 0;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f0f9ff 30%,
+    #e0f2fe 70%,
+    #f8fafc 100%
+  );
+  border-bottom: 2px solid rgba(2, 132, 199, 0.15);
+  padding: 18px 0;
   width: 100%;
   position: relative;
   overflow: hidden;
 }
 
-/* Abstract curves overlay on banner for premium aesthetics */
+/* Abstract curves and grid overlay on banner for premium aesthetics */
 .header-banner::before {
   content: "";
   position: absolute;
@@ -22,9 +28,25 @@
   right: 0;
   bottom: 0;
   background-image:
-    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.04) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(239, 68, 68, 0.03) 0px, transparent 50%);
-  /* pointer-events: none; */
+    linear-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(2, 132, 199, 0.08) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(239, 68, 68, 0.06) 0%,
+      transparent 50%
+    );
+  background-size:
+    40px 40px,
+    40px 40px,
+    100% 100%,
+    100% 100%;
+  pointer-events: none;
+  opacity: 0.85;
 }
 
 .banner-content {
@@ -37,21 +59,28 @@
 .banner-logo-link {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   max-width: 100%;
   text-decoration: none;
 }
 
 .banner-emblem {
-  width: 100px;
-  height: 100px;
+  width: 95px;
+  height: 95px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-round);
-  padding: 6px;
+  /* border-radius: var(--radius-round); */
+  /* background: #ffffff; */
+  /* padding: 8px; */
+  /* box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.15); */
   transition: var(--transition-normal);
   flex-shrink: 0;
+}
+
+.banner-logo-link:hover .banner-emblem {
+  /* transform: scale(1.05) rotate(5deg); */
+  /* box-shadow: 0 12px 30px -4px rgba(2, 132, 199, 0.25); */
 }
 
 .emblem-img {
@@ -68,54 +97,59 @@
 }
 
 .banner-title-top {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-family: var(--font-display), "Inter", sans-serif;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #0369a1;
-  letter-spacing: 1.5px;
-  line-height: 1.1;
+  letter-spacing: 1px;
+  line-height: 1.2;
   margin: 0;
-  text-shadow:
-    0 1px 0px #fff,
-    0 2px 4px rgba(2, 132, 199, 0.15);
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(3, 105, 161, 0.08);
 }
 
 .banner-title-bottom {
-  font-family: var(--font-display);
-  font-size: 2rem;
+  font-family: var(--font-display), "Inter", sans-serif;
+  font-size: 1.9rem;
   font-weight: 900;
-  color: #dc2626;
+  color: #d97706; /* High-end gold-orange */
+  background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: 0.5px;
-  line-height: 1.2;
+  line-height: 1.25;
   margin: 4px 0 2px 0;
-  text-shadow:
-    0 1px 0px #fff,
-    0 0 10px rgba(254, 243, 199, 0.8),
-    0 2px 4px rgba(220, 38, 38, 0.15);
+  text-transform: uppercase;
+  filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.08));
 }
 
 .banner-location {
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #dc2626;
-  letter-spacing: 1px;
+  font-family: var(--font-display), "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 750;
+  color: #475569;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  /* background: #f1f5f9; */
+  padding: 2px 8px;
+  border-radius: 4px;
+  /* border: 1px solid #e2e8f0; */
+  margin-top: 2px;
 }
 
 /* Navigation Menu Bar Section */
 .header-nav-bar {
-  background: linear-gradient(90deg, #0f2c59 0%, #1e3a8a 100%);
-  box-shadow: 0 4px 15px rgba(15, 44, 89, 0.15);
+  background: linear-gradient(90deg, #0f2c59 0%, #1e3a8a 50%, #0f2c59 100%);
+  box-shadow: 0 4px 20px rgba(15, 44, 89, 0.2);
   position: sticky;
   top: 0;
   z-index: 999;
   width: 100%;
-  height: 52px;
+  height: 54px;
   display: flex;
   align-items: center;
   transition: var(--transition-fast);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nav-bar-content {

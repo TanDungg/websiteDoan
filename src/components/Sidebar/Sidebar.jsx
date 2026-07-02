@@ -11,22 +11,11 @@ import "./Sidebar.css";
 
 export default function Sidebar() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [popularPosts, setPopularPosts] = useState([]);
   const [biThuContact, setBiThuContact] = useState(null);
   const [stats, setStats] = useState({ online: 12, homNay: 0, tongCong: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/baiViet")
-      .then((res) => res.json())
-      .then((data) => {
-        // Sort by views descending to get the most viewed posts
-        const sorted = [...data].sort((a, b) => (b.luotXem || 0) - (a.luotXem || 0));
-        setPopularPosts(sorted.slice(0, 3));
-      })
-      .catch((err) =>
-        console.error("Failed to load popular posts for sidebar:", err),
-      );
 
     fetch("/api/thongKe")
       .then((res) => res.json())
@@ -60,11 +49,7 @@ export default function Sidebar() {
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year}`;
-  };
+
 
   return (
     <aside className="sidebar-container">
@@ -89,47 +74,7 @@ export default function Sidebar() {
         </form>
       </div>
 
-      {/* Popular news list */}
-      <div className="sidebar-widget recent-widget card">
-        <h4>Tin xem nhiều nhất</h4>
-        <div className="recent-posts-list">
-          {popularPosts.length > 0 ? (
-            popularPosts.map((post) => (
-              <div
-                key={post.id}
-                className="recent-post-item"
-                onClick={() => navigate(`/tin-tuc/${post.id}`)}
-              >
-                <img
-                  src={post.anhDaiDien}
-                  alt={post.tieuDe}
-                  className="recent-post-thumb"
-                />
-                <div className="recent-post-info">
-                  <span className="recent-post-date">
-                    {formatDate(post.ngayDang)}
-                  </span>
-                  <h5 className="recent-post-title">
-                    <Link to={`/tin-tuc/${post.id}`}>{post.tieuDe}</Link>
-                  </h5>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p
-              className="no-recent-posts"
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                textAlign: "center",
-                margin: "20px 0",
-              }}
-            >
-              Chưa có bài viết phổ biến.
-            </p>
-          )}
-        </div>
-      </div>
+
 
       {/* Quick Access links */}
       <div className="sidebar-widget quick-links-widget card">

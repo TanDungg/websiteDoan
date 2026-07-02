@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Check, Calendar, Phone, Mail, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, Check, Calendar, Phone, Mail, Clock, Download } from "lucide-react";
 import { Table, Modal, FormItem } from "../../../components";
 import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
+import ExcelImportModal from "./ExcelImportModal";
 
 export default function Members() {
   const [members, setMembers] = useState([]);
   const [branches, setBranches] = useState([]);
   const [showMemberModal, setShowMemberModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [memberForm, setMemberForm] = useState({
     hoTen: "",
@@ -259,14 +261,25 @@ export default function Members() {
     <div className="panel-wrapper">
       <div className="panel-header">
         <h3>Quản lý Hồ sơ Đoàn viên xã</h3>
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={() => handleOpenMemberModal()}
-        >
-          <Plus size={18} />
-          <span>Thêm đoàn viên</span>
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className="btn btn-outline"
+            type="button"
+            onClick={() => setShowImportModal(true)}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <Download size={16} />
+            <span>Import Excel</span>
+          </button>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={() => handleOpenMemberModal()}
+          >
+            <Plus size={18} />
+            <span>Thêm đoàn viên</span>
+          </button>
+        </div>
       </div>
 
       <Table
@@ -372,6 +385,14 @@ export default function Members() {
           />
         </div>
       </Modal>
+
+      <ExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        type="members"
+        branches={branches}
+        onSuccess={loadData}
+      />
     </div>
   );
 }

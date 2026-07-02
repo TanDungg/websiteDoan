@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Check, Download } from "lucide-react";
 import { Table, FormItem } from "../../../components";
 import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
+import ExcelImportModal from "./ExcelImportModal";
 
 const getChucVuString = (pos) => {
   switch (Number(pos)) {
@@ -29,6 +30,7 @@ const positionOptions = [
 export default function Bch() {
   const [bchMembers, setBchMembers] = useState([]);
   const [showMemberModal, setShowMemberModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [memberForm, setMemberForm] = useState({
     hoTen: "",
@@ -265,14 +267,25 @@ export default function Bch() {
     <div className="panel-wrapper">
       <div className="panel-header">
         <h3>Ban Chấp Hành đương nhiệm</h3>
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={() => handleOpenMemberModal()}
-        >
-          <Plus size={18} />
-          <span>Thêm thành viên BCH</span>
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className="btn btn-outline"
+            type="button"
+            onClick={() => setShowImportModal(true)}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <Download size={16} />
+            <span>Import Excel</span>
+          </button>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={() => handleOpenMemberModal()}
+          >
+            <Plus size={18} />
+            <span>Thêm thành viên BCH</span>
+          </button>
+        </div>
       </div>
 
       <Table
@@ -504,6 +517,13 @@ export default function Bch() {
           </div>
         </div>
       )}
+
+      <ExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        type="bch"
+        onSuccess={loadBch}
+      />
     </div>
   );
 }

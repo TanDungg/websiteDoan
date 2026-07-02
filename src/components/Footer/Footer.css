@@ -137,7 +137,6 @@
 
 .footer-bottom {
   background-color: #05070a;
-  padding: 12px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.03);
   font-size: 0.85rem;
   color: #64748b;
@@ -149,6 +148,7 @@
   gap: 10px;
   align-items: center;
   text-align: center;
+  padding: 12px !important;
 }
 
 @media (min-width: 768px) {

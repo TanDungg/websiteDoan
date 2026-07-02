@@ -109,6 +109,9 @@ export default function News() {
             </div>
 
             <form onSubmit={handleSearchSubmit} className="inline-search-form">
+              <span className="inline-search-icon-left">
+                <Search size={16} />
+              </span>
               <input
                 type="text"
                 className="form-control"
@@ -116,9 +119,6 @@ export default function News() {
                 value={searchText}
                 onChange={handleSearchChange}
               />
-              <button type="submit" className="inline-search-btn" aria-label="Search">
-                <Search size={18} />
-              </button>
             </form>
           </div>
 
@@ -150,7 +150,7 @@ export default function News() {
               <p>Không tìm thấy bài viết nào phù hợp với bộ lọc hiện tại.</p>
               <button 
                 className="btn btn-primary"
-                onClick={() => { setSelectedCategory('all'); setSearchText(''); setSearchParams({}); }}
+                onClick={() => { handleCategorySelect('all'); setSearchText(''); setSearchParams({}); }}
               >
                 Đặt lại bộ lọc
               </button>

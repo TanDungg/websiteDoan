@@ -70,8 +70,42 @@ router.delete("/:id", async (req, res) => {
     sendRealtimeUpdate("chiDoan");
     res.json({ success: true, message: "Xóa chi đoàn thành công!" });
   } catch (err) {
-    console.error("DELETE /api/chiDoan error:", err);
+    console.error("DELETE /api/chiDoan/error:", err);
     res.status(500).json({ error: "Lỗi xóa chi đoàn trực thuộc" });
+  }
+});
+
+// POST /api/chiDoan/bulk
+router.post("/bulk", async (req, res) => {
+  const { list } = req.body;
+  if (!Array.isArray(list)) {
+    return res.status(400).json({ error: "Dữ liệu không hợp lệ" });
+  }
+  const createdBy = "admin";
+  const createdAt = new Date().toISOString();
+  try {
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const nameVal = item.tenChiDoan || item.name;
+      const typeIdVal = item.loaiChiDoanId || item.branchTypeId;
+      const id = (Date.now() + i).toString() + Math.random().toString(36).substring(2, 6);
+      await runQuery(
+        `INSERT INTO "chiDoan" ("id", "tenChiDoan", "loaiChiDoanId", "createdBy", "createdAt", "updatedBy", "updatedAt")
+         VALUES (@id, @nameVal, @typeIdVal, @createdBy, @createdAt, @createdBy, @createdAt)`,
+        {
+          id,
+          nameVal,
+          typeIdVal,
+          createdBy,
+          createdAt,
+        },
+      );
+    }
+    sendRealtimeUpdate("chiDoan");
+    res.json({ success: true, message: `Import thành công ${list.length} chi đoàn!` });
+  } catch (err) {
+    console.error("POST /api/chiDoan/bulk error:", err);
+    res.status(500).json({ error: "Lỗi import danh sách chi đoàn", details: err.message });
   }
 });
 

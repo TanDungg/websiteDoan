@@ -79,6 +79,11 @@
   color: #ffffff !important;
 }
 
+.card-badge.badge-tu-thien {
+  background-color: rgba(219, 39, 119, 0.88) !important;
+  color: #ffffff !important;
+}
+
 .card-info {
   padding: 24px;
   display: flex;
