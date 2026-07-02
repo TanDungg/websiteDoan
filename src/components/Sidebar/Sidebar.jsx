@@ -16,7 +16,7 @@ import apiService from "src/services/apiService";
 export default function Sidebar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [biThuContact, setBiThuContact] = useState(null);
-  const [stats, setStats] = useState({ online: 12, homNay: 0, tongCong: 0 });
+  const [stats, setStats] = useState({ online: 0, homNay: 0, tongCong: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {

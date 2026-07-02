@@ -4,8 +4,6 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import { newsCategories } from '../../data/mockData';
 import './NewsCard.css';
 
-const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80";
-
 const getCleanSummary = (text) => {
   if (!text) return "";
   
@@ -69,10 +67,16 @@ export default function NewsCard({ news }) {
 
   return (
     <article className="card news-card" onClick={() => navigate(`/tin-tuc/${id}`)}>
-      <div className="card-image-wrapper">
-        <img src={anhDaiDien || DEFAULT_IMAGE} alt={tieuDe} className="card-image" loading="lazy" />
-        <span className={`badge badge-${danhMuc} card-badge`}>{catName}</span>
-      </div>
+      {anhDaiDien ? (
+        <div className="card-image-wrapper">
+          <img src={anhDaiDien} alt={tieuDe} className="card-image" loading="lazy" />
+          <span className={`badge badge-${danhMuc} card-badge`}>{catName}</span>
+        </div>
+      ) : (
+        <div className="card-no-image-badge-wrapper" style={{ padding: "16px 16px 0 16px" }}>
+          <span className={`badge badge-${danhMuc}`}>{catName}</span>
+        </div>
+      )}
       
       <div className="card-info">
         <div className="card-meta">

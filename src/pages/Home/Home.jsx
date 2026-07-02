@@ -64,9 +64,6 @@ const getCleanText = (text, maxLength = 120) => {
   return cleaned;
 };
 
-const DEFAULT_IMAGE =
-  "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80";
-
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const parts = dateStr.split("-");
@@ -270,7 +267,9 @@ export default function Home() {
                       key={news.id}
                       className="slider-item"
                       style={{
-                        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%), url(${news.anhDaiDien || DEFAULT_IMAGE})`,
+                        backgroundImage: news.anhDaiDien
+                          ? `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%), url(${news.anhDaiDien})`
+                          : `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%)`,
                       }}
                       onClick={() => navigate(`/tin-tuc/${news.id}`)}
                     >
@@ -349,11 +348,13 @@ export default function Home() {
                       onClick={() => navigate(`/tin-tuc/${post.id}`)}
                     >
                       <div className="entry-index-badge">{idx + 1}</div>
-                      <img
-                        src={post.anhDaiDien || DEFAULT_IMAGE}
-                        alt={post.tieuDe}
-                        className="entry-thumbnail"
-                      />
+                      {post.anhDaiDien ? (
+                        <img
+                          src={post.anhDaiDien}
+                          alt={post.tieuDe}
+                          className="entry-thumbnail"
+                        />
+                      ) : null}
                       <div className="entry-info-block">
                         <h4 className="entry-title-link">{post.tieuDe}</h4>
                         <div className="entry-metadata">
@@ -401,10 +402,12 @@ export default function Home() {
                       onClick={() => navigate(`/tin-tuc/${cat1Featured.id}`)}
                     >
                       <div className="featured-card-img-holder">
-                        <img
-                          src={cat1Featured.anhDaiDien || DEFAULT_IMAGE}
-                          alt={cat1Featured.tieuDe}
-                        />
+                        {cat1Featured.anhDaiDien ? (
+                          <img
+                            src={cat1Featured.anhDaiDien}
+                            alt={cat1Featured.tieuDe}
+                          />
+                        ) : null}
                         <span className={`home-card-badge badge-${cat1Featured.danhMuc}`}>
                           {newsCategories.find((c) => c.id === cat1Featured.danhMuc)?.name || "Tin tức"}
                         </span>
@@ -433,11 +436,13 @@ export default function Home() {
                           className="showcase-sublist-item"
                           onClick={() => navigate(`/tin-tuc/${subNews.id}`)}
                         >
-                          <img
-                            src={subNews.anhDaiDien || DEFAULT_IMAGE}
-                            alt={subNews.tieuDe}
-                            className="sublist-item-thumb"
-                          />
+                          {subNews.anhDaiDien ? (
+                            <img
+                              src={subNews.anhDaiDien}
+                              alt={subNews.tieuDe}
+                              className="sublist-item-thumb"
+                            />
+                          ) : null}
                           <div className="sublist-item-info">
                             <h5 className="sublist-item-title">
                               {subNews.tieuDe}
@@ -497,10 +502,12 @@ export default function Home() {
                       onClick={() => navigate(`/tin-tuc/${cat2Featured.id}`)}
                     >
                       <div className="featured-card-img-holder">
-                        <img
-                          src={cat2Featured.anhDaiDien || DEFAULT_IMAGE}
-                          alt={cat2Featured.tieuDe}
-                        />
+                        {cat2Featured.anhDaiDien ? (
+                          <img
+                            src={cat2Featured.anhDaiDien}
+                            alt={cat2Featured.tieuDe}
+                          />
+                        ) : null}
                         <span className={`home-card-badge badge-${cat2Featured.danhMuc}`}>
                           {newsCategories.find((c) => c.id === cat2Featured.danhMuc)?.name || "Tin tức"}
                         </span>
@@ -529,11 +536,13 @@ export default function Home() {
                           className="showcase-sublist-item"
                           onClick={() => navigate(`/tin-tuc/${subNews.id}`)}
                         >
-                          <img
-                            src={subNews.anhDaiDien || DEFAULT_IMAGE}
-                            alt={subNews.tieuDe}
-                            className="sublist-item-thumb"
-                          />
+                          {subNews.anhDaiDien ? (
+                            <img
+                              src={subNews.anhDaiDien}
+                              alt={subNews.tieuDe}
+                              className="sublist-item-thumb"
+                            />
+                          ) : null}
                           <div className="sublist-item-info">
                             <h5 className="sublist-item-title">
                               {subNews.tieuDe}
@@ -581,11 +590,13 @@ export default function Home() {
                         onClick={() => navigate(`/tin-tuc/${item.id}`)}
                       >
                         <div className="example-avatar-holder">
-                          <img
-                            src={item.anhDaiDien || DEFAULT_IMAGE}
-                            alt={item.tieuDe}
-                            className="example-avatar-img"
-                          />
+                          {item.anhDaiDien ? (
+                            <img
+                              src={item.anhDaiDien}
+                              alt={item.tieuDe}
+                              className="example-avatar-img"
+                            />
+                          ) : null}
                         </div>
                         <div className="example-info">
                           <h4 className="example-name">{item.tieuDe}</h4>

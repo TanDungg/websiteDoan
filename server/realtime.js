@@ -46,4 +46,5 @@ function sendRealtimeUpdate(target) {
 module.exports = {
   initRealtime,
   sendRealtimeUpdate,
+  clients,
 };
