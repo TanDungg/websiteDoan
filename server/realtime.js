@@ -9,7 +9,7 @@ function initRealtime(app) {
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.setHeader("X-Accel-Buffering", "no");
-    
+
     // Ensure response headers are sent immediately
     res.flushHeaders();
 
@@ -17,7 +17,9 @@ function initRealtime(app) {
     res.write(`data: ${JSON.stringify({ type: "CONNECTED" })}\n\n`);
 
     // Clean up stale sockets first
-    clients = clients.filter((c) => c.res && c.res.socket && !c.res.socket.destroyed);
+    clients = clients.filter(
+      (c) => c.res && c.res.socket && !c.res.socket.destroyed,
+    );
 
     // If tabId is provided, close any existing connections for the same tab (e.g. on page refresh)
     if (tabId) {
@@ -58,8 +60,10 @@ function sendRealtimeUpdate(target) {
   const message = `data: ${JSON.stringify(payload)}\n\n`;
 
   // Clean up stale sockets first
-  clients = clients.filter((c) => c.res && c.res.socket && !c.res.socket.destroyed);
-  
+  clients = clients.filter(
+    (c) => c.res && c.res.socket && !c.res.socket.destroyed,
+  );
+
   clients.forEach((client) => {
     try {
       client.res.write(message);
@@ -69,8 +73,12 @@ function sendRealtimeUpdate(target) {
   });
 }
 
+function getClients() {
+  return clients;
+}
+
 module.exports = {
   initRealtime,
   sendRealtimeUpdate,
-  clients,
+  getClients,
 };

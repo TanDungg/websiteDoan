@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { runQuery } = require("../database");
-const { clients } = require("../realtime");
+const { getClients } = require("../realtime");
 
 // GET /api/thongKe -> statistics of visits
 router.get("/", async (req, res) => {
@@ -15,8 +15,8 @@ router.get("/", async (req, res) => {
     const totalResult = await runQuery('SELECT "soLuotTruyCap" FROM "thongKeTruyCap"');
     const tongCong = totalResult.rows.reduce((sum, row) => sum + (Number(row.soLuotTruyCap) || 0), 0);
 
-    // 3. Actual online users from SSE active connections list
-    const online = clients ? clients.length : 0;
+    // 3. Actual online users from SSE active connections list (via dynamic getter)
+    const online = getClients() ? getClients().length : 0;
 
     res.json({
       online,
