@@ -1,17 +1,33 @@
 class ApiService {
+  constructor() {
+    this.activeGetRequests = {};
+  }
+
   async get(url, config = {}) {
-    try {
-      const response = await fetch(url, { method: "GET", ...config });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(
-          errData.error || `Lỗi tải dữ liệu (Mã lỗi: ${response.status})`,
-        );
-      }
-      return await response.json();
-    } catch (error) {
-      throw this.handleError(error);
+    const cacheKey = url + JSON.stringify(config);
+    if (this.activeGetRequests[cacheKey]) {
+      return this.activeGetRequests[cacheKey];
     }
+
+    const requestPromise = (async () => {
+      try {
+        const response = await fetch(url, { method: "GET", ...config });
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(
+            errData.error || `Lỗi tải dữ liệu (Mã lỗi: ${response.status})`,
+          );
+        }
+        return await response.json();
+      } catch (error) {
+        throw this.handleError(error);
+      } finally {
+        delete this.activeGetRequests[cacheKey];
+      }
+    })();
+
+    this.activeGetRequests[cacheKey] = requestPromise;
+    return requestPromise;
   }
 
   async post(

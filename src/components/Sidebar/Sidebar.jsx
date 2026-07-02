@@ -11,6 +11,7 @@ import {
   Image,
 } from "lucide-react";
 import "./Sidebar.css";
+import apiService from "src/services/apiService";
 
 export default function Sidebar() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,19 +20,16 @@ export default function Sidebar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-
-    fetch("/api/thongKe")
-      .then((res) => res.json())
+    apiService
+      .get("/api/thongKe")
       .then((data) => setStats(data))
       .catch((err) => console.error("Failed to load statistics:", err));
 
-    fetch("/api/gioiThieu")
-      .then((res) => res.json())
+    apiService
+      .get("/api/gioiThieu")
       .then((data) => {
         if (data.bchMembers) {
-          const biThu = data.bchMembers.find(
-            (m) => Number(m.chucVu) === 1
-          );
+          const biThu = data.bchMembers.find((m) => Number(m.chucVu) === 1);
           if (biThu && biThu.soDienThoai) {
             setBiThuContact({
               name: biThu.hoTen,
@@ -40,9 +38,7 @@ export default function Sidebar() {
           }
         }
       })
-      .catch((err) =>
-        console.error("Failed to load intro for sidebar:", err),
-      );
+      .catch((err) => console.error("Failed to load intro for sidebar:", err));
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -51,8 +47,6 @@ export default function Sidebar() {
       navigate(`/tin-tuc?search=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
-
-
 
   return (
     <aside className="sidebar-container">
@@ -76,8 +70,6 @@ export default function Sidebar() {
           </button>
         </form>
       </div>
-
-
 
       {/* Quick Access links */}
       <div className="sidebar-widget quick-links-widget card">
@@ -116,23 +108,27 @@ export default function Sidebar() {
 
       {/* Banner Links Widget */}
       <div className="sidebar-widget banner-links-widget">
-        <a 
-          href="https://hochiminh.vn" 
-          target="_blank" 
+        <a
+          href="https://hochiminh.vn"
+          target="_blank"
           rel="noopener noreferrer"
           className="banner-link-card hoc-tap-bac"
         >
           <span className="banner-link-title">HỌC TẬP & LÀM THEO</span>
-          <span className="banner-link-subtitle">Tấm gương đạo đức Hồ Chí Minh</span>
+          <span className="banner-link-subtitle">
+            Tấm gương đạo đức Hồ Chí Minh
+          </span>
         </a>
-        <a 
-          href="https://dichvucong.gov.vn" 
-          target="_blank" 
+        <a
+          href="https://dichvucong.gov.vn"
+          target="_blank"
           rel="noopener noreferrer"
           className="banner-link-card dich-vu-cong"
         >
           <span className="banner-link-title">CỔNG DỊCH VỤ CÔNG</span>
-          <span className="banner-link-subtitle">Hệ thống thông tin Quốc gia</span>
+          <span className="banner-link-subtitle">
+            Hệ thống thông tin Quốc gia
+          </span>
         </a>
       </div>
 
@@ -166,7 +162,10 @@ export default function Sidebar() {
           vui lòng liên hệ trực tiếp:
         </p>
         {biThuContact?.phone ? (
-          <a href={`tel:${biThuContact.phone.replace(/[^0-9+]/g, "")}`} className="hotline-number">
+          <a
+            href={`tel:${biThuContact.phone.replace(/[^0-9+]/g, "")}`}
+            className="hotline-number"
+          >
             <Phone size={20} />
             <span>{biThuContact.phone} (Bí thư)</span>
           </a>
