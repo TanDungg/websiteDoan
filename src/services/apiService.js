@@ -1,10 +1,20 @@
 class ApiService {
   constructor() {
     this.activeGetRequests = {};
+    this.resolvedCache = {};
+    this.CACHE_DURATION = 1500; // 1.5 seconds cache TTL
   }
 
   async get(url, config = {}) {
     const cacheKey = url + JSON.stringify(config);
+
+    // 1. Check if there is a fresh resolved cache item
+    const cachedItem = this.resolvedCache[cacheKey];
+    if (cachedItem && Date.now() - cachedItem.timestamp < this.CACHE_DURATION) {
+      return cachedItem.data;
+    }
+
+    // 2. Check if there is an active request in progress
     if (this.activeGetRequests[cacheKey]) {
       return this.activeGetRequests[cacheKey];
     }
@@ -18,7 +28,15 @@ class ApiService {
             errData.error || `Lỗi tải dữ liệu (Mã lỗi: ${response.status})`,
           );
         }
-        return await response.json();
+        const data = await response.json();
+        
+        // Cache the resolved data
+        this.resolvedCache[cacheKey] = {
+          data,
+          timestamp: Date.now(),
+        };
+
+        return data;
       } catch (error) {
         throw this.handleError(error);
       } finally {
