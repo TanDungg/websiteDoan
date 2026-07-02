@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Award, ArrowRight } from "lucide-react";
 
-export default function BrightExamples({ brightExamples, getCleanText }) {
+export default function GuongSang({ brightExamples, getCleanText }) {
   const navigate = useNavigate();
 
   return (

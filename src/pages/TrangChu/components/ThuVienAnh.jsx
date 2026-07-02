@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Image, ArrowRight } from "lucide-react";
 
-export default function HomeGallery({ galleryItems }) {
+export default function ThuVienAnh({ galleryItems }) {
   const navigate = useNavigate();
 
   if (galleryItems.length === 0) return null;

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Bell } from "lucide-react";
 
-export default function AnnouncementTicker({ posts, formatDate }) {
+export default function ThongBaoChay({ posts, formatDate }) {
   const notices = posts.filter((p) => p.danhMuc === "thong-bao");
 
   return (

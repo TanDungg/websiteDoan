@@ -1,7 +1,7 @@
 import React from "react";
 import { Award } from "lucide-react";
 
-export default function CongressBanner({ congressTitle, congressSlogan }) {
+export default function BannerDaiHoi({ congressTitle, congressSlogan }) {
   return (
     <div className="congress-campaign-banner card">
       <div className="congress-banner-backdrop">

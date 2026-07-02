@@ -65,18 +65,18 @@ function initMockDbStore() {
 
 function runMockQuery(queryText, params = {}) {
   const normalized = queryText.replace(/\s+/g, " ").trim();
-  const tblMatch = 
-    queryText.match(/FROM\s+"(\w+)"/i)?.[1] || 
-    queryText.match(/INTO\s+"(\w+)"/i)?.[1] || 
-    queryText.match(/UPDATE\s+"(\w+)"/i)?.[1] || 
+  const tblMatch =
+    queryText.match(/FROM\s+"(\w+)"/i)?.[1] ||
+    queryText.match(/INTO\s+"(\w+)"/i)?.[1] ||
+    queryText.match(/UPDATE\s+"(\w+)"/i)?.[1] ||
     queryText.match(/DELETE\s+FROM\s+"(\w+)"/i)?.[1];
 
   if (!tblMatch || !mockDbStore[tblMatch]) {
     // If it's a count query or special query
-    if (normalized.includes("COUNT(*) AS count FROM \"chiDoan\"")) {
+    if (normalized.includes('COUNT(*) AS count FROM "chiDoan"')) {
       return { rows: [{ count: mockDbStore.chiDoan.length }], rowCount: 1 };
     }
-    if (normalized.includes("COUNT(*) AS count FROM \"doanVien\"")) {
+    if (normalized.includes('COUNT(*) AS count FROM "doanVien"')) {
       return { rows: [{ count: mockDbStore.doanVien.length }], rowCount: 1 };
     }
     return { rows: [], rowCount: 0 };
@@ -88,7 +88,8 @@ function runMockQuery(queryText, params = {}) {
   if (normalized.startsWith("SELECT")) {
     if (tblMatch === "taiKhoanAdmin") {
       const user = table.find(
-        (u) => u.tenDangNhap === params.tenDangNhap && u.matKhau === params.matKhau
+        (u) =>
+          u.tenDangNhap === params.tenDangNhap && u.matKhau === params.matKhau,
       );
       return { rows: user ? [user] : [], rowCount: user ? 1 : 0 };
     }
@@ -119,7 +120,7 @@ function runMockQuery(queryText, params = {}) {
         list = list.filter(
           (item) =>
             (item.tieuDe && item.tieuDe.toLowerCase().includes(term)) ||
-            (item.tomTat && item.tomTat.toLowerCase().includes(term))
+            (item.tomTat && item.tomTat.toLowerCase().includes(term)),
         );
       }
       // Sort by date/ngayDang descending
@@ -127,7 +128,9 @@ function runMockQuery(queryText, params = {}) {
     }
 
     if (tblMatch === "vanBan") {
-      list.sort((a, b) => (b.ngayBanHanh || "").localeCompare(a.ngayBanHanh || ""));
+      list.sort((a, b) =>
+        (b.ngayBanHanh || "").localeCompare(a.ngayBanHanh || ""),
+      );
     }
 
     if (tblMatch === "gopY") {
@@ -141,22 +144,30 @@ function runMockQuery(queryText, params = {}) {
 
     if (tblMatch === "chiDoan") {
       list = list.map((cd) => {
-        const type = mockDbStore.loaiChiDoan.find((t) => String(t.id) === String(cd.loaiChiDoanId));
+        const type = mockDbStore.loaiChiDoan.find(
+          (t) => String(t.id) === String(cd.loaiChiDoanId),
+        );
         return { ...cd, groupName: type ? type.tenLoai : "" };
       });
-      list.sort((a, b) => (a.tenChiDoan || "").localeCompare(b.tenChiDoan || ""));
+      list.sort((a, b) =>
+        (a.tenChiDoan || "").localeCompare(b.tenChiDoan || ""),
+      );
     }
 
     if (tblMatch === "doanVien") {
       list = list.map((dv) => {
-        const cd = mockDbStore.chiDoan.find((b) => String(b.id) === String(dv.chiDoanId));
+        const cd = mockDbStore.chiDoan.find(
+          (b) => String(b.id) === String(dv.chiDoanId),
+        );
         return { ...dv, branchName: cd ? cd.tenChiDoan : "" };
       });
       list.sort((a, b) => (a.hoTen || "").localeCompare(b.hoTen || ""));
     }
 
     if (tblMatch === "anhAlbum" && params.albumId !== undefined) {
-      list = list.filter((item) => String(item.albumId) === String(params.albumId));
+      list = list.filter(
+        (item) => String(item.albumId) === String(params.albumId),
+      );
     }
 
     return { rows: list, rowCount: list.length };
@@ -183,10 +194,15 @@ function runMockQuery(queryText, params = {}) {
     if (params.id !== undefined) {
       index = table.findIndex((item) => String(item.id) === String(params.id));
     } else if (params.ngay !== undefined) {
-      index = table.findIndex((item) => String(item.ngay) === String(params.ngay));
+      index = table.findIndex(
+        (item) => String(item.ngay) === String(params.ngay),
+      );
     }
     if (index !== -1) {
-      if (normalized.includes('"soLuotTruyCap" = "soLuotTruyCap" + 1') || normalized.includes('[soLuotTruyCap] = [soLuotTruyCap] + 1')) {
+      if (
+        normalized.includes('"soLuotTruyCap" = "soLuotTruyCap" + 1') ||
+        normalized.includes("[soLuotTruyCap] = [soLuotTruyCap] + 1")
+      ) {
         table[index].soLuotTruyCap = (table[index].soLuotTruyCap || 0) + 1;
       } else {
         table[index] = { ...table[index], ...params };
@@ -199,17 +215,25 @@ function runMockQuery(queryText, params = {}) {
   // 4. DELETE queries
   if (normalized.startsWith("DELETE")) {
     const origLen = table.length;
-    mockDbStore[tblMatch] = table.filter((item) => String(item.id) !== String(params.id));
-    
+    mockDbStore[tblMatch] = table.filter(
+      (item) => String(item.id) !== String(params.id),
+    );
+
     // Cascade deletes
     if (tblMatch === "albumAnh") {
-      mockDbStore.anhAlbum = mockDbStore.anhAlbum.filter((img) => String(img.albumId) !== String(params.id));
+      mockDbStore.anhAlbum = mockDbStore.anhAlbum.filter(
+        (img) => String(img.albumId) !== String(params.id),
+      );
     }
     if (tblMatch === "loaiChiDoan") {
-      mockDbStore.chiDoan = mockDbStore.chiDoan.filter((cd) => String(cd.loaiChiDoanId) !== String(params.id));
+      mockDbStore.chiDoan = mockDbStore.chiDoan.filter(
+        (cd) => String(cd.loaiChiDoanId) !== String(params.id),
+      );
     }
     if (tblMatch === "chiDoan") {
-      mockDbStore.doanVien = mockDbStore.doanVien.filter((dv) => String(dv.chiDoanId) !== String(params.id));
+      mockDbStore.doanVien = mockDbStore.doanVien.filter(
+        (dv) => String(dv.chiDoanId) !== String(params.id),
+      );
     }
 
     return { rows: [], rowCount: origLen - mockDbStore[tblMatch].length };
@@ -405,11 +429,13 @@ const initializeDatabase = async () => {
         `);
 
         // Seed admin if empty
-        const adminCheck = await client.query('SELECT COUNT(*) FROM "taiKhoanAdmin"');
+        const adminCheck = await client.query(
+          'SELECT COUNT(*) FROM "taiKhoanAdmin"',
+        );
         if (parseInt(adminCheck.rows[0].count) === 0) {
           await client.query(
             'INSERT INTO "taiKhoanAdmin" ("tenDangNhap", "matKhau") VALUES ($1, $2)',
-            [mockAdmin.tenDangNhap, mockAdmin.matKhau]
+            [mockAdmin.tenDangNhap, mockAdmin.matKhau],
           );
         }
 
@@ -418,7 +444,7 @@ const initializeDatabase = async () => {
         if (parseInt(introCheck.rows[0].count) === 0) {
           await client.query(
             'INSERT INTO "intro" ("id", "lichSu", "soLuongDoanVien", "soLuongChiDoan", "thongTinChiDoan") VALUES ($1, $2, $3, $4, $5)',
-            [1, "", "0", "0", ""]
+            [1, "", "0", "0", ""],
           );
         }
 
@@ -427,8 +453,13 @@ const initializeDatabase = async () => {
         client.release();
       }
     } catch (err) {
-      console.warn("⚠️ PostgreSQL Connection/Initialization Failed:", err.message);
-      console.warn("⚠️ Falling back to built-in IN-MEMORY mock database store.");
+      console.warn(
+        "⚠️ PostgreSQL Connection/Initialization Failed:",
+        err.message,
+      );
+      console.warn(
+        "⚠️ Falling back to built-in IN-MEMORY mock database store.",
+      );
       useMockDb = true;
       initMockDbStore();
     }
@@ -447,10 +478,14 @@ const initializeDatabase = async () => {
         `);
         await sql.close();
       } catch (err) {
-        console.warn("⚠️ Failed to verify database existence via master database.");
+        console.warn(
+          "⚠️ Failed to verify database existence via master database.",
+        );
         try {
           await sql.close();
-        } catch (_) {}
+        } catch (_) {
+          // Ignore error if connection is already closed or not open
+        }
       }
 
       await sql.connect(sqlConfig);
@@ -615,24 +650,37 @@ const initializeDatabase = async () => {
       `);
 
       // Seed admin default in MSSQL
-      const adminCheck = await sql.query('SELECT COUNT(*) as count FROM [taiKhoanAdmin]');
+      const adminCheck = await sql.query(
+        "SELECT COUNT(*) as count FROM [taiKhoanAdmin]",
+      );
       if (adminCheck.recordset[0].count === 0) {
         const req = new sql.Request();
         req.input("user", mockAdmin.tenDangNhap);
         req.input("pass", mockAdmin.matKhau);
-        await req.query('INSERT INTO [taiKhoanAdmin] ([tenDangNhap], [matKhau]) VALUES (@user, @pass)');
+        await req.query(
+          "INSERT INTO [taiKhoanAdmin] ([tenDangNhap], [matKhau]) VALUES (@user, @pass)",
+        );
       }
 
       // Seed intro default in MSSQL
-      const introCheck = await sql.query('SELECT COUNT(*) as count FROM [intro]');
+      const introCheck = await sql.query(
+        "SELECT COUNT(*) as count FROM [intro]",
+      );
       if (introCheck.recordset[0].count === 0) {
-        await sql.query('INSERT INTO [intro] ([id], [lichSu], [soLuongDoanVien], [soLuongChiDoan], [thongTinChiDoan]) VALUES (1, \'\', \'0\', \'0\', \'\')');
+        await sql.query(
+          "INSERT INTO [intro] ([id], [lichSu], [soLuongDoanVien], [soLuongChiDoan], [thongTinChiDoan]) VALUES (1, '', '0', '0', '')",
+        );
       }
 
       console.log("MS SQL Server schema initialized successfully.");
     } catch (err) {
-      console.warn("⚠️ MS SQL Server Connection/Initialization Failed:", err.message);
-      console.warn("⚠️ Falling back to built-in IN-MEMORY mock database store.");
+      console.warn(
+        "⚠️ MS SQL Server Connection/Initialization Failed:",
+        err.message,
+      );
+      console.warn(
+        "⚠️ Falling back to built-in IN-MEMORY mock database store.",
+      );
       useMockDb = true;
       initMockDbStore();
     }

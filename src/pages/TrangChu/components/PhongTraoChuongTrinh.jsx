@@ -9,7 +9,7 @@ import {
   Briefcase,
 } from "lucide-react";
 
-export default function MovementsPrograms() {
+export default function PhongTraoChuongTrinh() {
   return (
     <div className="movements-programs-section">
       <div

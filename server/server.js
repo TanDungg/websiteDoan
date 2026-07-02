@@ -68,7 +68,12 @@ app.get("*", (req, res, next) => {
   if (req.url.startsWith("/api")) {
     return next();
   }
-  res.sendFile(path.join(distPath, "index.html"));
+  const indexPath = path.join(distPath, "index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("Frontend build not found. If this is development, please run/access Vite on port 5173 instead of accessing the backend port directly.");
+  }
 });
 
 // Start DB Initialization & Server

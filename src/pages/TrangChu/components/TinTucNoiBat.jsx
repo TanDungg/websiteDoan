@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Clock, Eye } from "lucide-react";
 
-export default function HeroGrid({
+export default function TinTucNoiBat({
   hotNews,
   latestPosts,
   popularPosts,

@@ -8,13 +8,13 @@ import { newsCategories } from "../../data/mockData";
 import "./TrangChu.css";
 
 // Subcomponents
-import AnnouncementTicker from "./components/AnnouncementTicker";
-import HeroGrid from "./components/HeroGrid";
-import ShowcaseCategory from "./components/ShowcaseCategory";
-import CongressBanner from "./components/CongressBanner";
-import BrightExamples from "./components/BrightExamples";
-import HomeGallery from "./components/HomeGallery";
-import MovementsPrograms from "./components/MovementsPrograms";
+import ThongBaoChay from "./components/ThongBaoChay";
+import TinTucNoiBat from "./components/TinTucNoiBat";
+import ChuyenMucTinTuc from "./components/ChuyenMucTinTuc";
+import BannerDaiHoi from "./components/BannerDaiHoi";
+import GuongSang from "./components/GuongSang";
+import ThuVienAnh from "./components/ThuVienAnh";
+import PhongTraoChuongTrinh from "./components/PhongTraoChuongTrinh";
 
 const getCleanText = (text, maxLength = 120) => {
   if (!text) return "";
@@ -167,10 +167,10 @@ export default function TrangChu() {
   return (
     <div className="home-container">
       {/* Announcement Ticker */}
-      <AnnouncementTicker posts={posts} formatDate={formatDate} />
+      <ThongBaoChay posts={posts} formatDate={formatDate} />
 
       {/* Top Hero Section: Slider & Tabbed news feed */}
-      <HeroGrid
+      <TinTucNoiBat
         hotNews={hotNews}
         latestPosts={latestPosts}
         popularPosts={popularPosts}
@@ -184,7 +184,7 @@ export default function TrangChu() {
           {/* Main news column */}
           <main className="news-main-section">
             {/* Category Section 1: Giáo Dục & Hoạt Động */}
-            <ShowcaseCategory
+            <ChuyenMucTinTuc
               title="Công tác Tuyên truyền, Giáo dục"
               icon={BookOpen}
               iconClass="header-icon-blue"
@@ -195,13 +195,13 @@ export default function TrangChu() {
             />
 
             {/* Campaign Banner - Youth Union Congress style */}
-            <CongressBanner
+            <BannerDaiHoi
               congressTitle={congressTitle}
               congressSlogan={congressSlogan}
             />
 
             {/* Category Section 2: Phong trào & Tình nguyện */}
-            <ShowcaseCategory
+            <ChuyenMucTinTuc
               title="Phong trào & Tình nguyện vì cộng đồng"
               icon={Flag}
               iconClass="header-icon-orange"
@@ -212,16 +212,16 @@ export default function TrangChu() {
             />
 
             {/* Category Section 3: Gương sáng trẻ */}
-            <BrightExamples
+            <GuongSang
               brightExamples={brightExamples}
               getCleanText={getCleanText}
             />
 
             {/* Gallery Section */}
-            <HomeGallery galleryItems={galleryItems} />
+            <ThuVienAnh galleryItems={galleryItems} />
 
             {/* Movements & Programs Columns */}
-            <MovementsPrograms />
+            <PhongTraoChuongTrinh />
           </main>
 
           {/* Sidebar column */}

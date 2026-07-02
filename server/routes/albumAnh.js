@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
       `SELECT g."id", g."tieuDe", g."ngayTao", gp."id" AS "photo_id", gp."duongDanAnh", gp."tenFile" 
        FROM "albumAnh" g 
        LEFT JOIN "anhAlbum" gp ON g."id" = gp."albumId" 
-       ORDER BY g."ngayTao" DESC`
+       ORDER BY g."ngayTao" DESC`,
     );
 
     const albumsMap = {};
@@ -55,7 +55,9 @@ router.post("/", async (req, res) => {
 
   const date = new Date().toISOString().split("T")[0];
   const crypto = require("crypto");
-  const galleryId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+  const galleryId = crypto.randomUUID
+    ? crypto.randomUUID()
+    : Date.now().toString();
 
   const createdBy = "admin";
   const createdAt = new Date().toISOString();
@@ -63,7 +65,13 @@ router.post("/", async (req, res) => {
     await runQuery(
       `INSERT INTO "albumAnh" ("id", "tieuDe", "ngayTao", "createdBy", "createdAt", "updatedBy", "updatedAt")
        VALUES (@id, @titleVal, @date, @createdBy, @createdAt, @createdBy, @createdAt)`,
-      { id: galleryId, titleVal: titleVal?.trim() || "Album hình ảnh hoạt động", date, createdBy, createdAt }
+      {
+        id: galleryId,
+        titleVal: titleVal?.trim() || "Album hình ảnh hoạt động",
+        date,
+        createdBy,
+        createdAt,
+      },
     );
 
     for (const file of files) {
@@ -80,7 +88,9 @@ router.post("/", async (req, res) => {
       let savedUrl = fileDataVal;
       if (fileDataVal.startsWith("data:") || fileDataVal.length > 500) {
         try {
-          const matches = fileDataVal.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          const matches = fileDataVal.match(
+            /^data:([A-Za-z-+/]+);base64,(.+)$/,
+          );
           let base64Buffer;
           let extension = ".jpg";
 
@@ -111,7 +121,7 @@ router.post("/", async (req, res) => {
       await runQuery(
         `INSERT INTO "anhAlbum" ("id", "albumId", "duongDanAnh", "tenFile", "createdBy", "createdAt", "updatedBy", "updatedAt")
          VALUES (@id, @galleryId, @savedUrl, @fileNameVal, @createdBy, @createdAt, @createdBy, @createdAt)`,
-        { id: photoId, galleryId, savedUrl, fileNameVal, createdBy, createdAt }
+        { id: photoId, galleryId, savedUrl, fileNameVal, createdBy, createdAt },
       );
     }
     sendRealtimeUpdate("albumAnh");
@@ -131,7 +141,7 @@ router.delete("/:id", async (req, res) => {
   try {
     const photosRes = await runQuery(
       'SELECT "duongDanAnh" FROM "anhAlbum" WHERE "albumId" = @id',
-      { id }
+      { id },
     );
 
     const uploadsPath = path.join(__dirname, "../uploads");
@@ -139,7 +149,10 @@ router.delete("/:id", async (req, res) => {
     photosRes.rows.forEach((row) => {
       const imageUrl = row.duongDanAnh;
       if (imageUrl && imageUrl.startsWith("/uploads/")) {
-        const actualPath = path.join(uploadsPath, imageUrl.replace("/uploads/", ""));
+        const actualPath = path.join(
+          uploadsPath,
+          imageUrl.replace("/uploads/", ""),
+        );
         if (fs.existsSync(actualPath)) {
           try {
             fs.unlinkSync(actualPath);
