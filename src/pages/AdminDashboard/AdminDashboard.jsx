@@ -9,14 +9,14 @@ import {
   Building,
   Shield,
 } from "lucide-react";
-import Posts from "./components/Posts";
-import Docs from "./components/Docs";
-import Feedbacks from "./components/Feedbacks";
-import Intro from "./components/Intro";
-import Branches from "./components/Branches";
-import Bch from "./components/Bch";
-import Gallery from "./components/Gallery";
-import Members from "./components/Members";
+import Posts from "./components/Posts/Posts";
+import Docs from "./components/Docs/Docs";
+import Feedbacks from "./components/Feedbacks/Feedbacks";
+import Intro from "./components/Intro/Intro";
+import Branches from "./components/Branches/Branches";
+import Bch from "./components/Bch/Bch";
+import Gallery from "./components/Gallery/Gallery";
+import Members from "./components/Members/Members";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 import "./AdminDashboard.css";

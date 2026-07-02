@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, FileText, Check } from "lucide-react";
-import { Table, FormItem } from "../../../components";
-import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import { Table, FormItem } from "../../../../components";
+import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 
 export default function Docs() {

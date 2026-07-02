@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit, Check, Upload, X } from "lucide-react";
 import { newsCategories } from "src/data/mockData";
 import { Table, Modal, FormItem } from "src/components";
 import { generateUUID } from "src/utils/Commons";
-import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 
 export default function Posts() {

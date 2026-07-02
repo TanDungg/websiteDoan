@@ -7,8 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { FormItem } from "../../../components";
-import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import { FormItem } from "../../../../components";
+import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
 
 export default function Gallery() {

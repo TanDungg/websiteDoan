@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Check, Settings, Download } from "lucide-react";
-import { Table, Modal, FormItem } from "../../../components";
-import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+import { Table, Modal, FormItem } from "../../../../components";
+import { useRealtimeRefresh } from "../../../../hooks/useRealtimeRefresh";
 import apiService from "src/services/apiService";
-import ExcelImportModal from "./ExcelImportModal";
+import ExcelImportModal from "../ExcelImportModal/ExcelImportModal";
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
