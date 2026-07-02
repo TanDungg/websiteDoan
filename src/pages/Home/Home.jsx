@@ -63,7 +63,8 @@ const getCleanText = (text, maxLength = 120) => {
   return cleaned;
 };
 
-const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80";
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -136,7 +137,7 @@ export default function Home() {
 
   // Categories News
   const activityNews = posts.filter(
-    (n) => n.danhMuc === "hoat-dong" || n.danhMuc === "tin-dia-phuong"
+    (n) => n.danhMuc === "hoat-dong" || n.danhMuc === "tin-dia-phuong",
   );
   const charityNews = posts.filter((n) => n.danhMuc === "tu-thien");
   const brightExamples = posts.filter((n) => n.danhMuc === "guong-sang");
@@ -556,7 +557,10 @@ export default function Home() {
                 <h3 className="showcase-section-title">
                   Gương sáng trẻ - Điển hình tiên tiến
                 </h3>
-                <Link to="/tin-tuc?category=guong-sang" className="showcase-more-link">
+                <Link
+                  to="/tin-tuc?category=guong-sang"
+                  className="showcase-more-link"
+                >
                   Xem tất cả <ArrowRight size={14} />
                 </Link>
               </div>

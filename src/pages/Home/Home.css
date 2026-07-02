@@ -18,14 +18,15 @@
 
 @media (min-width: 992px) {
   .hero-flex-layout {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
     align-items: stretch;
   }
 }
 
 /* Left side main news slider */
 .hero-main-slider {
-  flex: 1;
   position: relative;
   border-radius: 16px;
   overflow: hidden;
@@ -37,7 +38,7 @@
 
 @media (min-width: 992px) {
   .hero-main-slider {
-    width: 65%;
+    width: 100%;
   }
 }
 
@@ -199,8 +200,8 @@
 
 @media (min-width: 992px) {
   .hero-tabs-feed {
-    width: 35%;
-    max-height: 400px;
+    width: 100%;
+    height: 400px;
   }
 }
 
