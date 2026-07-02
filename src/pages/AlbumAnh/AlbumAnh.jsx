@@ -3,9 +3,9 @@ import { X, ZoomIn, ChevronLeft, ChevronRight, Image } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
-import "./Gallery.css";
+import "./AlbumAnh.css";
 
-export default function Gallery() {
+export default function AlbumAnh() {
   const [activeAlbum, setActiveAlbum] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 

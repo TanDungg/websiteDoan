@@ -3,12 +3,12 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import Home from "./pages/Home/Home";
-import Introduction from "./pages/Introduction/Introduction";
-import News from "./pages/News/News";
-import NewsDetail from "./pages/NewsDetail/NewsDetail";
-import Documents from "./pages/Documents/Documents";
-import Gallery from "./pages/Gallery/Gallery";
-import Contact from "./pages/Contact/Contact";
+import GioiThieu from "./pages/GioiThieu/GioiThieu";
+import BaiViet from "./pages/BaiViet/BaiViet";
+import ChiTietBaiViet from "./pages/ChiTietBaiViet/ChiTietBaiViet";
+import VanBan from "./pages/VanBan/VanBan";
+import AlbumAnh from "./pages/AlbumAnh/AlbumAnh";
+import LienHe from "./pages/LienHe/LienHe";
 import AdminLogin from "./pages/AdminLogin/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 
@@ -75,7 +75,7 @@ export default function App() {
         path="/gioi-thieu"
         element={
           <ClientLayout>
-            <Introduction />
+            <GioiThieu />
           </ClientLayout>
         }
       />
@@ -83,7 +83,7 @@ export default function App() {
         path="/tin-tuc"
         element={
           <ClientLayout>
-            <News />
+            <BaiViet />
           </ClientLayout>
         }
       />
@@ -91,7 +91,7 @@ export default function App() {
         path="/tin-tuc/:id"
         element={
           <ClientLayout>
-            <NewsDetail />
+            <ChiTietBaiViet />
           </ClientLayout>
         }
       />
@@ -99,7 +99,7 @@ export default function App() {
         path="/van-ban"
         element={
           <ClientLayout>
-            <Documents />
+            <VanBan />
           </ClientLayout>
         }
       />
@@ -107,7 +107,7 @@ export default function App() {
         path="/thu-vien"
         element={
           <ClientLayout>
-            <Gallery />
+            <AlbumAnh />
           </ClientLayout>
         }
       />
@@ -115,7 +115,7 @@ export default function App() {
         path="/lien-he"
         element={
           <ClientLayout>
-            <Contact />
+            <LienHe />
           </ClientLayout>
         }
       />

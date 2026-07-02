@@ -11,7 +11,7 @@ import {
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
-import "./Introduction.css";
+import "./GioiThieu.css";
 
 const getChucVuString = (pos) => {
   switch (Number(pos)) {
@@ -28,7 +28,7 @@ const getChucVuString = (pos) => {
   }
 };
 
-export default function Introduction() {
+export default function GioiThieu() {
   const {
     data,
     loading,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 import { FormItem } from "src/components";
-import "./Contact.css";
+import "./LienHe.css";
 
 const getChucVuString = (pos) => {
   switch (Number(pos)) {
@@ -13,7 +13,7 @@ const getChucVuString = (pos) => {
   }
 };
 
-export default function Contact() {
+export default function LienHe() {
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",

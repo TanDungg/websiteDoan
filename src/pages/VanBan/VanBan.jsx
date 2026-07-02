@@ -3,9 +3,9 @@ import { Search, FileText, Download, Calendar } from "lucide-react";
 import apiService from "src/services/apiService";
 import { useApi } from "src/hooks/useApi";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
-import "./Documents.css";
+import "./VanBan.css";
 
-export default function Documents() {
+export default function VanBan() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 

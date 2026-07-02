@@ -7,9 +7,9 @@ import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import { newsCategories } from "../../data/mockData";
 import NewsCard from "../../components/NewsCard/NewsCard";
 import Sidebar from "../../components/Sidebar/Sidebar";
-import "./News.css";
+import "./BaiViet.css";
 
-export default function News() {
+export default function BaiViet() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState("");
   const selectedCategory = searchParams.get("category") || "all";

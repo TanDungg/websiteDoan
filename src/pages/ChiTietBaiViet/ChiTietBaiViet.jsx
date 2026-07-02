@@ -6,9 +6,9 @@ import { useApi } from "src/hooks/useApi";
 import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
 import { newsCategories } from "../../data/mockData";
 import Sidebar from "../../components/Sidebar/Sidebar";
-import "./NewsDetail.css";
+import "./ChiTietBaiViet.css";
 
-export default function NewsDetail() {
+export default function ChiTietBaiViet() {
   const { id } = useParams();
   const [copied, setCopied] = useState(false);
 
